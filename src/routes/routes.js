@@ -3,11 +3,11 @@ import config from '../config';
 //Layouts
 
 import Home from '../views/blogs/Blog';
-import Following from '../views/blogs/Blog';
+import Login from '../views/login/Login';
 
 const publicRoutes = [
     { path: config.routes.blog, component: Home },
-    { path: config.routes.email, component: Following },
+    { path: config.routes.login, component: Login },
 ];
 
 const privateRoutes = [];

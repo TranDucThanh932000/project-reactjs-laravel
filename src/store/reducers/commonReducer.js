@@ -8,8 +8,8 @@ const initialState = {
       url: '/'
     },
     {
-      text: 'Email',
-      url: '/email'
+      text: 'Login',
+      url: '/login'
     },
   ]
 };

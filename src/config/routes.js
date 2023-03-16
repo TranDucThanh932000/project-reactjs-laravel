@@ -1,6 +1,6 @@
 const routes = {
     blog: '/',
-    email: '/email',
+    login: '/login',
     profile: '/@:nickname',
 };
 
