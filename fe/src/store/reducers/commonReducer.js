@@ -1,6 +1,7 @@
 import { actionName } from "../constants";
 
 const initialState = {
+  logged: false,
   openSidebar: true,
   sideBarItems: [
     {

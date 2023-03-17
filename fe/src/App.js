@@ -1,4 +1,4 @@
-import './App.scss';
+import styles from './App.scss';
 import {
   BrowserRouter as Router,
   Routes,
@@ -7,6 +7,9 @@ import {
 import { Fragment } from 'react';
 import { publicRoutes } from './routes';
 import { DefaultLayout } from './layouts';
+import classNames from "classnames/bind";
+
+const cx = classNames.bind(styles);
 
 function App() {
   return (
@@ -28,7 +31,9 @@ function App() {
                         path={route.path}
                         element={
                             <Layout>
-                                <Page />
+                                <div className={cx('p-2')}>
+                                    <Page />
+                                </div>
                             </Layout>
                         }
                     />

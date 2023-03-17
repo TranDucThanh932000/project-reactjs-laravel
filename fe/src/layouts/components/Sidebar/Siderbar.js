@@ -16,9 +16,13 @@ import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import { connect } from "react-redux";
 import { closeSidebar } from "../../../store/actions/commonAction";
-import store from '../../../store'
-import logo from '../../../assets/img/logo/logo.jpg'
-import { Link } from "react-router-dom";
+import store from "../../../store";
+import logo from "../../../assets/img/logo/logo.jpg";
+import { NavLink } from "react-router-dom";
+import styles from './Sidebar.module.scss';
+import classNames from "classnames/bind";
+
+const cx = classNames.bind(styles);
 
 const drawerWidth = 240;
 
@@ -72,7 +76,7 @@ const Drawer = styled(MuiDrawer, {
 const mapStateToProps = (state) => {
   return {
     open: state.commonReducer.openSidebar,
-    sideBarItems: state.commonReducer.sideBarItems
+    sideBarItems: state.commonReducer.sideBarItems,
   };
 };
 
@@ -80,7 +84,7 @@ const Sidebar = (props) => {
   const theme = useTheme();
 
   const handleDrawerClose = () => {
-    store.dispatch(closeSidebar())
+    store.dispatch(closeSidebar());
   };
 
   return (
@@ -88,12 +92,7 @@ const Sidebar = (props) => {
       <CssBaseline />
       <Drawer variant="permanent" open={props.open}>
         <DrawerHeader>
-            <img
-                src={logo}
-                height={'40px'}
-                alt={'logo'}
-                loading="lazy"
-            />
+          <img src={logo} height={"40px"} alt={"logo"} loading="lazy" />
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === "rtl" ? (
               <ChevronRightIcon />
@@ -105,31 +104,39 @@ const Sidebar = (props) => {
         <Divider />
         <List>
           {props.sideBarItems.map((item, index) => (
-            <Link to={item.url} key={index}>
-                <ListItem key={item.text} disablePadding sx={{ display: "block" }}>
+            <NavLink
+              to={item.url}
+              key={index}
+              className={(nav) => cx({ active: nav.isActive })}
+            >
+              <ListItem
+                key={item.text}
+                disablePadding
+                sx={{ display: "block" }}
+              >
                 <ListItemButton
-                    sx={{
+                  sx={{
                     minHeight: 48,
                     justifyContent: props.open ? "initial" : "center",
                     px: 2.5,
-                    }}
+                  }}
                 >
-                    <ListItemIcon
+                  <ListItemIcon
                     sx={{
-                        minWidth: 0,
-                        mr: props.open ? 3 : "auto",
-                        justifyContent: "center",
+                      minWidth: 0,
+                      mr: props.open ? 3 : "auto",
+                      justifyContent: "center",
                     }}
-                    >
+                  >
                     {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                    </ListItemIcon>
-                    <ListItemText
+                  </ListItemIcon>
+                  <ListItemText
                     primary={item.text}
                     sx={{ opacity: props.open ? 1 : 0 }}
-                    />
+                  />
                 </ListItemButton>
-                </ListItem>
-            </Link>
+              </ListItem>
+            </NavLink>
           ))}
         </List>
       </Drawer>

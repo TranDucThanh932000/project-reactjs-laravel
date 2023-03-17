@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
-const cx = classNames.bind(styles);
 import styles from './Blog.module.scss';
+const cx = classNames.bind(styles);
 
 function Blog() {
   return <div className={cx("wrapper")}>
