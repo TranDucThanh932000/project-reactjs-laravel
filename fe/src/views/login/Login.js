@@ -4,8 +4,10 @@ import { Formik } from "formik";
 import styles from "./Login.module.scss";
 import SendIcon from '@mui/icons-material/Send';
 import classNames from "classnames/bind";
-import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
+import * as authenticationService from '../../services/authenticationService'
+import store from "../../store";
+import { updateStatusLogin } from "../../store/actions/commonAction";
 
 const cx = classNames.bind(styles);
 
@@ -21,7 +23,14 @@ const schema = Yup.object().shape({
 });
 
 const Login = () => {
-  const history = useNavigate();
+
+  const handleLogin = async (values) => {
+    let token = await authenticationService.login({
+      ...values
+    })
+    store.dispatch(updateStatusLogin(true));
+    localStorage.setItem('loginToken', token);
+  }
 
   return (
     <Grid
@@ -35,11 +44,10 @@ const Login = () => {
       <Formik
         initialValues={{ account: "", password: "" }}
         validationSchema={schema}
-        onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            alert(JSON.stringify(values, null, 2));
-            setSubmitting(false);
-          }, 400);
+        onSubmit={async (values, { setSubmitting }) => {
+          setSubmitting(true);
+          await handleLogin(values);
+          setSubmitting(false);
         }}
       >
         {({
@@ -75,6 +83,7 @@ const Login = () => {
               error={touched.password && Boolean(errors.password)}
               helperText={touched.password && errors.password}
               className={cx('mb-2')}
+              type="password"
             />
             {isSubmitting && <LinearProgress></LinearProgress>}
             <div className={cx("text-center")}>

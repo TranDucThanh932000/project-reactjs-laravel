@@ -13,3 +13,10 @@ export const closeSidebar = () => {
         payload: false,
     }
 }
+
+export const updateStatusLogin = (payload) => {
+    return {
+        type: actionName.STATUS_LOGIN,
+        payload: payload
+    }
+}

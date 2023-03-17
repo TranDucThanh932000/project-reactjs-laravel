@@ -21,8 +21,30 @@ class Authentication extends Controller
         return response()->json(compact('token'));
     }
 
+    public function checkToken() {
+        $token = JWTAuth::parseToken()->getToken();
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            return response()->json(true, 200);
+        } catch (JWTException $e) {
+            return response()->json(false, 401);
+        }
+    }
+
     public function logout(Request $request)
     {
         return response()->json('success', 200);
+    }
+
+    public function refreshToken()
+    {
+        try {
+            $refreshed = JWTAuth::refresh(JWTAuth::getToken());
+            return response()->json([
+                'data' => $refreshed
+            ], 200);
+        } catch (JWTException $e) {
+            return response()->json(['error' => $e], 401);
+        }
     }
 }

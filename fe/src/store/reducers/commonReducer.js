@@ -22,6 +22,11 @@ const commonReducer = (state = initialState, action) => {
         ...state,
         openSidebar: action.payload,
       };
+    case actionName.STATUS_LOGIN:
+      return {
+        ...state,
+        logged: action.payload
+      }
     default:
       return state;
   }
