@@ -1,6 +1,7 @@
 const routes = {
     blog: '/',
     login: '/login',
+    luckyNumberToday: '/lucky-number-today',
     profile: '/@:nickname',
 };
 

@@ -7,7 +7,7 @@ import classNames from "classnames/bind";
 import * as Yup from "yup";
 import * as authenticationService from '../../services/authenticationService'
 import store from "../../store";
-import { updateStatusLogin } from "../../store/actions/commonAction";
+import { updateStatusLogin, closeSidebar } from "../../store/actions/commonAction";
 
 const cx = classNames.bind(styles);
 
@@ -23,6 +23,10 @@ const schema = Yup.object().shape({
 });
 
 const Login = () => {
+
+  React.useEffect(() => {
+    store.dispatch(closeSidebar());
+  }, [])
 
   const handleLogin = async (values) => {
     let token = await authenticationService.login({

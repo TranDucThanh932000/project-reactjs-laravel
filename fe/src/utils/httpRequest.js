@@ -11,12 +11,12 @@ httpRequest.interceptors.request.use(
     if (token) {
       const decodedToken = jwt_decode(token);
       const currentTime = Math.floor(Date.now() / 1000);
-      console.log(decodedToken)
       if (decodedToken.exp < currentTime) {
         // Token đã hết hạn, gửi yêu cầu đến API để lấy token mới
         return axios
-          .post(process.env.REACT_APP_BASE_URL + "/refresh-token", { token })
+          .post(process.env.REACT_APP_BASE_URL + "refresh-token", { token })
           .then((response) => {
+            console.log(response.data);
             const newToken = response.data.token;
             localStorage.setItem("loginToken", newToken);
             config.headers.Authorization = `Bearer ${newToken}`;

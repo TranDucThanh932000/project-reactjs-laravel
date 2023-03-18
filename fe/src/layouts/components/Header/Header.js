@@ -10,6 +10,7 @@ import Badge from "@mui/material/Badge";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MailIcon from "@mui/icons-material/Mail";
@@ -19,6 +20,10 @@ import { connect } from "react-redux";
 import { openSidebar } from "../../../store/actions/commonAction";
 import store from "../../../store";
 import { useNavigate } from "react-router-dom";
+import styles from './Header.module.scss';
+import classNames from "classnames/bind";
+
+const cx = classNames.bind(styles);
 
 const drawerWidth = 240;
 
@@ -197,7 +202,7 @@ const Header = (props) => {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="fixed" open={props.open}>
-        <Toolbar>
+        <Toolbar className={cx('commonBackgroundColor')}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -210,20 +215,20 @@ const Header = (props) => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography
+          {/* <Typography
             variant="h6"
             noWrap
             component="div"
             sx={{ display: { xs: "none", sm: "block" } }}
           >
             COC Mountain
-          </Typography>
-          <Search>
+          </Typography> */}
+          <Search className={cx('m-0')}>
             <SearchIconWrapper>
               <SearchIcon />
             </SearchIconWrapper>
             <StyledInputBase
-              placeholder="Search…"
+              placeholder="Tìm kiếm"
               inputProps={{ "aria-label": "search" }}
             />
           </Search>
@@ -256,7 +261,8 @@ const Header = (props) => {
               onClick={props.logged ? handleProfileMenuOpen : handleRedirectLogin}
               color="inherit"
             >
-              <AccountCircle />
+              {props.logged && <KeyboardArrowDownIcon/>}
+              {!props.logged && <AccountCircle />}
             </IconButton>
           </Box>
           <Box sx={{ display: { xs: "flex", md: "none" } }}>

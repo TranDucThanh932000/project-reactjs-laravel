@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+
+.lucky_number {
+    font-family: 'Dancing Script', cursive;
+    display: inline-block;
+    text-align: center;
+    font-size: 100px;
+    border: 2px solid black;
+    border-radius: 20%;
+    padding: 20px;
+    width: 100px;
+    +.lucky_number {
+        margin-left: 10px;
+    }
+}
+
+.box_shadow {
+    text-shadow: 0 0 10px #f00, 0 0 20px #f0f, 0 0 30px #00f;
+}

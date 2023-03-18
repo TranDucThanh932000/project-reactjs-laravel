@@ -1,11 +1,26 @@
+@import '../../../utils/variables';
+
 .width_250 {
     width: 250px;
 }
 
 .active {
     color: white;
-    background-color: transparent;
+    svg {
+        color: white;
+    }
     li {
-        background-color: grey;
+        background-color: $commonBackgroundColor;
+    }
+}
+
+.logo {
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    margin-left: 40px;
+    color: $colorCommon;
+    &_img {
+        background-color: $commonBackgroundColor;
     }
 }

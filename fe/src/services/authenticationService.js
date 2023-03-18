@@ -14,7 +14,7 @@ export const login = async ({ account, password }) => {
 
 export const checkToken = async () => {
     try {
-        const res = await httpRequest.post('/check-token', {
+        const res = await httpRequest.post('check-token', {
             token: localStorage.getItem('loginToken')
         });
         return res;

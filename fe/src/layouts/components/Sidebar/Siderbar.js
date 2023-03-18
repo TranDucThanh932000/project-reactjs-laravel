@@ -12,12 +12,9 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
 import { connect } from "react-redux";
 import { closeSidebar } from "../../../store/actions/commonAction";
 import store from "../../../store";
-import logo from "../../../assets/img/logo/logo.jpg";
 import { NavLink } from "react-router-dom";
 import styles from './Sidebar.module.scss';
 import classNames from "classnames/bind";
@@ -92,7 +89,10 @@ const Sidebar = (props) => {
       <CssBaseline />
       <Drawer variant="permanent" open={props.open}>
         <DrawerHeader>
-          <img src={logo} height={"40px"} alt={"logo"} loading="lazy" />
+          <div className={cx('logo')}>
+            {/* <img src={logo} height={"40px"} alt={"logo"} loading="lazy" className={cx('logo_img')}/> */}
+            <h3 className={cx('colorCommon')}>COC Mountain</h3>
+          </div>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === "rtl" ? (
               <ChevronRightIcon />
@@ -128,7 +128,7 @@ const Sidebar = (props) => {
                       justifyContent: "center",
                     }}
                   >
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                    {item.icon}
                   </ListItemIcon>
                   <ListItemText
                     primary={item.text}

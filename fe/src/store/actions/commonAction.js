@@ -20,3 +20,10 @@ export const updateStatusLogin = (payload) => {
         payload: payload
     }
 }
+
+export const updateStatusLoading = (payload) => {
+    return {
+        type: actionName.STATUS_LOADING,
+        payload: payload
+    }
+}

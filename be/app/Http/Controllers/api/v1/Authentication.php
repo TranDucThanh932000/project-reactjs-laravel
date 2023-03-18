@@ -41,7 +41,7 @@ class Authentication extends Controller
         try {
             $refreshed = JWTAuth::refresh(JWTAuth::getToken());
             return response()->json([
-                'data' => $refreshed
+                'token' => $refreshed
             ], 200);
         } catch (JWTException $e) {
             return response()->json(['error' => $e], 401);
