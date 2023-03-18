@@ -13,5 +13,5 @@ Route::get('/lucky-number-latest', [LuckyNumberController::class, 'getLatestLuck
 Route::group([
     'middleware' => ['jwt.auth']
 ], function() {
-    Route::get('/logout', [Authentication::class, 'logout']);
+    Route::post('/logout', [Authentication::class, 'logout']);
 });

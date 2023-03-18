@@ -22,3 +22,12 @@ export const checkToken = async () => {
         console.log(error);
     }
 };
+
+export const logout = async () => {
+    try {
+        const res = await httpRequest.post('logout');
+        return res;
+    } catch (error) {
+        console.log(error);
+    }
+};

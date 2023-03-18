@@ -7,7 +7,8 @@ import classNames from "classnames/bind";
 import * as Yup from "yup";
 import * as authenticationService from '../../services/authenticationService'
 import store from "../../store";
-import { updateStatusLogin, closeSidebar } from "../../store/actions/commonAction";
+import { updateStatusLogin, closeSidebar, openSidebar } from "../../store/actions/commonAction";
+import { useNavigate } from "react-router-dom";
 
 const cx = classNames.bind(styles);
 
@@ -24,6 +25,8 @@ const schema = Yup.object().shape({
 
 const Login = () => {
 
+  const navigate = useNavigate();
+
   React.useEffect(() => {
     store.dispatch(closeSidebar());
   }, [])
@@ -33,7 +36,9 @@ const Login = () => {
       ...values
     })
     store.dispatch(updateStatusLogin(true));
+    store.dispatch(openSidebar(true));
     localStorage.setItem('loginToken', token);
+    navigate('/');
   }
 
   return (
