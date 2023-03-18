@@ -11,4 +11,5 @@ class LuckyNumber extends Model
 
     protected $table = "lucky_numbers";
     
+    protected $fillable = ['date', 'lucky_number'];
 }

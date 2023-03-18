@@ -13,7 +13,7 @@ const initialState = {
       icon: <NewspaperIcon/>
     },
     {
-      text: 'Số may mắn hôm nay',
+      text: 'Số may mắn',
       url: '/lucky-number-today',
       icon: <StarOutlineIcon/>
     },

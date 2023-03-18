@@ -64,6 +64,11 @@ a {
   padding: 0 !important;
 }
 
+.justify-space-between {
+  display: flex;
+  justify-content: space-between;
+}
+
 //custom loader
 
 .loader-img {
