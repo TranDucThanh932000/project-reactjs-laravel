@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Blog;
 use Illuminate\Database\Seeder;
-use App\Models\User;
+use App\Models\LuckyNumber;
 
-class UsersTableSeeder extends Seeder
+class LuckyNumberTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -15,6 +14,6 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-        User::factory()->count(30)->create(); 
+        LuckyNumber::factory()->count(1)->create(); 
     }
 }

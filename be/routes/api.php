@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\v1\Authentication;
+use App\Http\Controllers\api\v1\BlogController;
+use App\Http\Controllers\api\v1\BlogLikeController;
 use App\Http\Controllers\api\v1\LuckyNumberController;
 
 Route::post('/login', [Authentication::class, 'login']);
@@ -14,4 +16,6 @@ Route::group([
     'middleware' => ['jwt.auth']
 ], function() {
     Route::post('/logout', [Authentication::class, 'logout']);
+    Route::resource('blogs', BlogController::class);
+    Route::resource('bloglikes', BlogLikeController::class);
 });

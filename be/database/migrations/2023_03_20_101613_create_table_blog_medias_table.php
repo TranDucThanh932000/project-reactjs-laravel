@@ -13,16 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('blog_medias', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('account')->unique();
-            $table->string('email');
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
+            $table->unsignedBigInteger('blog_id');
+            $table->unsignedBigInteger('media_id');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreign('media_id')->references('id')->on('medias');
+            $table->foreign('blog_id')->references('id')->on('blogs');
         });
     }
 
@@ -33,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('blog_medias');
     }
 };

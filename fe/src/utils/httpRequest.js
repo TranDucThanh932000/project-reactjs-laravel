@@ -16,7 +16,6 @@ httpRequest.interceptors.request.use(
         return axios
           .post(process.env.REACT_APP_BASE_URL + "refresh-token", { token })
           .then((response) => {
-            console.log(response.data);
             const newToken = response.data.token;
             localStorage.setItem("loginToken", newToken);
             config.headers.Authorization = `Bearer ${newToken}`;
@@ -47,6 +46,11 @@ export const get = async (path, options = {}) => {
 
 export const post = async (path, options = {}) => {
   const response = await httpRequest.post(path, options);
+  return response.data;
+};
+
+export const destroy = async (path, options = {}) => {
+  const response = await httpRequest.delete(path, options);
   return response.data;
 };
 
