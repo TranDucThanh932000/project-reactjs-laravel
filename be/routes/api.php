@@ -13,7 +13,7 @@ Route::get('/lucky-number-today', [LuckyNumberController::class, 'getLuckyNumber
 Route::get('/lucky-number-latest', [LuckyNumberController::class, 'getLatestLuckyNumber']);
 
 Route::group([
-    'middleware' => ['jwt.auth']
+    'middleware' => ['jwt.auth', 'throttle:60'],
 ], function() {
     Route::post('/logout', [Authentication::class, 'logout']);
     Route::resource('blogs', BlogController::class);

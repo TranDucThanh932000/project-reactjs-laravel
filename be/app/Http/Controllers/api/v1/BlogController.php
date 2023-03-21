@@ -16,10 +16,10 @@ class BlogController extends Controller
         $this->blog = $blog;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         return response()->json([
-            'blogs' => $this->blog->get()
+            'blogs' => $this->blog->get($request->from, $request->amount)
         ], 200);
     }
 

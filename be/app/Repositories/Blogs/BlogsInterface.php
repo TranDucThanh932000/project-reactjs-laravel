@@ -4,5 +4,5 @@ namespace App\Repositories\Blogs;
 
 interface BlogsInterface
 {
-    public function get();
+    public function get($from, $to);
 }
