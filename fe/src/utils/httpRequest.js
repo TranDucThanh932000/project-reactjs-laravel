@@ -44,8 +44,8 @@ export const get = async (path, options = {}) => {
   return response.data;
 };
 
-export const post = async (path, options = {}) => {
-  const response = await httpRequest.post(path, options);
+export const post = async (path, options = {}, config = {}) => {
+  const response = await httpRequest.post(path, options, config);
   return response.data;
 };
 

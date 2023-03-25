@@ -15,7 +15,8 @@ class AppServiceProvider extends ServiceProvider
     {
         $classes = [
             'Blogs',
-            'BlogLikes'
+            'BlogLikes',
+            'Medias'
         ];
 
         foreach ($classes as $class) {

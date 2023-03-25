@@ -18,7 +18,7 @@ class BlogsRepository implements BlogsInterface
 
     public function get($from, $amount)
     {
-        return $this->blog->with(['user', 'blogLikes' => function ($q) {
+        return $this->blog->with(['user', 'blogMedias', 'blogLikes' => function ($q) {
             $q->where('user_id', Auth::user()->id);
         }])->withCount('blogLikes')
         ->where('status', BlogStatus::PUBLIC)
@@ -26,5 +26,10 @@ class BlogsRepository implements BlogsInterface
         ->offset($from)
         ->take($amount)
         ->get();
+    }
+
+    public function store($blog)
+    {
+        return $this->blog->create($blog);
     }
 }

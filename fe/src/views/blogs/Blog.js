@@ -15,8 +15,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import CircularProgress from "@mui/material/CircularProgress";
-import Alert from '@mui/material/Alert';
-import Snackbar from '@mui/material/Snackbar';
+
 import * as blogService from "../../services/blogService";
 import * as blogLikeService from "../../services/blogLikeService";
 import store from "../../store";
@@ -24,14 +23,25 @@ import { connect } from "react-redux";
 
 import classNames from "classnames/bind";
 import styles from "./Blog.module.scss";
-import { Grid } from "@mui/material";
-import { updateStatusLoading } from "../../store/actions/commonAction";
+import {
+  Chip,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  OutlinedInput,
+  Select,
+} from "@mui/material";
+import { updateStatusLoading, updateTextAlert } from "../../store/actions/commonAction";
+import { useTheme } from "@mui/material/styles";
 import moment from "moment";
 import { Box } from "@mui/system";
-import Popper from '@mui/material/Popper';
+import Popper from "@mui/material/Popper";
+import CreateBlog from "./CreateBlog";
+import SkeletonBlog from "./Skeleton";
+
 const mapStateToProps = (state) => {
   return {
-    loading: state.commonReducer.loading,
   };
 };
 const cx = classNames.bind(styles);
@@ -51,12 +61,9 @@ function Blog() {
   const [expanded, setExpanded] = React.useState(false);
   const [items, setItems] = React.useState([]);
   const [loadMore, setLoadMore] = React.useState(false);
-  const [noLongerBlog, setNoLongerBlog] = React.useState(false);
   const [doneFirstLoad, setDoneFirstLoad] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const vertical = 'top';
-  const horizontal = 'right';
-  const colorAvatar = ["red", "pink", "grey", "blue", "green", "yellow"];
+  const colorAvatar = ["red", "pink", "grey", "blue", "green", "yellow", "orange", "gray", "#123333", "#678123"];
 
   const formatTime = React.useCallback((val) => {
     return moment(val, "YYYY-MM-DD hh:mm:ss").format("DD/MM/YYYY hh:mm");
@@ -88,28 +95,32 @@ function Blog() {
   };
 
   const handleLoadData = async (amount) => {
-    setNoLongerBlog(false);
-    await blogService
-      .blogs(items.length, amount)
-      .then((res) => {
-        if(!res) {
-          //too many request
-          return;
-        }
-        //setItems((prev) => prev.push(...res.blogs));
-        //như trên không chạy, khả năng do nó k thấy sự thay đổi địa chỉ nên không rerender
-        //còn concat này nó đẩy thêm data mới vào và tạo ra 1 mảng có địa chỉ mới
-        setItems((prev) => prev.concat(res.blogs));
-        if(res.blogs.length === 0) {
-          setNoLongerBlog(true);
-        }
-      })
-  }
+    await blogService.blogs(items.length, amount).then((res) => {
+      if (!res) {
+        //too many request
+        return;
+      }
+      //setItems((prev) => prev.push(...res.blogs));
+      //như trên không chạy, khả năng do nó k thấy sự thay đổi địa chỉ nên không rerender
+      //còn concat này nó đẩy thêm data mới vào và tạo ra 1 mảng có địa chỉ mới
+      setItems((prev) => prev.concat(res.blogs));
+      if (res.blogs.length === 0) {
+        store.dispatch(updateTextAlert('Không còn bài viết nào!'));
+        setTimeout(() => {
+          store.dispatch(updateTextAlert(''));
+        }, 3000)
+      }
+    });
+  };
+
+  const handleCreateBlog = (val) => {
+    setItems([val.blog, ...items]);
+  };
 
   //load 9 blog last
   React.useEffect(async () => {
     store.dispatch(updateStatusLoading(true));
-    await handleLoadData(9)
+    await handleLoadData(9);
     setDoneFirstLoad(true);
     store.dispatch(updateStatusLoading(false));
   }, []);
@@ -124,119 +135,213 @@ function Blog() {
       await handleLoadData(6);
       setLoadMore(false);
     }
-  }
+  };
 
   React.useEffect(() => {
     if (doneFirstLoad) {
       if (loadMore) {
-        window.removeEventListener('scroll', handleScroll);
+        window.removeEventListener("scroll", handleScroll);
       } else {
-        window.addEventListener('scroll', handleScroll);
+        window.addEventListener("scroll", handleScroll);
       }
     }
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
-  }, [doneFirstLoad, loadMore])
-
-  const handleHover = (event) => {
-    setAnchorEl(anchorEl ? null : event.currentTarget);
-  }
+  }, [doneFirstLoad, loadMore]);
 
   const openPopper = Boolean(anchorEl);
-  const id = openPopper ? 'simple-popper' : undefined;
+  const id = openPopper ? "simple-popper" : undefined;
+
+  //menu
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
+
+  const types = ["Oliver Hansen", "Van Henry", "April Tucker"];
+
+  function getStyles(name, personName, theme) {
+    return {
+      fontWeight:
+        personName.indexOf(name) === -1
+          ? theme.typography.fontWeightRegular
+          : theme.typography.fontWeightMedium,
+    };
+  }
+  const theme = useTheme();
+  const [personName, setPersonName] = React.useState([]);
+
+  const handleChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setPersonName(
+      // On autofill we get a stringified value.
+      typeof value === "string" ? value.split(",") : value
+    );
+  };
+  //
 
   return (
     <div className={cx("wrapper")}>
       <Grid container spacing={2}>
-        {items.length ? items.map((x, index) => {
-          return (
-            <Grid key={index} item xs={12} sm={6} md={4}>
-              <Card sx={{ maxWidth: "100%" }}>
-                <CardHeader
-                  avatar={
-                    <Avatar
-                      sx={{
-                        bgcolor: colorAvatar[Math.floor(Math.random() * 5)],
-                      }}
-                      aria-label="recipe"
-                    >
-                      {x.user.name[0]}
-                    </Avatar>
-                  }
-                  action={
-                    <IconButton aria-label="settings">
-                      <MoreVertIcon />
-                    </IconButton>
-                  }
-                  title={x.user.name}
-                  subheader={formatTime(x.updated_at)}
-                />
-                <CardMedia
-                  component="img"
-                  height="194"
-                  image={require("src/assets/img/logo/logo.png")}
-                  alt="Image"
-                  aria-describedby={x.id}
-                  onClick={handleHover}
-                />
-                <button aria-describedby={id} type="button" onClick={handleHover}>btn</button>
-                <Popper id={id} open={openPopper} anchorEl={anchorEl}>
-                  <Box sx={{ border: 1, p: 1, bgcolor: 'background.paper' }}>
-                    { x.id }
-                  </Box>
-                </Popper>
-                <CardContent>
-                  <Typography variant="body2" color="text.secondary">
-                    {x.short_description}
-                  </Typography>
-                </CardContent>
-                <CardActions disableSpacing>
-                  {!x.blog_likes.length ? (
-                    <IconButton
-                      aria-label="add to favorites"
-                      onClick={() => handleFavorite(1, index)}
-                    >
-                      <FavoriteBorderIcon />
-                    </IconButton>
-                  ) : (
-                    <IconButton
-                      aria-label="remove to favorites"
-                      onClick={() => handleFavorite(0, index)}
-                    >
-                      <FavoriteIcon sx={{ color: "pink" }} />
-                    </IconButton>
-                  )}
-                  {x.blog_likes_count}
-                  <IconButton aria-label="share">
-                    <ShareIcon />
-                  </IconButton>
-                  <ExpandMore
-                    expand={expanded}
-                    onClick={handleExpandClick}
-                    aria-expanded={expanded}
-                    aria-label="show more"
-                  >
-                    <ExpandMoreIcon />
-                  </ExpandMore>
-                </CardActions>
-                <Collapse in={expanded} timeout="auto" unmountOnExit>
-                  <CardContent>
-                    <Typography paragraph>{x.content}</Typography>
-                  </CardContent>
-                </Collapse>
-              </Card>
-              <Snackbar open={noLongerBlog} onClose={() => setNoLongerBlog(false)} autoHideDuration={3000} anchorOrigin={{ vertical, horizontal }}>
-                <Alert severity="info" onClose={() => setNoLongerBlog(false)} sx={{ width: '100%' }}>
-                  <strong>Không còn bài viết nào!</strong>
-                </Alert>
-              </Snackbar>
-            </Grid>
-          )})
-          : 
-          ( doneFirstLoad && <h1>Chưa có bài viết nào!!!</h1> ) 
-        }
+        <Grid item xs={12} sm={6}>
+          <FormControl sx={{ m: 1, width: 300 }}>
+            <InputLabel id="demo-multiple-chip-label">Thể loại</InputLabel>
+            <Select
+              labelId="demo-multiple-chip-label"
+              id="demo-multiple-chip"
+              multiple
+              value={personName}
+              onChange={handleChange}
+              input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+              renderValue={(selected) => (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {selected.map((value) => (
+                    <Chip key={value} label={value} />
+                  ))}
+                </Box>
+              )}
+              MenuProps={MenuProps}
+            >
+              {types.map((name) => (
+                <MenuItem
+                  key={name}
+                  value={name}
+                  style={getStyles(name, personName, theme)}
+                >
+                  {name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          container
+          direction="row"
+          justifyContent="flex-end"
+        >
+          <Box>
+            <CreateBlog createBlog={handleCreateBlog}></CreateBlog>
+          </Box>
+        </Grid>
+      </Grid>
+      <Grid container spacing={2} id="cuadricula">
+        {!doneFirstLoad && <SkeletonBlog />}
+        {items.length
+          ? items.map((x, index) => {
+              return (
+                <Grid key={index} item className={cx('item')}>
+                  <Card sx={{ maxWidth: "100%" }}>
+                    <CardHeader
+                      avatar={
+                        <Avatar
+                          sx={{
+                            bgcolor: colorAvatar[x.user.id % 10],
+                          }}
+                          aria-label="recipe"
+                        >
+                          {x.user.name[0]}
+                        </Avatar>
+                      }
+                      action={
+                        <IconButton aria-label="settings">
+                          <MoreVertIcon />
+                        </IconButton>
+                      }
+                      title={x.user.name}
+                      subheader={formatTime(x.updated_at)}
+                    />
+                    <CardContent>
+                      <Box>
+                        <Grid container spacing={2}>
+                          {x.blog_medias.length > 0 &&
+                            x.blog_medias.map((img) => (
+                              <Grid key={img.id} item sm={12} md={6}>
+                                <CardMedia
+                                  component="img"
+                                  height="194"
+                                  image={`https://docs.google.com/uc?id=${img.url}`}
+                                  alt="Image"
+                                  aria-describedby={img.id}
+                                  className={cx(
+                                    "image-blog",
+                                    "border-radius-1"
+                                  )}
+                                />
+                              </Grid>
+                            ))}
+                        </Grid>
+                      </Box>
+                      <Popper id={id} open={openPopper} anchorEl={anchorEl}>
+                        <Box
+                          sx={{ border: 1, p: 1, bgcolor: "background.paper" }}
+                        >
+                          {x.id}
+                        </Box>
+                      </Popper>
+                    </CardContent>
+                    <CardContent>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        className={cx("word-break")}
+                      >
+                        {x.short_description}
+                      </Typography>
+                    </CardContent>
+                    <CardActions disableSpacing>
+                      {!x.blog_likes.length ? (
+                        <IconButton
+                          aria-label="add to favorites"
+                          onClick={() => handleFavorite(1, index)}
+                        >
+                          <FavoriteBorderIcon />
+                        </IconButton>
+                      ) : (
+                        <IconButton
+                          aria-label="remove to favorites"
+                          onClick={() => handleFavorite(0, index)}
+                        >
+                          <FavoriteIcon sx={{ color: "pink" }} />
+                        </IconButton>
+                      )}
+                      {x.blog_likes_count}
+                      <IconButton aria-label="share">
+                        <ShareIcon />
+                      </IconButton>
+                      <ExpandMore
+                        expand={expanded}
+                        onClick={handleExpandClick}
+                        aria-expanded={expanded}
+                        aria-label="show more"
+                      >
+                        <ExpandMoreIcon />
+                      </ExpandMore>
+                    </CardActions>
+                    <Collapse in={expanded} timeout="auto" unmountOnExit>
+                      <CardContent>
+                        <Typography paragraph className={cx("word-break")}>
+                          {x.content}
+                        </Typography>
+                      </CardContent>
+                    </Collapse>
+                  </Card>
+                </Grid>
+              );
+            })
+          : doneFirstLoad && <h1>Chưa có bài viết nào!!!</h1>}
       </Grid>
       {loadMore && (
         <Box

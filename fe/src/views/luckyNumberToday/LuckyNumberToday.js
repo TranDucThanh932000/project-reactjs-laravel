@@ -24,6 +24,10 @@ const mapStateToProps = (state) => {
   };
 };
 
+const uploadImage = () => {
+
+}
+
 const cx = classNames.bind(styles);
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({

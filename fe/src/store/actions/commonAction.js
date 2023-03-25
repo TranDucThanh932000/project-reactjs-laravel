@@ -27,3 +27,10 @@ export const updateStatusLoading = (payload) => {
         payload: payload
     }
 }
+
+export const updateTextAlert = (payload) => {
+    return {
+        type: actionName.TEXT_ALERT,
+        payload: payload
+    }
+}

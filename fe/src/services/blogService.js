@@ -9,3 +9,23 @@ export const blogs = async (from, amount) => {
     }
 };
 
+export const createBlogs = async (data) => {
+    try {
+        let formData = new FormData();
+        formData.append('title', data.title);
+        formData.append('shortDescription', data.shortDescription);
+        formData.append('description', data.description);
+        for(let i = 0; i < data.images.length; i++) {
+            formData.append('images[]', data.images[i]);
+        }
+        const res = await httpRequest.post(`/blogs`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return res;
+    } catch (error) {
+        console.log(error);
+    }
+};
+

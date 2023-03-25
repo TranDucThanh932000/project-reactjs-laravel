@@ -6,6 +6,7 @@ const initialState = {
   loading: false,
   logged: false,
   openSidebar: true,
+  textAlert: '',
   sideBarItems: [
     {
       text: 'Bài viết',
@@ -36,6 +37,11 @@ const commonReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: action.payload
+      }
+    case actionName.TEXT_ALERT: 
+      return {
+        ...state,
+        textAlert: action.payload 
       }
     default:
       return state;

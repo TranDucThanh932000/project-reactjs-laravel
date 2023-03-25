@@ -17,6 +17,7 @@ class BlogFactory extends Factory
             'user_id' => User::factory()->count(1)->create()->first()->id,
             'title' => $this->faker->title(),
             'content' => Str::random(1000),
+            'short_description' => Str::random(100),
             'status' => 1
         ];
     }

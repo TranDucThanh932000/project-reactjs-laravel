@@ -4,7 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\v1\Authentication;
 use App\Http\Controllers\api\v1\BlogController;
 use App\Http\Controllers\api\v1\BlogLikeController;
+use App\Http\Controllers\api\v1\GoogleDriveController;
 use App\Http\Controllers\api\v1\LuckyNumberController;
+
+//google drive
+Route::get('google/login',[GoogleDriveController::class,'googleLogin'])->name('google.login');
 
 Route::post('/login', [Authentication::class, 'login']);
 Route::post('/refresh-token', [Authentication::class, 'refreshToken']);

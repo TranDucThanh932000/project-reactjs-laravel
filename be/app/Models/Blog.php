@@ -12,13 +12,17 @@ class Blog extends Model
 
     protected $table = "blogs";
     
-    protected $fillable = ['title', 'content', 'status'];
+    protected $fillable = ['user_id', 'title', 'content', 'status', 'short_description'];
 
     public function user() {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function blogLikes () {
+    public function blogLikes() {
         return $this->hasMany(BlogLike::class, 'blog_id', 'id');
+    }
+
+    public function blogMedias() {
+        return $this->belongsToMany(Media::class, 'blog_medias');
     }
 }
