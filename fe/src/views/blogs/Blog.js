@@ -237,7 +237,7 @@ function Blog() {
           </Box>
         </Grid>
       </Grid>
-      <Grid container spacing={2} id="cuadricula">
+      <Grid container id="cuadricula">
         {!doneFirstLoad && <SkeletonBlog />}
         {items.length
           ? items.map((x, index) => {

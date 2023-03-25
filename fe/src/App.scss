@@ -5,23 +5,11 @@
   font-family: 'Montserrat', sans-serif;
 }
 
-html,
-body,
-div,
-span,
-applet,
-object,
-iframe,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p {
+* {
   margin: 0;
   padding: 0;
   border: 0;
+  box-sizing: border-box;
 }
 
 ol,
@@ -92,10 +80,9 @@ a {
   grid-template-columns:repeat(6, minmax(auto, 100%)); 
   grid-template-rows:repeat(auto, 100%);
   grid-auto-flow: row;  /* or 'row dense', 'column', 'column dense' */
-  padding-right: 10px;
 
   .item {
-    margin: 6px;
+    margin: 5px;
     padding: 0;
     box-shadow: 0 0 10px gray, 0 0 1px gray;
     border-radius: 20px;
