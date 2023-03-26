@@ -21,8 +21,8 @@ class AppServiceProvider extends ServiceProvider
 
         foreach ($classes as $class) {
             $this->app->bind(
-                "App\Repositories\\{$class}\\${class}Interface",
-                "App\Repositories\\{$class}\\${class}Repository"
+                "App\Repositories\\{$class}\\{$class}Interface",
+                "App\Repositories\\{$class}\\{$class}Repository"
             );
         }
     }

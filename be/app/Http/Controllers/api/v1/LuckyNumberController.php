@@ -4,7 +4,6 @@ namespace App\Http\Controllers\api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Models\LuckyNumber;
-use Illuminate\Http\Request;
 
 class LuckyNumberController extends Controller
 {
