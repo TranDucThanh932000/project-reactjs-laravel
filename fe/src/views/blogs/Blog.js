@@ -126,10 +126,11 @@ function Blog() {
   }, []);
 
   const handleScroll = async () => {
+    const innerHeight = window.innerHeight;
     const scrollY = window.scrollY || window.pageYOffset;
     const scrollHeight = document.documentElement.scrollHeight;
     const windowHeight = window.innerHeight;
-    if (scrollY + windowHeight >= scrollHeight) {
+    if (scrollY + windowHeight >= (scrollHeight - innerHeight * 0.1)) {
       //get more 6 blogs
       setLoadMore(true);
       await handleLoadData(6);
@@ -192,9 +193,9 @@ function Blog() {
 
   return (
     <div className={cx("wrapper")}>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
-          <FormControl sx={{ m: 1, width: 300 }}>
+      <Grid container spacing={2} sx={{ my: 1 }}>
+        <Grid item xs={12} md={6} className={cx('py-0')}>
+          <FormControl sx={{ width: 300 }}>
             <InputLabel id="demo-multiple-chip-label">Thể loại</InputLabel>
             <Select
               labelId="demo-multiple-chip-label"
@@ -227,10 +228,12 @@ function Blog() {
         <Grid
           item
           xs={12}
-          sm={6}
+          md={6}
           container
           direction="row"
-          justifyContent="flex-end"
+          justifyContent={{xs: "", md: "flex-end"}}
+          marginTop={{ xs: "10px", md: "0" }}
+          className={cx('py-0')}
         >
           <Box>
             <CreateBlog createBlog={handleCreateBlog}></CreateBlog>

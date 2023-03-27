@@ -34,3 +34,11 @@ export const updateTextAlert = (payload) => {
         payload: payload
     }
 }
+
+export const updateModeLight = (payload) => {
+    localStorage.setItem('light-mode', payload);
+    return {
+        type: actionName.MODE_LIGHT,
+        payload: payload
+    }
+}

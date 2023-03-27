@@ -1,11 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,100&display=swap');
 @import 'utils/variables';
 
-* {
-  font-family: 'Montserrat', sans-serif;
+html {
+  overflow: overlay;
 }
 
 * {
+  font-family: 'Montserrat', sans-serif;
   margin: 0;
   padding: 0;
   border: 0;
@@ -73,6 +74,16 @@ a {
   border-radius: 10%;
 }
 
+.px-2 {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.MuiCardHeader-root {
+  align-items: start !important;
+  -webkit-align-items: start !important;
+}
+
 #cuadricula {
   max-width: 2000px;
   margin: 0px auto;
@@ -82,7 +93,7 @@ a {
   grid-auto-flow: row;  /* or 'row dense', 'column', 'column dense' */
 
   .item {
-    margin: 5px;
+    margin: 1px;
     padding: 0;
     box-shadow: 0 0 10px gray, 0 0 1px gray;
     border-radius: 20px;
@@ -93,6 +104,14 @@ a {
   .item:nth-child(2n){grid-column-end:span 2;}
   .item:nth-child(3n){grid-column-end:span 1;}
   .item:nth-child(3n){grid-row-end:span 1;}
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: $commonBackgroundColor;
+  border-radius: 20px;
 }
 
 @media only screen and (max-width: 576px) {

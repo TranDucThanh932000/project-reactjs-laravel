@@ -10,12 +10,13 @@ import { updateStatusLogin } from "./store/actions/commonAction";
 import { connect } from "react-redux";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
-
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 const mapStateToProps = (state) => {
   return {
     loading: state.commonReducer.loading,
-    textAlert: state.commonReducer.textAlert
+    textAlert: state.commonReducer.textAlert,
+    modeLight: state.commonReducer.modeLight
   };
 };
 
@@ -26,6 +27,12 @@ const App = (props) => {
   const [showAlert, isShowAlert] = useState(false);
   const vertical = "top";
   const horizontal = "right";
+
+  const darkTheme = createTheme({
+    palette: {
+      mode: props.modeLight,
+    },
+  });
 
   useEffect(async () => {
     if (!localStorage.getItem("loginToken")) {
@@ -49,53 +56,55 @@ const App = (props) => {
 
   return (
     <>
-      <Router>
-        <div className="App">
-          <Routes>
-            {publicRoutes.map((route, index) => {
-              let Layout = DefaultLayout;
-              if (route.layout) {
-                Layout = route.layout;
-              } else if (route.layout === null) {
-                Layout = Fragment;
-              }
-              const Page = route.component;
+      <ThemeProvider theme={darkTheme}>
+        <Router>
+          <div className="App">
+            <Routes>
+              {publicRoutes.map((route, index) => {
+                let Layout = DefaultLayout;
+                if (route.layout) {
+                  Layout = route.layout;
+                } else if (route.layout === null) {
+                  Layout = Fragment;
+                }
+                const Page = route.component;
 
-              return (
-                <Route
-                  key={index}
-                  path={route.path}
-                  element={
-                    <Layout>
-                      <div className={cx("p-2")}>
-                        <Page />
-                      </div>
-                    </Layout>
-                  }
-                />
-              );
-            })}
-          </Routes>
-        </div>
-      </Router>
-      {props.loading && (
-        <div className="loading-div">
-          <div className="loader-img"></div>
-        </div>
-      )}
-      <Snackbar
-        open={props.textAlert ? true : false}
-        onClose={() => isShowAlert(false)}
-        anchorOrigin={{ vertical, horizontal }}
-      >
-        <Alert
-          severity="info"
+                return (
+                  <Route
+                    key={index}
+                    path={route.path}
+                    element={
+                      <Layout>
+                        <div className={cx("px-2")}>
+                          <Page />
+                        </div>
+                      </Layout>
+                    }
+                  />
+                );
+              })}
+            </Routes>
+          </div>
+        </Router>
+        {props.loading && (
+          <div className="loading-div">
+            <div className="loader-img"></div>
+          </div>
+        )}
+        <Snackbar
+          open={props.textAlert ? true : false}
           onClose={() => isShowAlert(false)}
-          sx={{ width: "100%" }}
+          anchorOrigin={{ vertical, horizontal }}
         >
-          <strong>{props.textAlert}</strong>
-        </Alert>
-      </Snackbar>
+          <Alert
+            severity="info"
+            onClose={() => isShowAlert(false)}
+            sx={{ width: "100%" }}
+          >
+            <strong>{props.textAlert}</strong>
+          </Alert>
+        </Snackbar>
+      </ThemeProvider>
     </>
   );
 };

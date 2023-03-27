@@ -87,7 +87,10 @@ const Sidebar = (props) => {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <Drawer variant="permanent" open={props.open}>
+      <Drawer 
+        variant="permanent" 
+        open={props.open}
+        >
         <DrawerHeader>
           <div className={cx('logo')}>
             {/* <img src={logo} height={"40px"} alt={"logo"} loading="lazy" className={cx('logo_img')}/> */}

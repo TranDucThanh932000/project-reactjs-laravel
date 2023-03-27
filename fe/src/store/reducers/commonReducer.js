@@ -7,6 +7,7 @@ const initialState = {
   logged: false,
   openSidebar: true,
   textAlert: '',
+  modeLight: localStorage.getItem('light-mode') ?? 'light',
   sideBarItems: [
     {
       text: 'Bài viết',
@@ -42,6 +43,11 @@ const commonReducer = (state = initialState, action) => {
       return {
         ...state,
         textAlert: action.payload 
+      }
+    case actionName.MODE_LIGHT: 
+      return {
+        ...state,
+        modeLight: action.payload 
       }
     default:
       return state;
