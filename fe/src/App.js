@@ -6,7 +6,7 @@ import { DefaultLayout } from "./layouts";
 import classNames from "classnames/bind";
 import * as authentication from "./services/authenticationService";
 import store from "./store";
-import { updateStatusLogin } from "./store/actions/commonAction";
+import { updateStatusLogin, updateStatusLoading, closeSidebar } from "./store/actions/commonAction";
 import { connect } from "react-redux";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
@@ -35,6 +35,11 @@ const App = (props) => {
   });
 
   useEffect(async () => {
+    //240 là width sidebar
+    if(window.innerWidth - 240 < 350) {
+      store.dispatch(closeSidebar());
+    }
+    store.dispatch(updateStatusLoading(true));
     if (!localStorage.getItem("loginToken")) {
       if (window.location.href.includes("login")) return;
       window.location.href = "/login";
@@ -52,6 +57,7 @@ const App = (props) => {
         }
       }
     }
+    store.dispatch(updateStatusLoading(false));
   }, []);
 
   return (
