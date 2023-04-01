@@ -1,8 +1,11 @@
 import * as httpRequest from '../utils/httpRequest';
 
-export const blogs = async (from, amount) => {
+export const blogs = async (from, amount, categories) => {
+    if(categories != '') {
+        categories = categories.map(x => x.id).join('-');
+    }
     try {
-        const res = await httpRequest.get(`/blogs?from=${from}&amount=${amount}`);
+        const res = await httpRequest.get(`/blogs?from=${from}&amount=${amount}&categories=${categories}`);
         return res;
     } catch (error) {
         console.log(error);

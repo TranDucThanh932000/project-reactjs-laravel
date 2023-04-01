@@ -22,6 +22,9 @@ import store from '../../store'
 const cx = classNames.bind(styles);
 
 const schema = Yup.object().shape({
+  title: Yup.string()
+    .required("Yêu cầu")
+    .max(200, "Tối đa 200 ký tự"),
   shortDescription: Yup.string()
     .required("Yêu cầu")
     .max(200, "Tối đa 200 ký tự"),
@@ -105,7 +108,7 @@ const CreateBlog = (props) => {
                   value={values.title}
                   error={touched.title && Boolean(errors.title)}
                   helperText={touched.title && errors.title}
-                  className={cx("mb-2")}
+                  className={cx("mb-2", "mt-2")}
                   type="text"
                 />
                 <TextField

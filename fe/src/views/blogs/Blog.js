@@ -15,9 +15,11 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import CircularProgress from "@mui/material/CircularProgress";
+import CancelIcon from '@mui/icons-material/Cancel';
 
 import * as blogService from "../../services/blogService";
 import * as blogLikeService from "../../services/blogLikeService";
+import * as categoryService from '../../services/categoryService'
 import store from "../../store";
 import { connect } from "react-redux";
 
@@ -64,6 +66,9 @@ function Blog() {
   const [doneFirstLoad, setDoneFirstLoad] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const colorAvatar = ["red", "pink", "grey", "blue", "green", "yellow", "orange", "gray", "#123333", "#678123"];
+  const [listType, setListType] = React.useState([]);
+  const [typeChoosed, setTypeChoosed] = React.useState([]);
+  const [resetItemLength, setResetItemLength] = React.useState(false);
 
   const formatTime = React.useCallback((val) => {
     return moment(val, "YYYY-MM-DD hh:mm:ss").format("DD/MM/YYYY hh:mm");
@@ -94,8 +99,8 @@ function Blog() {
     store.dispatch(updateStatusLoading(false));
   };
 
-  const handleLoadData = async (amount) => {
-    await blogService.blogs(items.length, amount).then((res) => {
+  const handleLoadData = async (amount, categories, isScroll) => {
+    await blogService.blogs(isScroll ? items.length : 0, amount, categories).then((res) => {
       if (!res) {
         //too many request
         return;
@@ -103,7 +108,12 @@ function Blog() {
       //setItems((prev) => prev.push(...res.blogs));
       //như trên không chạy, khả năng do nó k thấy sự thay đổi địa chỉ nên không rerender
       //còn concat này nó đẩy thêm data mới vào và tạo ra 1 mảng có địa chỉ mới
-      setItems((prev) => prev.concat(res.blogs));
+      if (isScroll) {
+        setItems((prev) => prev.concat(res.blogs));
+      } else {
+        setItems(() => [].concat(res.blogs));
+      }
+      setResetItemLength((prev) => !prev);
       if (res.blogs.length === 0) {
         store.dispatch(updateTextAlert('Không còn bài viết nào!'));
         setTimeout(() => {
@@ -117,10 +127,21 @@ function Blog() {
     setItems([val.blog, ...items]);
   };
 
-  //load 9 blog last
+  const getListType = () => {
+    categoryService.getListType().then((res) => {
+      setListType([{
+        id: '',
+        name: 'Tất cả'
+      }, 
+      ...res]);
+    })
+  }
+
+  //load 9 blog last of any category
   React.useEffect(async () => {
     store.dispatch(updateStatusLoading(true));
-    await handleLoadData(9);
+    getListType();
+    await handleLoadData(9, '', false);
     setDoneFirstLoad(true);
     store.dispatch(updateStatusLoading(false));
   }, []);
@@ -133,16 +154,14 @@ function Blog() {
     if (scrollY + windowHeight >= (scrollHeight - innerHeight * 0.1)) {
       //get more 6 blogs
       setLoadMore(true);
-      await handleLoadData(6);
+      await handleLoadData(6, typeChoosed, true);
       setLoadMore(false);
     }
   };
 
   React.useEffect(() => {
     if (doneFirstLoad) {
-      if (loadMore) {
-        window.removeEventListener("scroll", handleScroll);
-      } else {
+      if (!loadMore) {
         window.addEventListener("scroll", handleScroll);
       }
     }
@@ -150,7 +169,7 @@ function Blog() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [doneFirstLoad, loadMore]);
+  }, [doneFirstLoad, loadMore, typeChoosed, resetItemLength]);
 
   const openPopper = Boolean(anchorEl);
   const id = openPopper ? "simple-popper" : undefined;
@@ -167,14 +186,6 @@ function Blog() {
     },
   };
 
-  const [listType, setListType] = React.useState([
-    { key: 0, label: 'Tất cả' },
-    { key: 1, label: 'jQuery' },
-    { key: 2, label: 'Polymer' },
-    { key: 3, label: 'React' },
-    { key: 4, label: 'Vue.js' },
-  ]);
-
   function getStyles(name, typeChoosed, theme) {
     return {
       fontWeight:
@@ -184,30 +195,30 @@ function Blog() {
     };
   }
   const theme = useTheme();
-  const [typeChoosed, setTypeChoosed] = React.useState([
-  ]);
 
-  const handleChange = (event) => {
+  const handleChange = async (event) => {
     var {
       target: { value },
     } = event;
 
-    if(value[value.length - 1].key === 0) {
+    if(value[value.length - 1].id === '') {
       value = [listType[0]];
-    } else if(value.length > 1 && value[0].key === 0) {
+    } else if(value.length > 1 && value[0].id === '') {
       value = [value[1]];
     }
 
     setTypeChoosed(
       // On autofill we get a stringified value.
-      typeof value === "string" ? value.split(",") : value
+      () => typeof value === "string" ? value.split(",") : value
     );
+    store.dispatch(updateStatusLoading(true));
+    await handleLoadData(9, value, false);
+    store.dispatch(updateStatusLoading(false));
   };
   //
 
   const handleDeleteSelection = (chipToDelete) => {
-    console.log('delete')
-    setListType((chips) => chips.filter((chip) => chip.key != chipToDelete.key));
+    setTypeChoosed((chips) => chips.filter((chip) => chip.id != chipToDelete.id));
   };
 
   return (
@@ -227,22 +238,30 @@ function Blog() {
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                   <>
                     {selected.map((value) => (
-                      <Chip key={value.key} label={value.label} color="primary" onDelete={() => handleDeleteSelection(value)}/>
+                      <Chip key={value.id} label={value.name} color="primary" 
+                      deleteIcon={
+                        <CancelIcon
+                          onMouseDown={(event) => event.stopPropagation()}
+                        />
+                      }
+                      onDelete={() => handleDeleteSelection(value)}/>
                     ))}
                   </>
                 </Box>
               )}
               MenuProps={MenuProps}
             >
-              {listType.map((x) => (
-                <MenuItem
-                  key={x.key}
-                  value={x}
-                  style={getStyles(x.label, typeChoosed, theme)}
-                >
-                  {x.label}
-                </MenuItem>
-              ))}
+              {
+                listType.map((x) => (
+                  <MenuItem
+                    key={x.id}
+                    value={x}
+                    style={getStyles(x.name, typeChoosed, theme)}
+                  >
+                    {x.name}
+                  </MenuItem>
+                ))
+              }
             </Select>
           </FormControl>
         </Grid>

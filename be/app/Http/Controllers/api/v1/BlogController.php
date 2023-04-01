@@ -28,7 +28,12 @@ class BlogController extends Controller
 
     public function index(Request $request)
     {
-        $blog = $this->blog->get($request->from, $request->amount);
+        $blog = [];
+        $listCategory = [];
+        if (!empty($request->categories)) {
+            $listCategory = explode('-', $request->categories);
+        }
+        $blog = $this->blog->get($request->from, $request->amount, $listCategory);
 
         return response()->json([
             'blogs' => $blog
