@@ -167,33 +167,52 @@ function Blog() {
     },
   };
 
-  const types = ["Oliver Hansen", "Van Henry", "April Tucker"];
+  const [listType, setListType] = React.useState([
+    { key: 0, label: 'Tất cả' },
+    { key: 1, label: 'jQuery' },
+    { key: 2, label: 'Polymer' },
+    { key: 3, label: 'React' },
+    { key: 4, label: 'Vue.js' },
+  ]);
 
-  function getStyles(name, personName, theme) {
+  function getStyles(name, typeChoosed, theme) {
     return {
       fontWeight:
-        personName.indexOf(name) === -1
+        typeChoosed.indexOf(name) === -1
           ? theme.typography.fontWeightRegular
           : theme.typography.fontWeightMedium,
     };
   }
   const theme = useTheme();
-  const [personName, setPersonName] = React.useState([]);
+  const [typeChoosed, setTypeChoosed] = React.useState([
+  ]);
 
   const handleChange = (event) => {
-    const {
+    var {
       target: { value },
     } = event;
-    setPersonName(
+
+    if(value[value.length - 1].key === 0) {
+      value = [listType[0]];
+    } else if(value.length > 1 && value[0].key === 0) {
+      value = [value[1]];
+    }
+
+    setTypeChoosed(
       // On autofill we get a stringified value.
       typeof value === "string" ? value.split(",") : value
     );
   };
   //
 
+  const handleDeleteSelection = (chipToDelete) => {
+    console.log('delete')
+    setListType((chips) => chips.filter((chip) => chip.key != chipToDelete.key));
+  };
+
   return (
     <div className={cx("wrapper")}>
-      <Grid container spacing={2} sx={{ my: 1 }}>
+      <Grid container spacing={2} sx={{ my: 2 }}>
         <Grid item xs={12} md={6} className={cx('py-0')}>
           <FormControl sx={{ width: 300 }}>
             <InputLabel id="demo-multiple-chip-label">Thể loại</InputLabel>
@@ -201,25 +220,27 @@ function Blog() {
               labelId="demo-multiple-chip-label"
               id="demo-multiple-chip"
               multiple
-              value={personName}
+              value={typeChoosed}
               onChange={handleChange}
               input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
               renderValue={(selected) => (
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip key={value} label={value} />
-                  ))}
+                  <>
+                    {selected.map((value) => (
+                      <Chip key={value.key} label={value.label} color="primary" onDelete={() => handleDeleteSelection(value)}/>
+                    ))}
+                  </>
                 </Box>
               )}
               MenuProps={MenuProps}
             >
-              {types.map((name) => (
+              {listType.map((x) => (
                 <MenuItem
-                  key={name}
-                  value={name}
-                  style={getStyles(name, personName, theme)}
+                  key={x.key}
+                  value={x}
+                  style={getStyles(x.label, typeChoosed, theme)}
                 >
-                  {name}
+                  {x.label}
                 </MenuItem>
               ))}
             </Select>
