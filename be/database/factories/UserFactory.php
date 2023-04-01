@@ -20,7 +20,7 @@ class UserFactory extends Factory
             'email' => $this->faker->safeEmail(),
             'account' => $this->faker->unique()->regexify('/^[A-Za-z0-9]{8,16}$/'),
             'email_verified_at' => now(),
-            'password' => '$2a$12$gJvbN4gaHLBXhQXWDeoHM.uoLWcrkvEKHOUeXrgSziQVMCl62K4Ju', // 123123123
+            'password' => '$2y$10$DkcIdkX6Y/XVVi38bIG02OGJTQzFOIJFkK0zfsdlvyRPKebRPpAz2', // 123123123
             'remember_token' => Str::random(10),
         ];
     }

@@ -17,7 +17,11 @@ httpRequest.interceptors.request.use(
           .post(process.env.REACT_APP_BASE_URL + "refresh-token", { token })
           .then((response) => {
             const newToken = response.data.token;
-            localStorage.setItem("loginToken", newToken);
+            if(newToken) {
+              localStorage.setItem("loginToken", newToken);
+            } else {
+              localStorage.removeItem("loginToken");
+            }
             config.headers.Authorization = `Bearer ${newToken}`;
             return Promise.resolve(config);
           })
