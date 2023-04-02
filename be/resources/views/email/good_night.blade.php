@@ -56,6 +56,10 @@
         .m-0 {
             margin: 0 !important;
         }
+        .img {
+            width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 <body>
@@ -63,7 +67,7 @@
         <h1 class="text-left m-0">{{ $time }}</h1>
         <h1 class="text-left m-0">{{ $date }}</h1>
         <div class="image">
-            <img src="{{ $urlImg }}" alt="bed">
+            <img src="{{ $urlImg }}" class="img" alt="goodnight">
             <div class="overlay">
                 <p>Chào bạn,</p>
                 <p>{{ $content }}</p>
