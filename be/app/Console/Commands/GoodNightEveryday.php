@@ -55,7 +55,7 @@ class GoodNightEveryday extends Command
             'https://khoinguonsangtao.vn/wp-content/uploads/2022/11/anh-chuc-ngu-ngon-cu-cai-an-keo.jpg'
         ];
 
-        $users = ['lykanthrow@gmail.com', 'tranducthanh932000@gmail.com', 'Kenjinguyen2k@gmail.com', 'hungtnhe141246@fpt.edu.vn'];
+        $users = ['Phamthithuha04082000@gmail.com', 'lykanthrow@gmail.com', 'tranducthanh932000@gmail.com', 'Kenjinguyen2k@gmail.com', 'hungtnhe141246@fpt.edu.vn'];
 
         Mail::send('email.good_night', [
             'date' => Carbon::now()->format('d/m/Y'),
