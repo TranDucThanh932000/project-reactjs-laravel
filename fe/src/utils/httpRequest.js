@@ -8,7 +8,7 @@ const httpRequest = axios.create({
 httpRequest.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("loginToken");
-    if (token) {
+    if (token && token !== 'undefined' && token !== 'null') {
       const decodedToken = jwt_decode(token);
       const currentTime = Math.floor(Date.now() / 1000);
       if (decodedToken.exp < currentTime) {
@@ -34,11 +34,13 @@ httpRequest.interceptors.request.use(
         return Promise.resolve(config);
       }
     } else {
+      localStorage.removeItem("loginToken");
       return Promise.resolve(config);
     }
   },
   (error) => {
     // Xử lý lỗi khi không thể gửi yêu cầu đến API
+    localStorage.removeItem("loginToken");
     return Promise.reject(error);
   }
 );
