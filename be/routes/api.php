@@ -12,6 +12,7 @@ use App\Http\Controllers\api\v1\LuckyNumberController;
 Route::get('google/login',[GoogleDriveController::class,'googleLogin'])->name('google.login');
 
 Route::post('/login', [Authentication::class, 'login']);
+Route::post('/register', [Authentication::class, 'register']);
 Route::post('/refresh-token', [Authentication::class, 'refreshToken']);
 Route::post('/check-token', [Authentication::class, 'checkToken']);
 Route::get('/lucky-number-today', [LuckyNumberController::class, 'getLuckyNumberToday']);

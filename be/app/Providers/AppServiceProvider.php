@@ -17,7 +17,8 @@ class AppServiceProvider extends ServiceProvider
             'Blogs',
             'BlogLikes',
             'Medias',
-            'Categories'
+            'Categories',
+            'User'
         ];
 
         foreach ($classes as $class) {

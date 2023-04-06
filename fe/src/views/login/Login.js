@@ -8,7 +8,8 @@ import * as Yup from "yup";
 import * as authenticationService from '../../services/authenticationService'
 import store from "../../store";
 import { updateStatusLogin, closeSidebar, openSidebar } from "../../store/actions/commonAction";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import LinkMui from '@mui/material/Link';
 
 const cx = classNames.bind(styles);
 
@@ -48,7 +49,7 @@ const Login = () => {
       justifyContent="center"
       alignItems="center"
       spacing={3}
-      className={cx("center")}
+      className={cx("center", "max400px")}
     >
       <Formik
         initialValues={{ account: "", password: "" }}
@@ -100,6 +101,17 @@ const Login = () => {
                 Đăng nhập
               </Button>
             </div>
+            <Link to={'/register'}>
+              <LinkMui
+                component="button"
+              >
+                Đăng ký
+              </LinkMui>
+            </Link>
+            <br/>
+            <Link to={"/"}>
+              <LinkMui component="button">Trở về trang chủ</LinkMui>
+            </Link>
           </form>
         )}
       </Formik>

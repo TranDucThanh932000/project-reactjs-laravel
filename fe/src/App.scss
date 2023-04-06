@@ -106,6 +106,10 @@ a {
   .item:nth-child(3n){grid-row-end:span 1;}
 }
 
+.max400px {
+  max-width: 400px;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
 }

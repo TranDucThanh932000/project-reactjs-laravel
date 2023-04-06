@@ -8,6 +8,7 @@ export const login = async ({ account, password }) => {
         });
         return res.token;
     } catch (error) {
+        localStorage.removeItem('loginToken');
         console.log(error);
     }
 };
@@ -31,3 +32,13 @@ export const logout = async () => {
         console.log(error);
     }
 };
+
+export const register = async (data) => {
+    try {
+        const res = await httpRequest.post('register', data);
+        return res;
+    } catch (error) {
+        localStorage.removeItem('loginToken');
+        console.log(error);
+    }
+}
