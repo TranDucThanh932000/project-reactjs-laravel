@@ -1,16 +1,11 @@
 import * as httpRequest from '../utils/httpRequest';
 
 export const login = async ({ account, password }) => {
-    try {
-        const res = await httpRequest.post('login', {
-            account,
-            password,
-        });
-        return res.token;
-    } catch (error) {
-        localStorage.removeItem('loginToken');
-        console.log(error);
-    }
+    const res = await httpRequest.post('login', {
+        account,
+        password,
+    });
+    return res;
 };
 
 export const checkToken = async () => {
@@ -41,4 +36,9 @@ export const register = async (data) => {
         localStorage.removeItem('loginToken');
         console.log(error);
     }
+}
+
+export const checkAccount = async (account) => {
+    const res = await httpRequest.get(`check-account?account=${account}`);
+    return res;
 }

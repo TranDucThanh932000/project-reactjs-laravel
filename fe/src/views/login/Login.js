@@ -10,6 +10,8 @@ import store from "../../store";
 import { updateStatusLogin, closeSidebar, openSidebar } from "../../store/actions/commonAction";
 import { Link, useNavigate } from "react-router-dom";
 import LinkMui from '@mui/material/Link';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn';
 
 const cx = classNames.bind(styles);
 
@@ -27,19 +29,27 @@ const schema = Yup.object().shape({
 const Login = () => {
 
   const navigate = useNavigate();
+  const [loginFailMsg, setLoginFailMsg] = React.useState('');
 
   React.useEffect(() => {
     store.dispatch(closeSidebar());
   }, [])
 
   const handleLogin = async (values) => {
-    let token = await authenticationService.login({
-      ...values
-    })
-    store.dispatch(updateStatusLogin(true));
-    store.dispatch(openSidebar(true));
-    localStorage.setItem('loginToken', token);
-    navigate('/');
+    try {
+      let res = await authenticationService.login({
+        ...values
+      })
+      store.dispatch(updateStatusLogin(true));
+      store.dispatch(openSidebar(true));
+      localStorage.setItem('loginToken', res.token);
+      navigate('/');
+    } catch (e) {
+      if(e.response.status === 401) {
+        setLoginFailMsg('Sai tài khoản hoặc mật khẩu');
+        localStorage.removeItem('loginToken');
+      }
+    }
   }
 
   return (
@@ -49,7 +59,7 @@ const Login = () => {
       justifyContent="center"
       alignItems="center"
       spacing={3}
-      className={cx("center", "max400px")}
+      className={cx("center", "max400px", "border-form")}
     >
       <Formik
         initialValues={{ account: "", password: "" }}
@@ -75,7 +85,10 @@ const Login = () => {
               id="account"
               name="account"
               label="Tài khoản"
-              onChange={handleChange}
+              onChange={(event) => {
+                setLoginFailMsg('')
+                handleChange(event);
+              }}
               onBlur={handleBlur}
               value={values.account}
               error={touched.account && Boolean(errors.account)}
@@ -87,7 +100,10 @@ const Login = () => {
               id="password"
               name="password"
               label="Mật khẩu"
-              onChange={handleChange}
+              onChange={(event) => {
+                setLoginFailMsg('')
+                handleChange(event);
+              }}
               onBlur={handleBlur}
               value={values.password}
               error={touched.password && Boolean(errors.password)}
@@ -95,22 +111,31 @@ const Login = () => {
               className={cx('mb-2')}
               type="password"
             />
-            {isSubmitting && <LinearProgress></LinearProgress>}
+            {isSubmitting && <LinearProgress className={cx('mb-2')}></LinearProgress>}
+            <p className={cx("text-red", "text-center")}>{ loginFailMsg }</p>
             <div className={cx("text-center")}>
               <Button type="submit" disabled={isSubmitting} variant="outlined" endIcon={<SendIcon />}>
                 Đăng nhập
               </Button>
             </div>
             <Link to={'/register'}>
-              <LinkMui
-                component="button"
-              >
-                Đăng ký
-              </LinkMui>
+              <Button variant="text" className={'p-0'} startIcon={<HowToRegIcon />}>
+                <LinkMui
+                  component="span"
+                >
+                  Đăng ký
+                </LinkMui>
+              </Button>
             </Link>
             <br/>
             <Link to={"/"}>
-              <LinkMui component="button">Trở về trang chủ</LinkMui>
+              <Button variant="text" className={'p-0'} startIcon={<KeyboardReturnIcon />}>
+                <LinkMui
+                  component="span"
+                >
+                  Trở về trang chủ
+                </LinkMui>
+              </Button>
             </Link>
           </form>
         )}

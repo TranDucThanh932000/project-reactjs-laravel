@@ -14,6 +14,8 @@ import {
 } from "../../store/actions/commonAction";
 import { Link, useNavigate } from "react-router-dom";
 import LinkMui from "@mui/material/Link";
+import LoginIcon from "@mui/icons-material/Login";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 
 const cx = classNames.bind(styles);
 
@@ -31,26 +33,55 @@ const schema = Yup.object().shape({
     .required("Yêu cầu")
     .min(6, "Ít nhất 6 ký tự")
     .max(16, "Tối đa 16 ký tự"),
-    password_confirmation: Yup.string()
+  password_confirmation: Yup.string()
     .required("Yêu cầu")
     .oneOf([Yup.ref("password"), null], "Mật khẩu chưa khớp"),
 });
 
 const Register = () => {
   const navigate = useNavigate();
+  const [info, setInfo] = React.useState({
+    account: "",
+    password: "",
+    password_confirmation: "",
+    name: "",
+    email: "",
+  });
+  const [accountErrorMsg, setAccountErrorMsg] = React.useState("");
 
   React.useEffect(() => {
     store.dispatch(closeSidebar());
   }, []);
 
+  React.useEffect(() => {
+    setAccountErrorMsg("");
+    const timerId = setTimeout(() => {
+      if (info.account) {
+        authenticationService
+          .checkAccount(info.account)
+          .then((response) => {
+            setAccountErrorMsg(
+              response.isAccountValid ? "" : "Tài khoản đã tồn tại"
+            );
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      } else {
+        setAccountErrorMsg("");
+      }
+    }, 400);
+
+    return () => clearTimeout(timerId);
+  }, [info.account]);
+
   const handleRegister = async (values) => {
-    let token = await authenticationService.register(values);
-    console.log(token)
+    let res = await authenticationService.register(values);
 
     store.dispatch(updateStatusLogin(true));
     store.dispatch(openSidebar(true));
-    localStorage.setItem('loginToken', token.token);
-    navigate('/');
+    localStorage.setItem("loginToken", res.token);
+    navigate("/");
   };
 
   return (
@@ -60,10 +91,10 @@ const Register = () => {
       justifyContent="center"
       alignItems="center"
       spacing={3}
-      className={cx("center", "max400px")}
+      className={cx("center", "max400px", "border-form")}
     >
       <Formik
-        initialValues={{ account: "", password: "", password_confirmation: "", name: "", email: "" }}
+        initialValues={info}
         validationSchema={schema}
         onSubmit={async (values, { setSubmitting }) => {
           setSubmitting(true);
@@ -98,7 +129,9 @@ const Register = () => {
               id="email"
               name="email"
               label="Email"
-              onChange={handleChange}
+              onChange={(event) => {
+                handleChange(event);
+              }}
               onBlur={handleBlur}
               value={values.email}
               error={touched.email && Boolean(errors.email)}
@@ -110,13 +143,26 @@ const Register = () => {
               id="account"
               name="account"
               label="Tài khoản"
-              onChange={handleChange}
+              onChange={(e) => {
+                setInfo({...info, account: e.target.value});
+                handleChange(e);
+              }}
               onBlur={handleBlur}
               value={values.account}
               error={touched.account && Boolean(errors.account)}
               helperText={touched.account && errors.account}
               className={cx("mb-2")}
             />
+            {accountErrorMsg && (
+              <p
+                className={cx(
+                  "text-red",
+                  "MuiFormHelperText-root Mui-error MuiFormHelperText-sizeMedium MuiFormHelperText-contained MuiFormHelperText-filled custom-text-error-input"
+                )}
+              >
+                {accountErrorMsg}
+              </p>
+            )}
             <TextField
               fullWidth
               id="password"
@@ -138,12 +184,19 @@ const Register = () => {
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.password_confirmation}
-              error={touched.password_confirmation && Boolean(errors.password_confirmation)}
-              helperText={touched.password_confirmation && errors.password_confirmation}
+              error={
+                touched.password_confirmation &&
+                Boolean(errors.password_confirmation)
+              }
+              helperText={
+                touched.password_confirmation && errors.password_confirmation
+              }
               className={cx("mb-2")}
               type="password"
             />
-            {isSubmitting && <LinearProgress></LinearProgress>}
+            {isSubmitting && (
+              <LinearProgress className={cx("mb-2")}></LinearProgress>
+            )}
             <div className={cx("text-center")}>
               <Button
                 type="submit"
@@ -155,11 +208,23 @@ const Register = () => {
               </Button>
             </div>
             <Link to={"/login"}>
-              <LinkMui component="button">Đăng nhập</LinkMui>
+              <Button
+                variant="text"
+                className={"p-0"}
+                startIcon={<LoginIcon />}
+              >
+                <LinkMui component="span">Đăng nhập</LinkMui>
+              </Button>
             </Link>
-            <br/>
+            <br />
             <Link to={"/"}>
-              <LinkMui component="button">Trở về trang chủ</LinkMui>
+              <Button
+                variant="text"
+                className={"p-0"}
+                startIcon={<KeyboardReturnIcon />}
+              >
+                <LinkMui component="span">Trở về trang chủ</LinkMui>
+              </Button>
             </Link>
           </form>
         )}

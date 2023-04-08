@@ -41,9 +41,11 @@ import { Box } from "@mui/system";
 import Popper from "@mui/material/Popper";
 import CreateBlog from "./CreateBlog";
 import SkeletonBlog from "./Skeleton";
+import { useNavigate } from "react-router-dom";
 
 const mapStateToProps = (state) => {
   return {
+    logged: state.commonReducer.logged
   };
 };
 const cx = classNames.bind(styles);
@@ -59,7 +61,7 @@ const ExpandMore = styled((props) => {
   }),
 }));
 
-function Blog() {
+function Blog(props) {
   const [expanded, setExpanded] = React.useState(false);
   const [items, setItems] = React.useState([]);
   const [loadMore, setLoadMore] = React.useState(false);
@@ -69,6 +71,7 @@ function Blog() {
   const [listType, setListType] = React.useState([]);
   const [typeChoosed, setTypeChoosed] = React.useState([]);
   const [resetItemLength, setResetItemLength] = React.useState(false);
+  const navigate = useNavigate();
 
   const formatTime = React.useCallback((val) => {
     return moment(val, "YYYY-MM-DD hh:mm:ss").format("DD/MM/YYYY hh:mm");
@@ -79,6 +82,10 @@ function Blog() {
   };
 
   const handleFavorite = async (val, index) => {
+    if(! props.logged) {
+      navigate('/login');
+      return;
+    }
     const newItems = [...items];
     store.dispatch(updateStatusLoading(true));
     if (val) {
@@ -217,8 +224,11 @@ function Blog() {
   };
   //
 
-  const handleDeleteSelection = (chipToDelete) => {
+  const handleDeleteSelection = async (chipToDelete) => {
     setTypeChoosed((chips) => chips.filter((chip) => chip.id != chipToDelete.id));
+    store.dispatch(updateStatusLoading(true));
+    await handleLoadData(6, typeChoosed.filter((chip) => chip.id != chipToDelete.id), false);
+    store.dispatch(updateStatusLoading(false));
   };
 
   return (

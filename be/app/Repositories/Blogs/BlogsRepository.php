@@ -3,9 +3,8 @@
 namespace App\Repositories\Blogs;
 
 use App\Models\Blog;
-use Illuminate\Support\Facades\Auth;
 use App\Enums\BlogStatus;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use JWTAuth;
 
 class BlogsRepository implements BlogsInterface
 {
@@ -19,8 +18,11 @@ class BlogsRepository implements BlogsInterface
 
     public function get($from, $amount, $listCategory)
     {
-        $user = JWTAuth::parseToken()->authenticate();
-
+        $user = null;
+        if(auth()->guard('api')->check()) {
+            $user = JWTAuth::parseToken()->authenticate();
+        }
+        
         return $this->blog
         ->when(! empty($listCategory), function ($q) use ($listCategory) {
             return $q->join('blog_categories', 'blog_categories.blog_id', '=', 'blogs.id')

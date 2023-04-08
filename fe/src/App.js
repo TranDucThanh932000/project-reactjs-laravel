@@ -40,12 +40,12 @@ const App = (props) => {
       store.dispatch(closeSidebar());
     }
     store.dispatch(updateStatusLoading(true));
-    if (!localStorage.getItem("loginToken")) {
+    if (! localStorage.getItem("loginToken")) {
       if (window.location.href.includes("login")) {
         store.dispatch(updateStatusLoading(false));
         return;
       }
-      window.location.href = "/login";
+      // window.location.href = "/login";
     } else {
       let isExisting = await authentication.checkToken(
         localStorage.getItem("loginToken")

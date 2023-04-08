@@ -15,12 +15,13 @@ Route::post('/login', [Authentication::class, 'login']);
 Route::post('/register', [Authentication::class, 'register']);
 Route::post('/refresh-token', [Authentication::class, 'refreshToken']);
 Route::post('/check-token', [Authentication::class, 'checkToken']);
+Route::get('/check-account', [Authentication::class, 'checkAccountExist']);
 Route::get('/lucky-number-today', [LuckyNumberController::class, 'getLuckyNumberToday']);
 Route::get('/lucky-number-latest', [LuckyNumberController::class, 'getLatestLuckyNumber']);
 Route::resource('blogs', BlogController::class);
-Route::group(['prefix' => 'blogs',  'namespace' => 'Blog'], function() {
+// Route::group(['prefix' => 'blogs',  'namespace' => 'Blog'], function() {
     
-});
+// });
 
 Route::resource('categories', CategoryController::class);
 

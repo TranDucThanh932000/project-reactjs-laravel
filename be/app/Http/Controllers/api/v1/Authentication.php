@@ -44,9 +44,8 @@ class Authentication extends Controller
 
     public function logout()
     {
-
         try {
-            $user = Auth::user();
+            $user = JWTAuth::parseToken()->authenticate();
 
             $token = JWTAuth::fromUser($user);
     
@@ -92,5 +91,23 @@ class Authentication extends Controller
             return response()->json(['error' => 'could_not_create_token'], 500);
         }
         return response()->json(compact('token'));
+    }
+
+    public function checkAccountExist(Request $request)
+    {
+        try {
+            $user = $this->user->getByAccount($request->account);
+            if($user) {
+                return response()->json([
+                    'isAccountValid' => false
+                ], 200);
+            }
+            
+            return response()->json([
+                'isAccountValid' => true
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json('fail', 400);
+        }
     }
 }
