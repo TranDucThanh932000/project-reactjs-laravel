@@ -7,14 +7,15 @@
     "require": {
         "php": "^8.0",
         "bensampo/laravel-enum": "^6.3",
+        "fakerphp/faker": "^1.9.1",
         "fruitcake/laravel-cors": "^2.0.5",
         "google/apiclient": "^2.13",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^9.0",
         "laravel/sanctum": "^2.14",
         "laravel/tinker": "^2.7",
-        "tymon/jwt-auth": "^2.0",
-        "fakerphp/faker": "^1.9.1"
+        "pusher/pusher-php-server": "^7.2",
+        "tymon/jwt-auth": "^2.0"
     },
     "require-dev": {
         "laravel/sail": "^1.0.1",

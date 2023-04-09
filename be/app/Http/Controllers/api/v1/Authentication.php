@@ -36,7 +36,7 @@ class Authentication extends Controller
         $token = JWTAuth::parseToken()->getToken();
         try {
             $user = JWTAuth::parseToken()->authenticate();
-            return response()->json(true, 200);
+            return response()->json($user, 200);
         } catch (JWTException $e) {
             return response()->json(false, 401);
         }

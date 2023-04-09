@@ -5,6 +5,7 @@ use App\Http\Controllers\api\v1\Authentication;
 use App\Http\Controllers\api\v1\BlogController;
 use App\Http\Controllers\api\v1\BlogLikeController;
 use App\Http\Controllers\api\v1\CategoryController;
+use App\Http\Controllers\api\v1\ChatController;
 use App\Http\Controllers\api\v1\GoogleDriveController;
 use App\Http\Controllers\api\v1\LuckyNumberController;
 
@@ -23,11 +24,14 @@ Route::resource('blogs', BlogController::class);
     
 // });
 
+Route::get('/chat/users-contacted', [ChatController::class, 'getUsersContacted']);
+Route::get('/chat/msg-friend', [ChatController::class, 'getMsgFriend']);
 Route::resource('categories', CategoryController::class);
 
 Route::group([
-    'middleware' => ['jwt.auth', 'throttle:60'],
+    'middleware' => ['jwt.auth', 'throttle:120'],
 ], function() {
     Route::post('/logout', [Authentication::class, 'logout']);
+    Route::resource('chat', ChatController::class);
     Route::resource('bloglikes', BlogLikeController::class);
 });

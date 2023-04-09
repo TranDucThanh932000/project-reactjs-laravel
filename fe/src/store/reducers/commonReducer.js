@@ -19,7 +19,8 @@ const initialState = {
       url: '/lucky-number-today',
       icon: <StarOutlineIcon/>
     },
-  ]
+  ],
+  currentUser: {},
 };
 
 const commonReducer = (state = initialState, action) => {
@@ -48,6 +49,11 @@ const commonReducer = (state = initialState, action) => {
       return {
         ...state,
         modeLight: action.payload 
+      }
+    case actionName.CURRENT_USER:
+      return {
+        ...state,
+        currentUser: action.payload 
       }
     default:
       return state;

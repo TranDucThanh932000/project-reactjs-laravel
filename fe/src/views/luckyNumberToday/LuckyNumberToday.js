@@ -115,7 +115,7 @@ const LuckyNumberToday = () => {
 
   return (
     <Box component="div">
-      <Box className={cx('justify-space-between')}>
+      <Box className={cx('justify-space-between', 'py-2')}>
         <Box>
           <h1>Số may mắn hôm nay</h1>
         </Box>

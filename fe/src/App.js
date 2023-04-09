@@ -6,11 +6,13 @@ import { DefaultLayout } from "./layouts";
 import classNames from "classnames/bind";
 import * as authentication from "./services/authenticationService";
 import store from "./store";
-import { updateStatusLogin, updateStatusLoading, closeSidebar } from "./store/actions/commonAction";
+import { updateStatusLogin, updateStatusLoading, closeSidebar, updateCurrentUser } from "./store/actions/commonAction";
 import { connect } from "react-redux";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { Box } from "@mui/material";
+import Chatting from "./views/chatting/Chatting";
 
 const mapStateToProps = (state) => {
   return {
@@ -47,10 +49,10 @@ const App = (props) => {
       }
       // window.location.href = "/login";
     } else {
-      let isExisting = await authentication.checkToken(
+      let user = await authentication.checkToken(
         localStorage.getItem("loginToken")
       );
-      if (!isExisting) {
+      if (!user) {
         if (window.location.href.includes("login")) {
           store.dispatch(updateStatusLoading(false));
           return;
@@ -58,6 +60,7 @@ const App = (props) => {
         window.location.href = "/login";
       } else {
         store.dispatch(updateStatusLogin(true));
+        store.dispatch(updateCurrentUser(user));
         if (window.location.href.includes("login")) {
           window.location.href = "/";
         }
@@ -88,7 +91,10 @@ const App = (props) => {
                     element={
                       <Layout>
                         <div className={cx("px-2")}>
-                          <Page />
+                          <div className={cx("zIndex100")}>
+                            <Page/>
+                          </div>
+                          <Chatting></Chatting>
                         </div>
                       </Layout>
                     }
@@ -98,11 +104,13 @@ const App = (props) => {
             </Routes>
           </div>
         </Router>
+
         {props.loading && (
           <div className="loading-div">
             <div className="loader-img"></div>
           </div>
         )}
+        
         <Snackbar
           open={props.textAlert ? true : false}
           onClose={() => isShowAlert(false)}

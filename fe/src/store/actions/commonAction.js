@@ -42,3 +42,10 @@ export const updateModeLight = (payload) => {
         payload: payload
     }
 }
+
+export const updateCurrentUser = (payload) => {
+    return {
+        type: actionName.CURRENT_USER,
+        payload: payload
+    }
+}

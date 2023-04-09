@@ -144,11 +144,11 @@ function Blog(props) {
     })
   }
 
-  //load 9 blog last of any category
+  //load 15 blog last of any category
   React.useEffect(async () => {
     store.dispatch(updateStatusLoading(true));
     getListType();
-    await handleLoadData(9, '', false);
+    await handleLoadData(15, '', false);
     setDoneFirstLoad(true);
     store.dispatch(updateStatusLoading(false));
   }, []);
@@ -219,7 +219,7 @@ function Blog(props) {
       () => typeof value === "string" ? value.split(",") : value
     );
     store.dispatch(updateStatusLoading(true));
-    await handleLoadData(9, value, false);
+    await handleLoadData(15, value, false);
     store.dispatch(updateStatusLoading(false));
   };
   //
