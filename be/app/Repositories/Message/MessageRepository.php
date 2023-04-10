@@ -40,13 +40,14 @@ class MessageRepository implements MessageInterface
 
     public function getMessageOfFriend($friendId, $currentUserId)
     {
-        $msgs = $this->message->where([
-            'user_id' => $friendId,
-            'to_user_id' => $currentUserId
-        ])->orWhere([
-            'user_id' => $currentUserId,
-            'to_user_id' => $friendId
-        ])->orderBy('created_at', 'asc')->get();
+        $limit= 1000;
+        $msgs = $this->message->where(function($q) use ($friendId, $currentUserId) {
+            $q->where('user_id', $friendId)->where('to_user_id', $currentUserId);
+        })
+        ->orWhere(function ($q) use ($friendId, $currentUserId) {
+            $q->where('user_id', $currentUserId)->where('to_user_id', $friendId);
+        })
+        ->orderBy('created_at', 'asc')->limit($limit)->get();
 
         return $msgs;
     }

@@ -92,7 +92,8 @@ const mapStateToProps = (state) => {
     logged: state.commonReducer.logged,
     modeLight: state.commonReducer.modeLight,
     usersContacted: state.chattingReducer.usersContacted,
-    chatting: state.chattingReducer.chatting
+    chatting: state.chattingReducer.chatting,
+    currentUser: state.commonReducer.currentUser
   };
 };
 
@@ -225,6 +226,7 @@ const Header = (props) => {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
+      <MenuItem onClick={handleMenuClose}>Chào {props.currentUser.name} - {props.currentUser.id}</MenuItem>
       <MenuItem onClick={handleMenuClose}>Thông tin cá nhân</MenuItem>
       <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
     </Menu>
@@ -388,12 +390,12 @@ const Header = (props) => {
                             currentMsg: '',
                             msg: []
                           };
-                          res.msgs.forEach(x => {
+                          res.msgs.forEach(msg => {
                             newUserMsg.msg.push({
-                              message: x.content,
-                              toOther: x.id == x.to_user_id ? true : false,
-                              created_at: x.created_at,
-                              id: x.id
+                              message: msg.content,
+                              toOther: x.id == msg.to_user_id ? true : false,
+                              created_at: msg.created_at,
+                              id: msg.id
                             })
                           });
                           store.dispatch(openAndGetMsg(newUserMsg));

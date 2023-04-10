@@ -16,7 +16,8 @@ class Message implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public function __construct(
-        public ModelsMessage $message
+        public ModelsMessage $message,
+        public string $channel,
     )
     {
     }
@@ -28,6 +29,6 @@ class Message implements ShouldBroadcast
 
     public function broadcastAs()
     {
-        return 'message';
+        return $this->channel;
     }
 }

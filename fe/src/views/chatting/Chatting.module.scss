@@ -3,8 +3,9 @@
   bottom: 0;
   // right: 15px;
   width: 300px;
-  height: 410px;
-  border-radius: 10px;
+  height: 400px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   font-family: Arial, sans-serif;
@@ -14,7 +15,7 @@
 .chat-header {
   background-color: #1877f2;
   color: #fff;
-  padding: 10px;
+  padding: 5px 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -23,7 +24,7 @@
 .chat-body {
   height: 300px;
   overflow-y: scroll;
-  padding: 10px;
+  padding: 10px 0 10px 10px;
   background-color: white;
 }
 
@@ -34,21 +35,31 @@
 }
 
 .sent {
-  background-color: #f1f0f0;
-  border-radius: 10px;
-  padding: 5px 10px;
+  max-width: 75%;
   margin-bottom: 10px;
-  max-width: 70%;
+  &__msg {
+    display: inline-block;
+    background-color: #f1f0f0;
+    border-radius: 26px;
+    padding: 5px 10px;
+    overflow-wrap: anywhere;
+  }
 }
 
-.received {
-  background-color: #1877f2;
-  color: #fff;
-  border-radius: 10px;
-  padding: 5px 10px;
+.receiver {
+  max-width: 75%;
+  margin-left: auto;
   margin-bottom: 10px;
-  align-self: flex-start;
-  max-width: 70%;
+  display: flex;
+  justify-content: end;
+  &__msg {
+    border-radius: 26px;
+    background-color: #1877f2;
+    display: inline-block;
+    padding: 5px 10px;
+    overflow-wrap: anywhere;
+    color: #fff;
+  }
 }
 
 .chat-footer {

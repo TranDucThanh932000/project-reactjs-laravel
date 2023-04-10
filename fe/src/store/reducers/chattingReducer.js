@@ -26,16 +26,31 @@ const chattingReducer = (state = initialState, action) => {
         chatting: JSON.parse(JSON.stringify(state.chatting)),
       };
     case actionName.SEND_MESSAGE:
-      for(let i = 0; i < state.chatting.length; i++) {
-        if (state.chatting[i].toUserId == action.payload.message.to_user_id) {
-          state.chatting[i].msg.push({
-            message: action.payload.message.content,
-            toOther: action.payload.currentUser.id != action.payload.message.to_user_id ? true : false,
-            created_at: action.payload.message.created_at,
-            id: action.payload.message.id
-          });
-          state.chatting[i].currentMsg = ''
-          break;
+      if(action.payload.message.user_id == action.payload.currentUser.id) {
+        for(let i = 0; i < state.chatting.length; i++) {
+          if (state.chatting[i].toUserId == action.payload.message.to_user_id) {
+            state.chatting[i].msg.push({
+              message: action.payload.message.content,
+              toOther: true,
+              created_at: action.payload.message.created_at,
+              id: action.payload.message.id
+            });
+            state.chatting[i].currentMsg = ''
+            break;
+          }
+        }
+      } else {
+        for(let i = 0; i < state.chatting.length; i++) {
+          if (state.chatting[i].toUserId == action.payload.message.user_id) {
+            state.chatting[i].msg.push({
+              message: action.payload.message.content,
+              toOther: false,
+              created_at: action.payload.message.created_at,
+              id: action.payload.message.id
+            });
+            state.chatting[i].currentMsg = ''
+            break;
+          }
         }
       }
 

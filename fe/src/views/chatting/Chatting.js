@@ -23,7 +23,7 @@ import SendIcon from "@mui/icons-material/Send";
 import Pusher from "pusher-js";
 import styles from "./Chatting.module.scss";
 import classNames from "classnames/bind";
-import * as chattingService from "../../services/chattingService"
+import * as chattingService from "../../services/chattingService";
 
 const cx = classNames.bind(styles);
 
@@ -35,31 +35,67 @@ const mapStateToProps = (state) => {
 };
 
 const Chatting = (props) => {
+  const messagesEndRef = React.useRef(null);
 
   React.useEffect(() => {
-    if(props.chatting.length) {
-      document.getElementById('end-' + props.chatting.length).scrollIntoView({ behavior: 'smooth' });
+    if (props.chatting.length && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "auto" });
     }
-  }, [props.chatting]);
+  }, [props.chatting.length, messagesEndRef]);
+
+  const generateRandomKey = (length) => {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+  
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+  
+    return result;
+  }
+  
+  const generateUniqueKey = (length, existingKeys) => {
+    let key = generateRandomKey(length);
+    while (existingKeys.includes(key)) {
+      key = generateRandomKey(length);
+    }
+    return key;
+  }
 
   const handleClickSendMessage = async (message, toUserId) => {
-    await chattingService.sendMessage({
-      toUserId,
-      message
-    })
-    .then(() => {
-    })
-    .catch((err) => {
-      console.log(err)
-    })
+    console.log(generateUniqueKey(16, generateRandomKey(16)))
+    store.dispatch(
+      sendMessage({
+        'message': {
+          content: message,
+          user_id: props.currentUser.id,
+          to_user_id: toUserId,
+          created_at: new Date(),
+          id: generateUniqueKey(16, generateRandomKey(16)),
+        },
+        currentUser: props.currentUser,
+      })
+    );
+    await chattingService
+      .sendMessage({
+        toUserId,
+        message,
+      })
+      .then(() => {})
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   const handleChangeCurrentMsg = (event, toUserId) => {
-    store.dispatch(updateCurrentMsg({
-      currentMsg: event.target.value,
-      toUserId
-    }))
-  }
+    store.dispatch(
+      updateCurrentMsg({
+        currentMsg: event.target.value,
+        toUserId,
+      })
+    );
+  };
 
   React.useEffect(() => {
     const pusher = new Pusher("0c1bb67e922d5e222312", {
@@ -67,7 +103,7 @@ const Chatting = (props) => {
     });
 
     const channel = pusher.subscribe("chat");
-    channel.bind("message", function (data) {
+    channel.bind(`message-private-${props.currentUser.id}`, function (data) {
       store.dispatch(
         sendMessage({
           message: data.message,
@@ -75,13 +111,17 @@ const Chatting = (props) => {
         })
       );
     });
-  }, []);
+  }, [props.currentUser]);
 
   return (
     <>
       <Box display={"flex"} flexDirection={"row-reverse"}>
         {props.chatting.map((chat, index) => (
-          <Box className={cx("chat-container")} key={chat.toUserId} sx={{ right: `${(index) * 300}px` }}>
+          <Box
+            className={cx("chat-container")}
+            key={chat.toUserId}
+            sx={{ right: `${15 + index * 300}px` }}
+          >
             <div className={cx("chat-header")}>
               <h3>Chat với {chat.toUserId}</h3>
               <IconButton
@@ -89,37 +129,51 @@ const Chatting = (props) => {
                   store.dispatch(openAndCloseChatting(chat.toUserId));
                 }}
               >
-                <CloseIcon></CloseIcon>
+                <CloseIcon className={cx("text-white")}></CloseIcon>
               </IconButton>
             </div>
-            <div className={cx("chat-body")} id={'end-' + (index + 1)}>
-              <ul className={cx("messages")}>
+            <div className={cx("chat-body")}>
+              <ul className={cx("messages")} id={"end-" + (index + 1)}>
                 {chat.msg.map((msg) =>
                   msg.toOther ? (
-                    <li key={msg.id} className={cx("receiver")}>{msg.message}</li>
+                    <li key={msg.id} className={cx("receiver")}>
+                      <div className={cx("receiver__msg")}>
+                        <span>{msg.message}</span>
+                      </div>
+                    </li>
                   ) : (
-                    <li key={msg.id} className={cx("sent")}>{msg.message}</li>
+                    <li key={msg.id} className={cx("sent")}>
+                      <div className={cx("sent__msg")}>
+                        <span>{msg.message}</span>
+                      </div>
+                    </li>
                   )
                 )}
+                <li ref={messagesEndRef}></li>
               </ul>
             </div>
             <div className={cx("chat-footer")}>
-              <input 
-                type="text" 
+              <input
+                id={"chat-to-" + chat.toUserId}
+                type="text"
                 placeholder="Nhập tin nhắn..."
                 value={chat.currentMsg}
-                onChange={(e) => { handleChangeCurrentMsg(e, chat.toUserId) }}/>
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={() => {
-                      handleClickSendMessage(chat.currentMsg, chat.toUserId);
-                    }}
-                    edge="end"
-                  >
-                    <SendIcon color="primary"></SendIcon>
-                  </IconButton>
-                </InputAdornment>
+                onChange={(e) => {
+                  handleChangeCurrentMsg(e, chat.toUserId);
+                }}
+              />
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={() => {
+                    handleClickSendMessage(chat.currentMsg, chat.toUserId);
+                  }}
+                  edge="end"
+                  disabled={chat.currentMsg.length === 0}
+                >
+                  <SendIcon color="primary"></SendIcon>
+                </IconButton>
+              </InputAdornment>
             </div>
           </Box>
         ))}
