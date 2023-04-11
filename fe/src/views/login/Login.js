@@ -53,94 +53,95 @@ const Login = () => {
   }
 
   return (
-    <Grid
-      container
-      direction="row"
-      justifyContent="center"
-      alignItems="center"
-      spacing={3}
-      className={cx("center", "max400px", "border-form")}
-    >
-      <Formik
-        initialValues={{ account: "", password: "" }}
-        validationSchema={schema}
-        onSubmit={async (values, { setSubmitting }) => {
-          setSubmitting(true);
-          await handleLogin(values);
-          setSubmitting(false);
-        }}
+    <div className={cx('overlay')}>
+      <Grid
+        container
+        direction="row"
+        justifyContent="center"
+        alignItems="center"
+        className={cx("center", "max400px", "border-form")}
       >
-        {({
-          values,
-          errors,
-          touched,
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          isSubmitting,
-        }) => (
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              id="account"
-              name="account"
-              label="Tài khoản"
-              onChange={(event) => {
-                setLoginFailMsg('')
-                handleChange(event);
-              }}
-              onBlur={handleBlur}
-              value={values.account}
-              error={touched.account && Boolean(errors.account)}
-              helperText={touched.account && errors.account}
-              className={cx('mb-2')}
-            />
-            <TextField
-              fullWidth
-              id="password"
-              name="password"
-              label="Mật khẩu"
-              onChange={(event) => {
-                setLoginFailMsg('')
-                handleChange(event);
-              }}
-              onBlur={handleBlur}
-              value={values.password}
-              error={touched.password && Boolean(errors.password)}
-              helperText={touched.password && errors.password}
-              className={cx('mb-2')}
-              type="password"
-            />
-            {isSubmitting && <LinearProgress className={cx('mb-2')}></LinearProgress>}
-            <p className={cx("text-red", "text-center")}>{ loginFailMsg }</p>
-            <div className={cx("text-center")}>
-              <Button type="submit" disabled={isSubmitting} variant="outlined" endIcon={<SendIcon />}>
-                Đăng nhập
-              </Button>
-            </div>
-            <Link to={'/register'}>
-              <Button variant="text" className={'p-0'} startIcon={<HowToRegIcon />}>
-                <LinkMui
-                  component="span"
-                >
-                  Đăng ký
-                </LinkMui>
-              </Button>
-            </Link>
-            <br/>
-            <Link to={"/"}>
-              <Button variant="text" className={'p-0'} startIcon={<KeyboardReturnIcon />}>
-                <LinkMui
-                  component="span"
-                >
-                  Trở về trang chủ
-                </LinkMui>
-              </Button>
-            </Link>
-          </form>
-        )}
-      </Formik>
-    </Grid>
+        <Formik
+          initialValues={{ account: "", password: "" }}
+          validationSchema={schema}
+          onSubmit={async (values, { setSubmitting }) => {
+            setSubmitting(true);
+            await handleLogin(values);
+            setSubmitting(false);
+          }}
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            isSubmitting,
+          }) => (
+            <form onSubmit={handleSubmit}>
+              <TextField
+                fullWidth
+                id="account"
+                name="account"
+                label="Tài khoản"
+                onChange={(event) => {
+                  setLoginFailMsg('')
+                  handleChange(event);
+                }}
+                onBlur={handleBlur}
+                value={values.account}
+                error={touched.account && Boolean(errors.account)}
+                helperText={touched.account && errors.account}
+                className={cx('mb-2')}
+              />
+              <TextField
+                fullWidth
+                id="password"
+                name="password"
+                label="Mật khẩu"
+                onChange={(event) => {
+                  setLoginFailMsg('')
+                  handleChange(event);
+                }}
+                onBlur={handleBlur}
+                value={values.password}
+                error={touched.password && Boolean(errors.password)}
+                helperText={touched.password && errors.password}
+                className={cx('mb-2')}
+                type="password"
+              />
+              {isSubmitting && <LinearProgress className={cx('mb-2')}></LinearProgress>}
+              <p className={cx("text-red", "text-center")}>{ loginFailMsg }</p>
+              <div className={cx("text-center")}>
+                <Button type="submit" disabled={isSubmitting} variant="outlined" endIcon={<SendIcon />}>
+                  Đăng nhập
+                </Button>
+              </div>
+              <Link to={'/register'}>
+                <Button variant="text" className={'p-0'} startIcon={<HowToRegIcon />}>
+                  <LinkMui
+                    component="span"
+                  >
+                    Đăng ký
+                  </LinkMui>
+                </Button>
+              </Link>
+              <br/>
+              <Link to={"/"}>
+                <Button variant="text" className={'p-0'} startIcon={<KeyboardReturnIcon />}>
+                  <LinkMui
+                    component="span"
+                  >
+                    Trở về trang chủ
+                  </LinkMui>
+                </Button>
+              </Link>
+            </form>
+          )}
+        </Formik>
+      </Grid>
+    </div>
   );
 };
 

@@ -114,7 +114,7 @@ const LuckyNumberToday = () => {
   }, []);
 
   return (
-    <Box component="div">
+    <Box component="div" className={cx('d-flex', 'flex-column')}>
       <Box className={cx('justify-space-between', 'py-2')}>
         <Box>
           <h1>Số may mắn hôm nay</h1>
@@ -170,23 +170,26 @@ const LuckyNumberToday = () => {
           </Modal>
         </Box>
       </Box>
-      <Box component="div" className={cx("center", "box_shadow")}>
-        <Box component="span" className={cx("lucky_number")}>
-          {firstNum}
+      <div className={cx("flex-grow-1")}>
+        <Box component="div" className={cx("center", "box_shadow", "box_numbers")}>
+          <Box component="span" className={cx("lucky_number")}>
+            {firstNum}
+          </Box>
+          <Box component="span" className={cx("lucky_number")}>
+            {secondNum}
+          </Box>
+          <Box component="span" className={cx("lucky_number")}>
+            {thirdNum}
+          </Box>
+          <Box component="span" className={cx("lucky_number")}>
+            {fourthNum}
+          </Box>
+          <Box component="span" className={cx("lucky_number")}>
+            {fifthNum}
+          </Box>
         </Box>
-        <Box component="span" className={cx("lucky_number")}>
-          {secondNum}
-        </Box>
-        <Box component="span" className={cx("lucky_number")}>
-          {thirdNum}
-        </Box>
-        <Box component="span" className={cx("lucky_number")}>
-          {fourthNum}
-        </Box>
-        <Box component="span" className={cx("lucky_number")}>
-          {fifthNum}
-        </Box>
-      </Box>
+      </div>
+
     </Box>
   );
 };

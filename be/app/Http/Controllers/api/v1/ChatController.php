@@ -8,6 +8,7 @@ use App\Repositories\Message\MessageInterface;
 use Exception;
 use Illuminate\Http\Request;
 use JWTAuth;
+use Pusher\Pusher;
 
 class ChatController extends Controller
 {
@@ -29,7 +30,7 @@ class ChatController extends Controller
                 'to_user_id' => $request->toUserId,
                 'content' => $request->message
             ]);
-            broadcast(new Message($message, 'message-private-' . $request->toUserId))->toOthers();
+            broadcast(new Message($message, 'private-message-' . $request->toUserId))->toOthers();
     
             return response()->json([
                 'message' => $message
@@ -64,5 +65,25 @@ class ChatController extends Controller
         return response()->json([
             'msgs' => $msgs
         ], 200);
+    }
+
+    public function authBroadCasting(Request $request)
+    {
+        try {
+            JWTAuth::parseToken()->authenticate();
+            $socket_id = $request->input('socket_id');
+            $channel_name = $request->input('channel_name');
+    
+            $pusher = new Pusher(env('PUSHER_APP_KEY'), env('PUSHER_APP_SECRET'), env('PUSHER_APP_ID'), [
+                'cluster' => env('PUSHER_APP_CLUSTER'),
+                'useTLS' => true
+            ]);
+            $auth = $pusher->socket_auth($channel_name, $socket_id);
+
+            return response($auth);
+        } catch (Exception $e) {
+
+            return response('Unauthorized', 401);
+        }
     }
 }

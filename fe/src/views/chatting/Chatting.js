@@ -1,15 +1,7 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
 import {
   IconButton,
-  InputAdornment,
-  InputLabel,
-  OutlinedInput,
-  TextField,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { connect } from "react-redux";
@@ -36,6 +28,19 @@ const mapStateToProps = (state) => {
 
 const Chatting = (props) => {
   const messagesEndRef = React.useRef(null);
+  const [pusher, setPusher] = React.useState(new Pusher("0c1bb67e922d5e222312", {
+    cluster: "ap1",
+    authEndpoint: 'http://localhost:8000/api/v1/chat/pusher/auth',
+    auth: {
+      headers: {
+        "Authorization": "Bearer " + localStorage.getItem('loginToken'),
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    encrypted: true,
+  }));
+  const [channel, setChannel] = React.useState(pusher.subscribe("private-chat"));
+  const [arrTyping, setArrTyping] = React.useState([]);
 
   React.useEffect(() => {
     if (props.chatting.length && messagesEndRef.current) {
@@ -63,8 +68,7 @@ const Chatting = (props) => {
     return key;
   }
 
-  const handleClickSendMessage = async (message, toUserId) => {
-    console.log(generateUniqueKey(16, generateRandomKey(16)))
+  const handleClickSendMessage = async (message, toUserId, index) => {
     store.dispatch(
       sendMessage({
         'message': {
@@ -77,6 +81,10 @@ const Chatting = (props) => {
         currentUser: props.currentUser,
       })
     );
+    //scroll to last message
+    let list = document.getElementById('end-' + index);
+    list.lastElementChild.scrollIntoView({ behavior: "smooth" });
+    //
     await chattingService
       .sendMessage({
         toUserId,
@@ -88,7 +96,7 @@ const Chatting = (props) => {
       });
   };
 
-  const handleChangeCurrentMsg = (event, toUserId) => {
+  const handleChangeCurrentMsg = (event, toUserId, index) => {
     store.dispatch(
       updateCurrentMsg({
         currentMsg: event.target.value,
@@ -97,13 +105,31 @@ const Chatting = (props) => {
     );
   };
 
-  React.useEffect(() => {
-    const pusher = new Pusher("0c1bb67e922d5e222312", {
-      cluster: "ap1",
-    });
+  const handleKeyPress = (e, msg, toUserId, index) => {
+    if (e.key === 'Enter' && msg) {
+      handleClickSendMessage(msg, toUserId, index)
+    } else if (msg) {
+      // trigger event when input
+      channel.trigger(`client-typing-from-${props.currentUser.id}-to-${toUserId}`, 'typing-event', {
+        message: `${props.currentUser.id}` + ' mình đang nhập tin nhắn'
+      })
+      //receiver message
+      props.chatting.forEach(x => {
+        channel.bind(`client-typing-from-${x.toUserId}-to-${props.currentUser.id}`, function (data) {
+          if(! arrTyping.includes(x.toUserId)) {
+            setArrTyping((prev) => [...prev, x.toUserId]);
+            setTimeout(() => {
+              let newArr = arrTyping.filter(userId => userId == x.toUserId);
+              setArrTyping(newArr);
+            }, 2000);
+          }
+        })
+      })
+    }
+  }
 
-    const channel = pusher.subscribe("chat");
-    channel.bind(`message-private-${props.currentUser.id}`, function (data) {
+  React.useEffect(() => {
+    channel.bind(`private-message-${props.currentUser.id}`, function (data) {
       store.dispatch(
         sendMessage({
           message: data.message,
@@ -149,31 +175,35 @@ const Chatting = (props) => {
                     </li>
                   )
                 )}
+                <li className={cx(arrTyping.includes(chat.toUserId) ? '' : 'hidden')}>
+                  <div className={cx('typing-indicator')}></div>
+                  <div className={cx('typing-indicator')}></div>
+                  <div className={cx('typing-indicator')}></div>
+                </li>
                 <li ref={messagesEndRef}></li>
               </ul>
             </div>
             <div className={cx("chat-footer")}>
               <input
-                id={"chat-to-" + chat.toUserId}
+                id={"chat-to-" + (index + 1)}
                 type="text"
                 placeholder="Nhập tin nhắn..."
                 value={chat.currentMsg}
                 onChange={(e) => {
                   handleChangeCurrentMsg(e, chat.toUserId);
                 }}
+                onKeyDown={(e) => {
+                  handleKeyPress(e, chat.currentMsg, chat.toUserId, (index + 1));
+                }}
               />
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="toggle password visibility"
-                  onClick={() => {
-                    handleClickSendMessage(chat.currentMsg, chat.toUserId);
-                  }}
-                  edge="end"
-                  disabled={chat.currentMsg.length === 0}
-                >
-                  <SendIcon color="primary"></SendIcon>
-                </IconButton>
-              </InputAdornment>
+              <IconButton
+                onClick={() => {
+                  handleClickSendMessage(chat.currentMsg, chat.toUserId, (index + 1));
+                }}
+                disabled={chat.currentMsg.length === 0}
+              >
+                <SendIcon className={cx(chat.currentMsg.length === 0 ? 'text-gray' : 'primary')}></SendIcon>
+              </IconButton>
             </div>
           </Box>
         ))}

@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
 
 .lucky_number {
-    font-family: 'Dancing Script', cursive;
+    font-family: cursive;
     display: inline-block;
     text-align: center;
     font-size: 100px;
@@ -21,4 +21,30 @@
 .py-2 {
     padding-top: 16px;
     padding-bottom: 16px;
+}
+
+.box_numbers {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+@media only screen and (max-width: 1200px) {
+    .center {
+        position: static;
+    }
+}
+
+@media only screen and (min-width: 769px) and (max-width: 1200px) {
+    .lucky_number {
+        width: 80px;
+        font-size: 40px;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .lucky_number {
+        width: 50px;
+        font-size: 25px;
+    }
 }

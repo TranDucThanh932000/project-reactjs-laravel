@@ -23,14 +23,19 @@ Route::resource('blogs', BlogController::class);
 // Route::group(['prefix' => 'blogs',  'namespace' => 'Blog'], function() {
     
 // });
-
-Route::get('/chat/users-contacted', [ChatController::class, 'getUsersContacted']);
-Route::get('/chat/msg-friend', [ChatController::class, 'getMsgFriend']);
 Route::resource('categories', CategoryController::class);
 
 Route::group([
     'middleware' => ['jwt.auth', 'throttle:120'],
 ], function() {
+    Route::group([
+        'prefix' => 'chat',
+    ], function() {
+        Route::get('users-contacted', [ChatController::class, 'getUsersContacted']);
+        Route::get('msg-friend', [ChatController::class, 'getMsgFriend']);
+        Route::post('pusher/auth', [ChatController::class, 'authBroadCasting']);
+    });
+
     Route::post('/logout', [Authentication::class, 'logout']);
     Route::resource('chat', ChatController::class);
     Route::resource('bloglikes', BlogLikeController::class);

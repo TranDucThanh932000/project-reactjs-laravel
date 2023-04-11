@@ -316,7 +316,7 @@ const Header = (props) => {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="fixed" open={props.open}>
-        <Toolbar className={cx("commonBackgroundColor")}>
+        <Toolbar className={cx("commonBackgroundColor")} sx={{ paddingRight: {xs: "0", md: "16px"} }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"

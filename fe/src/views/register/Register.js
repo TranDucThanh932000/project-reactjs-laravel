@@ -85,151 +85,152 @@ const Register = () => {
   };
 
   return (
-    <Grid
-      container
-      direction="row"
-      justifyContent="center"
-      alignItems="center"
-      spacing={3}
-      className={cx("center", "max400px", "border-form")}
-    >
-      <Formik
-        initialValues={info}
-        validationSchema={schema}
-        onSubmit={async (values, { setSubmitting }) => {
-          setSubmitting(true);
-          await handleRegister(values);
-          setSubmitting(false);
-        }}
+    <div className={cx('overlay')}>
+      <Grid
+        container
+        direction="row"
+        justifyContent="center"
+        alignItems="center"
+        className={cx("center", "max400px", "border-form")}
       >
-        {({
-          values,
-          errors,
-          touched,
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          isSubmitting,
-        }) => (
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              id="name"
-              name="name"
-              label="Họ và tên"
-              onChange={handleChange}
-              onBlur={handleBlur}
-              value={values.name}
-              error={touched.name && Boolean(errors.name)}
-              helperText={touched.name && errors.name}
-              className={cx("mb-2")}
-            />
-            <TextField
-              fullWidth
-              id="email"
-              name="email"
-              label="Email"
-              onChange={(event) => {
-                handleChange(event);
-              }}
-              onBlur={handleBlur}
-              value={values.email}
-              error={touched.email && Boolean(errors.email)}
-              helperText={touched.email && errors.email}
-              className={cx("mb-2")}
-            />
-            <TextField
-              fullWidth
-              id="account"
-              name="account"
-              label="Tài khoản"
-              onChange={(e) => {
-                setInfo({...info, account: e.target.value});
-                handleChange(e);
-              }}
-              onBlur={handleBlur}
-              value={values.account}
-              error={touched.account && Boolean(errors.account)}
-              helperText={touched.account && errors.account}
-              className={cx("mb-2")}
-            />
-            {accountErrorMsg && (
-              <p
-                className={cx(
-                  "text-red",
-                  "MuiFormHelperText-root Mui-error MuiFormHelperText-sizeMedium MuiFormHelperText-contained MuiFormHelperText-filled custom-text-error-input"
-                )}
-              >
-                {accountErrorMsg}
-              </p>
-            )}
-            <TextField
-              fullWidth
-              id="password"
-              name="password"
-              label="Mật khẩu"
-              onChange={handleChange}
-              onBlur={handleBlur}
-              value={values.password}
-              error={touched.password && Boolean(errors.password)}
-              helperText={touched.password && errors.password}
-              className={cx("mb-2")}
-              type="password"
-            />
-            <TextField
-              fullWidth
-              id="password_confirmation"
-              name="password_confirmation"
-              label="Nhập lại mật khẩu"
-              onChange={handleChange}
-              onBlur={handleBlur}
-              value={values.password_confirmation}
-              error={
-                touched.password_confirmation &&
-                Boolean(errors.password_confirmation)
-              }
-              helperText={
-                touched.password_confirmation && errors.password_confirmation
-              }
-              className={cx("mb-2")}
-              type="password"
-            />
-            {isSubmitting && (
-              <LinearProgress className={cx("mb-2")}></LinearProgress>
-            )}
-            <div className={cx("text-center")}>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                variant="outlined"
-                endIcon={<SendIcon />}
-              >
-                Đăng ký
-              </Button>
-            </div>
-            <Link to={"/login"}>
-              <Button
-                variant="text"
-                className={"p-0"}
-                startIcon={<LoginIcon />}
-              >
-                <LinkMui component="span">Đăng nhập</LinkMui>
-              </Button>
-            </Link>
-            <br />
-            <Link to={"/"}>
-              <Button
-                variant="text"
-                className={"p-0"}
-                startIcon={<KeyboardReturnIcon />}
-              >
-                <LinkMui component="span">Trở về trang chủ</LinkMui>
-              </Button>
-            </Link>
-          </form>
-        )}
-      </Formik>
-    </Grid>
+        <Formik
+          initialValues={info}
+          validationSchema={schema}
+          onSubmit={async (values, { setSubmitting }) => {
+            setSubmitting(true);
+            await handleRegister(values);
+            setSubmitting(false);
+          }}
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            isSubmitting,
+          }) => (
+            <form onSubmit={handleSubmit}>
+              <TextField
+                fullWidth
+                id="name"
+                name="name"
+                label="Họ và tên"
+                onChange={handleChange}
+                onBlur={handleBlur}
+                value={values.name}
+                error={touched.name && Boolean(errors.name)}
+                helperText={touched.name && errors.name}
+                className={cx("mb-2")}
+              />
+              <TextField
+                fullWidth
+                id="email"
+                name="email"
+                label="Email"
+                onChange={(event) => {
+                  handleChange(event);
+                }}
+                onBlur={handleBlur}
+                value={values.email}
+                error={touched.email && Boolean(errors.email)}
+                helperText={touched.email && errors.email}
+                className={cx("mb-2")}
+              />
+              <TextField
+                fullWidth
+                id="account"
+                name="account"
+                label="Tài khoản"
+                onChange={(e) => {
+                  setInfo({...info, account: e.target.value});
+                  handleChange(e);
+                }}
+                onBlur={handleBlur}
+                value={values.account}
+                error={touched.account && Boolean(errors.account)}
+                helperText={touched.account && errors.account}
+                className={cx("mb-2")}
+              />
+              {accountErrorMsg && (
+                <p
+                  className={cx(
+                    "text-red",
+                    "MuiFormHelperText-root Mui-error MuiFormHelperText-sizeMedium MuiFormHelperText-contained MuiFormHelperText-filled custom-text-error-input"
+                  )}
+                >
+                  {accountErrorMsg}
+                </p>
+              )}
+              <TextField
+                fullWidth
+                id="password"
+                name="password"
+                label="Mật khẩu"
+                onChange={handleChange}
+                onBlur={handleBlur}
+                value={values.password}
+                error={touched.password && Boolean(errors.password)}
+                helperText={touched.password && errors.password}
+                className={cx("mb-2")}
+                type="password"
+              />
+              <TextField
+                fullWidth
+                id="password_confirmation"
+                name="password_confirmation"
+                label="Nhập lại mật khẩu"
+                onChange={handleChange}
+                onBlur={handleBlur}
+                value={values.password_confirmation}
+                error={
+                  touched.password_confirmation &&
+                  Boolean(errors.password_confirmation)
+                }
+                helperText={
+                  touched.password_confirmation && errors.password_confirmation
+                }
+                className={cx("mb-2")}
+                type="password"
+              />
+              {isSubmitting && (
+                <LinearProgress className={cx("mb-2")}></LinearProgress>
+              )}
+              <div className={cx("text-center")}>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  variant="outlined"
+                  endIcon={<SendIcon />}
+                >
+                  Đăng ký
+                </Button>
+              </div>
+              <Link to={"/login"}>
+                <Button
+                  variant="text"
+                  className={"p-0"}
+                  startIcon={<LoginIcon />}
+                >
+                  <LinkMui component="span">Đăng nhập</LinkMui>
+                </Button>
+              </Link>
+              <br />
+              <Link to={"/"}>
+                <Button
+                  variant="text"
+                  className={"p-0"}
+                  startIcon={<KeyboardReturnIcon />}
+                >
+                  <LinkMui component="span">Trở về trang chủ</LinkMui>
+                </Button>
+              </Link>
+            </form>
+          )}
+        </Formik>
+      </Grid>
+    </div>
   );
 };
 
