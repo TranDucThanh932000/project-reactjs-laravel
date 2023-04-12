@@ -69,7 +69,7 @@ const Chatting = (props) => {
   }
 
   const handleClickSendMessage = async (message, toUserId, index) => {
-    store.dispatch(
+    await store.dispatch(
       sendMessage({
         'message': {
           content: message,
@@ -81,10 +81,12 @@ const Chatting = (props) => {
         currentUser: props.currentUser,
       })
     );
+
     //scroll to last message
     let list = document.getElementById('end-' + index);
-    list.lastElementChild.scrollIntoView({ behavior: "smooth" });
+    list.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
     //
+
     await chattingService
       .sendMessage({
         toUserId,
@@ -110,9 +112,7 @@ const Chatting = (props) => {
       handleClickSendMessage(msg, toUserId, index)
     } else if (msg) {
       // trigger event when input
-      channel.trigger(`client-typing-from-${props.currentUser.id}-to-${toUserId}`, 'typing-event', {
-        message: `${props.currentUser.id}` + ' mình đang nhập tin nhắn'
-      })
+      channel.trigger(`client-typing-from-${props.currentUser.id}-to-${toUserId}`, 'typing-event')
       //receiver message
       props.chatting.forEach(x => {
         channel.bind(`client-typing-from-${x.toUserId}-to-${props.currentUser.id}`, function (data) {

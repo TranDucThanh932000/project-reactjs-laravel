@@ -6,6 +6,7 @@ use App\Http\Controllers\api\v1\BlogController;
 use App\Http\Controllers\api\v1\BlogLikeController;
 use App\Http\Controllers\api\v1\CategoryController;
 use App\Http\Controllers\api\v1\ChatController;
+use App\Http\Controllers\api\v1\FollowerController;
 use App\Http\Controllers\api\v1\GoogleDriveController;
 use App\Http\Controllers\api\v1\LuckyNumberController;
 
@@ -37,6 +38,8 @@ Route::group([
     });
 
     Route::post('/logout', [Authentication::class, 'logout']);
+    Route::get('follow/top5', [FollowerController::class, 'getTop5']);
+    Route::resource('follow', FollowerController::class);
     Route::resource('chat', ChatController::class);
     Route::resource('bloglikes', BlogLikeController::class);
 });
