@@ -129,14 +129,16 @@ const Chatting = (props) => {
   }
 
   React.useEffect(() => {
-    channel.bind(`private-message-${props.currentUser.id}`, function (data) {
-      store.dispatch(
-        sendMessage({
-          message: data.message,
-          currentUser: props.currentUser,
-        })
-      );
-    });
+    if(props.currentUser) {
+      channel.bind(`private-message-${props.currentUser.id}`, function (data) {
+        store.dispatch(
+          sendMessage({
+            message: data.message,
+            currentUser: props.currentUser,
+          })
+        );
+      });
+    }
   }, [props.currentUser]);
 
   return (

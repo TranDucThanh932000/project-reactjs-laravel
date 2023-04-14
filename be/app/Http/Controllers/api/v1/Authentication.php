@@ -8,7 +8,6 @@ use App\Http\Requests\RegisterRequest;
 use App\Repositories\User\UserInterface;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class Authentication extends Controller
 {
@@ -22,6 +21,7 @@ class Authentication extends Controller
     public function login(Request $request)
     {
         $credentials = $request->only('account', 'password');
+        $token = '';
         try {
             if (! $token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'invalid_credentials'], 401);
@@ -29,7 +29,10 @@ class Authentication extends Controller
         } catch (JWTException $e) {
             return response()->json(['error' => 'could_not_create_token'], 500);
         }
-        return response()->json(compact('token'));
+        return response()->json([
+            'token' => $token,
+            'user' => $this->user->getByAccount($request->account)
+        ]);
     }
 
     public function checkToken() {

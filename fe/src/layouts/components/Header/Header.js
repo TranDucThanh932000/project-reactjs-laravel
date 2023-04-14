@@ -20,6 +20,7 @@ import {
   openSidebar,
   updateStatusLogin,
   updateModeLight,
+  updateCurrentUser
 } from "../../../store/actions/commonAction";
 import {
   openAndCloseChatting,
@@ -196,6 +197,7 @@ const Header = (props) => {
     await authentication.logout().then(() => {
       localStorage.removeItem("loginToken");
       store.dispatch(updateStatusLogin(false));
+      store.dispatch(updateCurrentUser(null));
       navigate("/login");
     });
   };
@@ -211,6 +213,7 @@ const Header = (props) => {
 
   const menuId = "primary-search-account-menu";
   const renderMenu = (
+    props.currentUser && 
     <Menu
       anchorEl={anchorEl}
       anchorOrigin={{

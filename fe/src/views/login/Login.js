@@ -7,7 +7,7 @@ import classNames from "classnames/bind";
 import * as Yup from "yup";
 import * as authenticationService from '../../services/authenticationService'
 import store from "../../store";
-import { updateStatusLogin, closeSidebar, openSidebar } from "../../store/actions/commonAction";
+import { updateStatusLogin, closeSidebar, openSidebar, updateCurrentUser } from "../../store/actions/commonAction";
 import { Link, useNavigate } from "react-router-dom";
 import LinkMui from '@mui/material/Link';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
@@ -41,6 +41,7 @@ const Login = () => {
         ...values
       })
       store.dispatch(updateStatusLogin(true));
+      store.dispatch(updateCurrentUser(res.user));
       store.dispatch(openSidebar(true));
       localStorage.setItem('loginToken', res.token);
       navigate('/');

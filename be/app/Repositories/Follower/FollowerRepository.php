@@ -3,7 +3,9 @@
 namespace App\Repositories\Follower;
 
 use App\Models\Follower;
+use Exception;
 use Illuminate\Support\Facades\DB;
+use JWTAuth;
 
 class FollowerRepository implements FollowerInterface
 {
@@ -24,16 +26,19 @@ class FollowerRepository implements FollowerInterface
 
     public function unfollow($user, $follower)
     {
-        $follow = $this->follower->where('user_id', $user)->where('follower', $follower)->first();
-        if($follow) {
-            return $follow->delete();
-        }
-        return false;
+        $follow = $this->follower->where('user_id', $user)->where('follower', $follower)->delete();
+        return $follow;
     }
 
     public function getTop($top)
     {
-        return $this->follower->select(DB::raw('user_id, count(follower) as countFollower'))
+        $userId = 0;
+        try {
+            $userId = JWTAuth::parseToken()->authenticate()->id;
+        } catch (Exception $e) {
+        }
+
+        return $this->follower->select(DB::raw('user_id, count(follower) as countFollower, SUM(CASE WHEN follower = ' . intval($userId) . ' THEN 1 ELSE 0 END) > 0 as followed'))
         ->groupBy('user_id')
         ->orderBy('countFollower', 'desc')
         ->limit($top)

@@ -15,7 +15,7 @@ import ListItemText from "@mui/material/ListItemText";
 import { connect } from "react-redux";
 import { closeSidebar } from "../../../store/actions/commonAction";
 import store from "../../../store";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import styles from "./Sidebar.module.scss";
 import classNames from "classnames/bind";
 import LooksOneIcon from "@mui/icons-material/LooksOne";
@@ -35,7 +35,6 @@ import PopupState, {
 } from "material-ui-popup-state";
 
 const cx = classNames.bind(styles);
-
 const drawerWidth = 240;
 
 const openedMixin = (theme) => ({
@@ -96,13 +95,14 @@ const mapStateToProps = (state) => {
 const Sidebar = (props) => {
   const theme = useTheme();
   const [listFollowerRanking, setListFollowerRanking] = React.useState([]);
+  const navigate = useNavigate();
+
   const handleDrawerClose = () => {
     store.dispatch(closeSidebar());
   };
 
   React.useEffect(() => {
     followService.getTop5Follower().then((res) => {
-      res.top5.forEach(x => x.followed = false)
       setListFollowerRanking(res.top5);
     });
   }, []);
@@ -254,7 +254,7 @@ const Sidebar = (props) => {
                                 <Card sx={{ maxWidth: 345, minWidth: 250 }}>
                                   <CardMedia
                                     sx={{ height: 140 }}
-                                    image="/static/images/cards/contemplative-reptile.jpg"
+                                    image="https://png.pngtree.com/thumb_back/fh260/background/20200714/pngtree-modern-double-color-futuristic-neon-background-image_351866.jpg"
                                     title={user.user.name}
                                   />
                                   <CardContent>
@@ -270,8 +270,14 @@ const Sidebar = (props) => {
                                     {
                                       !user.followed ? (
                                         <IconButton
-                                        disabled={user.user_id == props.currentUser.id ? true : false}
-                                        onClick={() => handleFollow(user.user_id)}>
+                                        disabled={props.currentUser && user.user_id == props.currentUser.id ? true : false}
+                                        onClick={() => {
+                                          if (props.currentUser) {
+                                            handleFollow(user.user_id)
+                                          } else {
+                                            navigate("/login");
+                                          }
+                                        }}>
                                           <AddAlertIcon></AddAlertIcon>
                                         </IconButton>
                                       ) : (

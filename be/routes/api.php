@@ -25,6 +25,7 @@ Route::resource('blogs', BlogController::class);
     
 // });
 Route::resource('categories', CategoryController::class);
+Route::get('follow/top5', [FollowerController::class, 'getTop5']);
 
 Route::group([
     'middleware' => ['jwt.auth', 'throttle:120'],
@@ -38,7 +39,6 @@ Route::group([
     });
 
     Route::post('/logout', [Authentication::class, 'logout']);
-    Route::get('follow/top5', [FollowerController::class, 'getTop5']);
     Route::resource('follow', FollowerController::class);
     Route::resource('chat', ChatController::class);
     Route::resource('bloglikes', BlogLikeController::class);

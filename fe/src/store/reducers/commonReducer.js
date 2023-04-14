@@ -20,7 +20,7 @@ const initialState = {
       icon: <StarOutlineIcon/>
     },
   ],
-  currentUser: {},
+  currentUser: null,
 };
 
 const commonReducer = (state = initialState, action) => {
