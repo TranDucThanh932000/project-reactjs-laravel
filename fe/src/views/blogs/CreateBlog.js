@@ -57,6 +57,13 @@ const CreateBlog = (props) => {
 
   const handleChangeFile = (event) => {
     const selectedImage = event.target.files[0];
+    if(selectedImage.size > 10485760) {
+      store.dispatch(updateTextAlert('File không được lớn quá 10MB'));
+      setTimeout(() => {
+        store.dispatch(updateTextAlert(''));
+      }, 3000)
+      return;
+    }
     selectedImage.url = URL.createObjectURL(selectedImage);
     setListFile([...listFile, selectedImage])
   }
@@ -146,9 +153,12 @@ const CreateBlog = (props) => {
                     </Grid>
                   ))}
                   <Grid item md={6} xs={12}>
-                    <Box className={cx('boxUploadImage')} onClick={handleOpenUploadImg}>
-                      <AddPhotoAlternateIcon></AddPhotoAlternateIcon>
-                    </Box>
+                    {
+                      listFile.length < 10 && 
+                      <Box className={cx('boxUploadImage')} onClick={handleOpenUploadImg}>
+                        <AddPhotoAlternateIcon></AddPhotoAlternateIcon>
+                      </Box>
+                    }
                   </Grid>
                 </Grid>
                 <input 
