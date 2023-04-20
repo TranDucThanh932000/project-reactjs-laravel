@@ -3,6 +3,7 @@
 namespace App\Repositories\Follower;
 
 use App\Models\Follower;
+use App\Models\Friend;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use JWTAuth;
@@ -10,10 +11,12 @@ use JWTAuth;
 class FollowerRepository implements FollowerInterface
 {
     private $follower;
+    private $friend;
 
-    public function __construct(Follower $follower)
+    public function __construct(Follower $follower, Friend $friend)
     {
         $this->follower = $follower;
+        $this->friend = $friend;
     }
 
     public function follow($user, $follower)
@@ -33,18 +36,33 @@ class FollowerRepository implements FollowerInterface
     public function getTop($top)
     {
         $userId = 0;
+        $listTopFollower = [];
         try {
-            $userId = JWTAuth::parseToken()->authenticate()->id;
+            try {
+                $userId = JWTAuth::parseToken()->authenticate()->id;
+            } catch (Exception $ex) {
+            }
+
+            $listTopFollower = $this->follower->select(DB::raw('user_id, count(follower) as countFollower, SUM(CASE WHEN follower = ' . intval($userId) . ' THEN 1 ELSE 0 END) > 0 as followed'))
+            ->groupBy('user_id')
+            ->orderBy('countFollower', 'desc')
+            ->limit($top)
+            ->with([
+            'user' => function ($q) {
+                $q->select('users.id', 'users.name');
+            },
+            //receiver
+            'user.friend' => function($q) use ($userId) {
+                $q->where('friend', $userId);
+            },
+            //sender
+            'user.isAddFriend' => function($q) use ($userId) {
+                $q->where('user_id', $userId);
+            }])
+            ->get();
         } catch (Exception $e) {
         }
 
-        return $this->follower->select(DB::raw('user_id, count(follower) as countFollower, SUM(CASE WHEN follower = ' . intval($userId) . ' THEN 1 ELSE 0 END) > 0 as followed'))
-        ->groupBy('user_id')
-        ->orderBy('countFollower', 'desc')
-        ->limit($top)
-        ->with(['user' => function ($q) {
-            $q->select('users.id', 'users.name');
-        }])
-        ->get();
+        return $listTopFollower;
     }
 }

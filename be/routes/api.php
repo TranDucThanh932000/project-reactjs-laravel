@@ -7,6 +7,7 @@ use App\Http\Controllers\api\v1\BlogLikeController;
 use App\Http\Controllers\api\v1\CategoryController;
 use App\Http\Controllers\api\v1\ChatController;
 use App\Http\Controllers\api\v1\FollowerController;
+use App\Http\Controllers\api\v1\FriendController;
 use App\Http\Controllers\api\v1\GoogleDriveController;
 use App\Http\Controllers\api\v1\LuckyNumberController;
 
@@ -42,4 +43,7 @@ Route::group([
     Route::resource('follow', FollowerController::class);
     Route::resource('chat', ChatController::class);
     Route::resource('bloglikes', BlogLikeController::class);
+    Route::post('/friend/cancel-request', [FriendController::class, 'cancelRequest']);
+    Route::post('/friend/accept-request', [FriendController::class, 'acceptRequest']);
+    Route::resource('friend', FriendController::class);
 });

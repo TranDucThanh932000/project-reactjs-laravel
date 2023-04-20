@@ -24,15 +24,20 @@ import Looks3Icon from "@mui/icons-material/Looks3";
 import Looks4Icon from "@mui/icons-material/Looks4";
 import Looks5Icon from "@mui/icons-material/Looks5";
 import * as followService from "../../../services/followService";
-import { Card, CardActions, CardContent, CardMedia, Popover, Typography } from "@mui/material";
+import * as friendService from "../../../services/friendService";
+import { Card, CardActions, CardContent, CardMedia, Tooltip, Typography } from "@mui/material";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AddAlertIcon from '@mui/icons-material/AddAlert';
 import HoverPopover from "material-ui-popup-state/HoverPopover";
 import PopupState, {
-  bindTrigger,
+  // bindTrigger,
   bindPopover,
   bindHover
 } from "material-ui-popup-state";
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
+import PersonAddDisabledIcon from '@mui/icons-material/PersonAddDisabled';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import { StatusFriend } from '../../../utils/constants'
 
 const cx = classNames.bind(styles);
 const drawerWidth = 240;
@@ -105,7 +110,7 @@ const Sidebar = (props) => {
     followService.getTop5Follower().then((res) => {
       setListFollowerRanking(res.top5);
     });
-  }, []);
+  }, [props.currentUser]);
 
   const rankingIcon = (rank) => {
     switch (rank) {
@@ -140,6 +145,62 @@ const Sidebar = (props) => {
       let newListFL = JSON.parse(JSON.stringify(listFollowerRanking));
       let index = newListFL.findIndex(x => x.user_id == userId);
       newListFL[index].followed = false;
+      setListFollowerRanking(newListFL);
+    })
+  }
+
+  const handleAddFriend = (friend) => {
+    friendService.addFriend(friend)
+    .then(() => {
+      let newListFL = JSON.parse(JSON.stringify(listFollowerRanking));
+      let index = newListFL.findIndex(x => x.user_id == friend);
+      newListFL[index].user.friend = [];
+      newListFL[index].user.is_add_friend = [
+        {
+          user_id: props.currentUser.id,
+          friend,
+          status: StatusFriend.WAITTING
+        }
+      ];
+      setListFollowerRanking(newListFL);
+    })
+  }
+
+  const handleUnFriend = (friend) => {
+    friendService.unFriend(friend)
+    .then(() => {
+      let newListFL = JSON.parse(JSON.stringify(listFollowerRanking));
+      let index = newListFL.findIndex(x => x.user_id == friend);
+      newListFL[index].user.friend = [];
+      newListFL[index].user.is_add_friend = [];
+      setListFollowerRanking(newListFL);
+    })
+  }
+
+  const handleCancelRequestFriend = (friend) => {
+    friendService.cancelRequest(friend)
+    .then(() => {
+      let newListFL = JSON.parse(JSON.stringify(listFollowerRanking));
+      let index = newListFL.findIndex(x => x.user_id == friend);
+      newListFL[index].user.friend = [];
+      newListFL[index].user.is_add_friend = [];
+      setListFollowerRanking(newListFL);
+    })
+  }
+
+  const handleAcceptRequestFriend = (friend) => {
+    friendService.acceptRequest(friend)
+    .then(() => {
+      let newListFL = JSON.parse(JSON.stringify(listFollowerRanking));
+      let index = newListFL.findIndex(x => x.user_id == friend);
+      newListFL[index].user.friend = [];
+      newListFL[index].user.is_add_friend = [
+        {
+          user_id: friend,
+          friend: props.currentUser.id,
+          status: StatusFriend.ACCEPTED
+        }
+      ];
       setListFollowerRanking(newListFL);
     })
   }
@@ -286,9 +347,32 @@ const Sidebar = (props) => {
                                         </IconButton>
                                       )
                                     }
-                                    <IconButton>
-                                      <PersonAddIcon></PersonAddIcon>
-                                    </IconButton>
+                                    {
+                                      ((user.user.friend.length > 0 || user.user.is_add_friend.length > 0)) 
+                                      ? 
+                                      (
+                                        ((user.user.friend.length > 0 && user.user.friend[0].status == StatusFriend.ACCEPTED) || (user.user.is_add_friend.length > 0 && user.user.is_add_friend[0].status == StatusFriend.ACCEPTED)) ? 
+                                        (<Tooltip title="Hủy kết bạn"><IconButton onClick={() => handleUnFriend(user.user_id)}><PersonRemoveIcon></PersonRemoveIcon></IconButton></Tooltip>)
+                                        : 
+                                        ((user.user.friend.length > 0 && user.user.friend[0].status == StatusFriend.WAITTING) ? <Tooltip title="Đồng ý kết bạn"><IconButton onClick={() => handleAcceptRequestFriend(user.user_id)}><HowToRegIcon></HowToRegIcon></IconButton></Tooltip> : <Tooltip title="Hủy yêu cầu kết bạn"><IconButton onClick={() => handleCancelRequestFriend(user.user_id)}><PersonAddDisabledIcon></PersonAddDisabledIcon></IconButton></Tooltip>)
+                                      )
+                                      : 
+                                      (
+                                        <IconButton
+                                          disabled={props.currentUser && user.user_id == props.currentUser.id ? true : false}
+                                          onClick={() => {
+                                            if (props.currentUser) {
+                                              handleAddFriend(user.user_id)
+                                            } else {
+                                              navigate("/login");
+                                            }
+                                          }}
+                                        >
+                                          <PersonAddIcon></PersonAddIcon>
+                                        </IconButton>
+                                      )                                    
+                                    }
+
                                   </CardActions>
                                 </Card>
                               </HoverPopover>
