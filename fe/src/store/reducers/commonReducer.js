@@ -1,6 +1,7 @@
 import { actionName } from "../constants";
 import NewspaperIcon from '@mui/icons-material/Newspaper';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
+import { TypeNotification, StatusRead } from "../../utils/constants";
 
 const initialState = {
   loading: false,
@@ -21,6 +22,7 @@ const initialState = {
     },
   ],
   currentUser: null,
+  notifications: []
 };
 
 const commonReducer = (state = initialState, action) => {
@@ -54,6 +56,41 @@ const commonReducer = (state = initialState, action) => {
       return {
         ...state,
         currentUser: action.payload 
+      }
+    case actionName.PUSH_NOTIFICATION:
+      switch(action.payload.type) {
+        case TypeNotification.ADD_FRIEND: {
+          state.notifications.push({
+            id: action.payload.id,
+            userId: action.payload.user.id,
+            userName: action.payload.user.name,
+            userImg: '',
+            type: TypeNotification.ADD_FRIEND,
+            status: StatusRead.UNREAD
+          })
+        }
+        default: 
+          break;
+      }
+
+      return {
+        ...state,
+        notifications: JSON.parse(JSON.stringify(state.notifications)),
+      }
+    case actionName.SET_NOTIFICATION:
+      return {
+        ...state,
+        notifications: JSON.parse(JSON.stringify(action.payload))
+      }
+    case actionName.UPDATE_NOTIFICATION:
+      let noti = state.notifications.find(x => {
+        return x.id == action.payload.id;
+      })
+      noti.status = action.payload.status
+
+      return {
+        ...state,
+        notifications: JSON.parse(JSON.stringify(state.notifications))
       }
     default:
       return state;

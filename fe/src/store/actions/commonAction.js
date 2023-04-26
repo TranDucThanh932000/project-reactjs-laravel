@@ -49,3 +49,24 @@ export const updateCurrentUser = (payload) => {
         payload: payload
     }
 }
+
+export const pushNotification = (payload) => {
+    return {
+        type: actionName.PUSH_NOTIFICATION,
+        payload: payload
+    }
+}
+
+export const setNotification = (payload) => {
+    return {
+        type: actionName.SET_NOTIFICATION,
+        payload: payload
+    }
+}
+
+export const updateNotification = (payload) => {
+    return {
+        type: actionName.UPDATE_NOTIFICATION,
+        payload: payload
+    }
+}

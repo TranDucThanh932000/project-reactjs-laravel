@@ -21,7 +21,8 @@ class AppServiceProvider extends ServiceProvider
             'User',
             'Message',
             'Follower',
-            'Friend'
+            'Friend',
+            'Notification'
         ];
 
         foreach ($classes as $class) {

@@ -20,28 +20,32 @@ import {
   openSidebar,
   updateStatusLogin,
   updateModeLight,
-  updateCurrentUser
+  updateCurrentUser,
+  pushNotification,
+  setNotification,
+  updateNotification
 } from "../../../store/actions/commonAction";
 import {
   openAndCloseChatting,
   updateUsersContacted,
-  openAndGetMsg
+  openAndGetMsg,
 } from "../../../store/actions/chattingAction";
 import store from "../../../store";
 import { useNavigate } from "react-router-dom";
 import styles from "./Header.module.scss";
 import classNames from "classnames/bind";
 import * as authentication from "../../../services/authenticationService";
+import * as notification from "../../../services/notificationService";
 import Switch from "@mui/material/Switch";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import {
-  Avatar,
-  ListItemAvatar,
-  ListItemText,
-} from "@mui/material";
+import { Avatar, ListItemAvatar, ListItemText } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
-import * as chattingService from "../../../services/chattingService"
+import * as chattingService from "../../../services/chattingService";
+import Pusher from "pusher-js";
+import { StatusRead, TypeNotification } from "../../../utils/constants";
+import MarkUnreadChatAltIcon from "@mui/icons-material/MarkUnreadChatAlt";
+import MarkChatReadIcon from '@mui/icons-material/MarkChatRead';
 
 const cx = classNames.bind(styles);
 
@@ -94,7 +98,8 @@ const mapStateToProps = (state) => {
     modeLight: state.commonReducer.modeLight,
     usersContacted: state.chattingReducer.usersContacted,
     chatting: state.chattingReducer.chatting,
-    currentUser: state.commonReducer.currentUser
+    currentUser: state.commonReducer.currentUser,
+    notifications: state.commonReducer.notifications,
   };
 };
 
@@ -123,6 +128,61 @@ const Header = (props) => {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
   const [anchorMessage, setAnchorMessage] = React.useState(null);
   const openListMessage = Boolean(anchorMessage);
+  const [anchorNotification, setAnchorNotification] = React.useState(null);
+  const openListNotification = Boolean(anchorNotification);
+  const [countNotificationUnread, setCountNotificationUnread] =
+    React.useState(0);
+  const [pusher, setPusher] = React.useState(
+    new Pusher("0c1bb67e922d5e222312", {
+      cluster: "ap1",
+      authEndpoint: "http://localhost:8000/api/v1/chat/pusher/auth",
+      auth: {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("loginToken"),
+          "Access-Control-Allow-Origin": "*",
+        },
+      },
+      encrypted: true,
+    })
+  );
+  const [channel, setChannel] = React.useState(
+    pusher.subscribe("private-notification")
+  );
+
+  React.useEffect(() => {
+    if (props.currentUser) {
+      channel.bind(
+        `private-notification-${props.currentUser.id}`,
+        function (data) {
+          setCountNotificationUnread((prev) => prev + 1)
+          store.dispatch(
+            pushNotification({
+              id: data.id,
+              user: data.user,
+              type: data.type,
+              blog: data.blog,
+            })
+          );
+        }
+      );
+      notification.getNotification().then((data) => {
+        let parseData = data.map((x) => {
+          return {
+            id: x.id,
+            userId: x.owner_user.id,
+            userName: x.owner_user.name,
+            userImg: "",
+            type: x.type,
+            status: x.status,
+          };
+        });
+        store.dispatch(setNotification(parseData));
+      });
+      notification.countNotification().then((data) => {
+        setCountNotificationUnread(data);
+      });
+    }
+  }, [props.currentUser]);
 
   //switch light
   const MaterialUISwitch = styled(Switch)(({ theme }) => ({
@@ -212,8 +272,7 @@ const Header = (props) => {
   };
 
   const menuId = "primary-search-account-menu";
-  const renderMenu = (
-    props.currentUser && 
+  const renderMenu = props.currentUser && (
     <Menu
       anchorEl={anchorEl}
       anchorOrigin={{
@@ -229,7 +288,9 @@ const Header = (props) => {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Chào {props.currentUser.name} - {props.currentUser.id}</MenuItem>
+      <MenuItem onClick={handleMenuClose}>
+        Chào {props.currentUser.name} - {props.currentUser.id}
+      </MenuItem>
       <MenuItem onClick={handleMenuClose}>Thông tin cá nhân</MenuItem>
       <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
     </Menu>
@@ -309,17 +370,43 @@ const Header = (props) => {
 
   const handleClickListMessage = (event) => {
     setAnchorMessage(event.currentTarget);
-    chattingService.getListUserContacted()
-    .then((res) => {
-      store.dispatch(updateUsersContacted(res.usersContacted));
-    })
-    .catch(() => {})
+    chattingService
+      .getListUserContacted()
+      .then((res) => {
+        store.dispatch(updateUsersContacted(res.usersContacted));
+      })
+      .catch(() => {});
+  };
+
+  const handleClickListNotification = (event) => {
+    setAnchorNotification(event.currentTarget);
+  };
+
+  const handleMarkStatusRead = (event, noti) => {
+    event.stopPropagation();
+    noti.status = noti.status === StatusRead.READED ? StatusRead.UNREAD : StatusRead.READED;
+    store.dispatch(updateNotification(noti))
+    if(noti.status == StatusRead.READED) {
+      setCountNotificationUnread((prev) => prev - 1)
+    } else {
+      setCountNotificationUnread((prev) => prev + 1)
+    }
+
+    notification
+      .markStatusRead({
+        id: noti.id,
+        status: noti.status,
+      })
+      .then(() => {});
   };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="fixed" open={props.open}>
-        <Toolbar className={cx("commonBackgroundColor")} sx={{ paddingRight: {xs: "0", md: "16px"} }}>
+        <Toolbar
+          className={cx("commonBackgroundColor")}
+          sx={{ paddingRight: { xs: "0", md: "16px" } }}
+        >
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -381,57 +468,108 @@ const Header = (props) => {
                 "aria-labelledby": "basic-button",
               }}
             >
-              {
-                props.usersContacted.map(x => (
-                  <MenuItem
-                    onClick={() => {
-                      if(props.chatting.findIndex(user => user.toUserId == x.id) < 0) {
-                        chattingService.getMessageOfFriend(x.id)
+              {props.usersContacted.map((x) => (
+                <MenuItem
+                  onClick={() => {
+                    if (
+                      props.chatting.findIndex(
+                        (user) => user.toUserId == x.id
+                      ) < 0
+                    ) {
+                      chattingService
+                        .getMessageOfFriend(x.id)
                         .then((res) => {
                           let newUserMsg = {
                             toUserId: x.id,
-                            currentMsg: '',
-                            msg: []
+                            currentMsg: "",
+                            msg: [],
                           };
-                          res.msgs.forEach(msg => {
+                          res.msgs.forEach((msg) => {
                             newUserMsg.msg.push({
                               message: msg.content,
                               toOther: x.id == msg.to_user_id ? true : false,
                               created_at: msg.created_at,
-                              id: msg.id
-                            })
+                              id: msg.id,
+                            });
                           });
                           store.dispatch(openAndGetMsg(newUserMsg));
                         })
-                        .catch(() => {})
-                      } else {
-                        store.dispatch(openAndCloseChatting(x.id));
-                      }
-                      setAnchorMessage(null);
-                    }}
-                    key={x.id}
-                  >
-                    <ListItemAvatar>
-                      <Avatar>
-                        <ImageIcon />
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText primary={x.name} secondary="Cách đây vài năm thôi" />
-                  </MenuItem>
-                  
-                ))
-              }
+                        .catch(() => {});
+                    } else {
+                      store.dispatch(openAndCloseChatting(x.id));
+                    }
+                    setAnchorMessage(null);
+                  }}
+                  key={x.id}
+                >
+                  <ListItemAvatar>
+                    <Avatar>
+                      <ImageIcon />
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={x.name}
+                    secondary="Cách đây vài năm thôi"
+                  />
+                </MenuItem>
+              ))}
             </Menu>
 
+            {/* notification */}
             <IconButton
               size="large"
               aria-label="show 17 new notifications"
               color="inherit"
+              id="basic-button"
+              aria-controls={openListNotification ? "basic-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={openListNotification ? "true" : undefined}
+              onClick={handleClickListNotification}
             >
-              <Badge badgeContent={17} color="error">
+              <Badge badgeContent={countNotificationUnread} color="error">
                 <NotificationsIcon />
               </Badge>
             </IconButton>
+            <Menu
+              id="basic-menu"
+              anchorEl={anchorNotification}
+              open={openListNotification}
+              onClose={() => {
+                setAnchorNotification(null);
+              }}
+              MenuListProps={{
+                "aria-labelledby": "basic-button",
+              }}
+            >
+              {props.notifications.map((x) => (
+                <MenuItem key={x.id} onClick={() => {console.log('123')}}>
+                  <ListItemAvatar>
+                    <Avatar>
+                      <ImageIcon />
+                    </Avatar>
+                  </ListItemAvatar>
+                  {x.type == TypeNotification.ADD_FRIEND && (
+                    <ListItemText
+                      secondary={`${x.userName} đã gửi lời kết bạn`}
+                    />
+                  )}
+                  {x.status == StatusRead.UNREAD ? (
+                    <MarkUnreadChatAltIcon
+                      style={{ marginLeft: "5px" }}
+                      onClick={(e) => handleMarkStatusRead(e, x)}
+                    ></MarkUnreadChatAltIcon>
+                  )
+                    : (
+                      <MarkChatReadIcon
+                        style={{ marginLeft: "5px" }}
+                        onClick={(e) => handleMarkStatusRead(e, x)}
+                      ></MarkChatReadIcon>
+                    )
+                }
+                </MenuItem>
+              ))}
+            </Menu>
+
             <IconButton
               size="large"
               edge="end"
