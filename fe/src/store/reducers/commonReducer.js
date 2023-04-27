@@ -22,7 +22,8 @@ const initialState = {
     },
   ],
   currentUser: null,
-  notifications: []
+  notifications: [],
+  notiStack: []
 };
 
 const commonReducer = (state = initialState, action) => {
@@ -91,6 +92,20 @@ const commonReducer = (state = initialState, action) => {
       return {
         ...state,
         notifications: JSON.parse(JSON.stringify(state.notifications))
+      }
+    case actionName.STACK_NOTIFICATION:
+      state.notiStack.push(action.payload)
+
+      return {
+        ...state,
+        notiStack: JSON.parse(JSON.stringify(state.notiStack))
+      }
+    case actionName.REMOVE_FIRST_NOTI_STACK:
+      state.notiStack.shift();  
+
+      return {
+        ...state,
+        notiStack: JSON.parse(JSON.stringify(state.notiStack))
       }
     default:
       return state;

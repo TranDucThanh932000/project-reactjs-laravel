@@ -23,7 +23,9 @@ import {
   updateCurrentUser,
   pushNotification,
   setNotification,
-  updateNotification
+  updateNotification,
+  updateNotiStack,
+  removeFirstNotiStack
 } from "../../../store/actions/commonAction";
 import {
   openAndCloseChatting,
@@ -44,8 +46,8 @@ import ImageIcon from "@mui/icons-material/Image";
 import * as chattingService from "../../../services/chattingService";
 import Pusher from "pusher-js";
 import { StatusRead, TypeNotification } from "../../../utils/constants";
-import MarkUnreadChatAltIcon from "@mui/icons-material/MarkUnreadChatAlt";
-import MarkChatReadIcon from '@mui/icons-material/MarkChatRead';
+import Brightness1Icon from '@mui/icons-material/Brightness1';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
 const cx = classNames.bind(styles);
 
@@ -155,6 +157,19 @@ const Header = (props) => {
         `private-notification-${props.currentUser.id}`,
         function (data) {
           setCountNotificationUnread((prev) => prev + 1)
+          let content = '';
+          if (data.type == TypeNotification.ADD_FRIEND) {
+            content = `<span><b><a href="#" target="_blank">${data.user.name}</a></b> đã gửi lời mời kết bạn</span>`
+          }
+          setTimeout(() => {
+            store.dispatch(removeFirstNotiStack());
+          }, 5000)
+          store.dispatch(
+            updateNotiStack({
+              id: data.id,
+              content: content
+            })
+          )
           store.dispatch(
             pushNotification({
               id: data.id,
@@ -554,16 +569,16 @@ const Header = (props) => {
                     />
                   )}
                   {x.status == StatusRead.UNREAD ? (
-                    <MarkUnreadChatAltIcon
-                      style={{ marginLeft: "5px" }}
+                    <Brightness1Icon
+                      style={{ marginLeft: "5px", color: '#c4c1c1' }}
                       onClick={(e) => handleMarkStatusRead(e, x)}
-                    ></MarkUnreadChatAltIcon>
+                    ></Brightness1Icon>
                   )
                     : (
-                      <MarkChatReadIcon
+                      <RadioButtonUncheckedIcon
                         style={{ marginLeft: "5px" }}
                         onClick={(e) => handleMarkStatusRead(e, x)}
-                      ></MarkChatReadIcon>
+                      ></RadioButtonUncheckedIcon>
                     )
                 }
                 </MenuItem>

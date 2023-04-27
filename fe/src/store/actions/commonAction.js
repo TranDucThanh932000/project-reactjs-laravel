@@ -70,3 +70,16 @@ export const updateNotification = (payload) => {
         payload: payload
     }
 }
+
+export const updateNotiStack = (payload) => {
+    return {
+        type: actionName.STACK_NOTIFICATION,
+        payload: payload
+    }
+}
+
+export const removeFirstNotiStack = () => {
+    return {
+        type: actionName.REMOVE_FIRST_NOTI_STACK,
+    }
+}

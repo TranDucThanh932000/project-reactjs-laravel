@@ -13,16 +13,27 @@ import Snackbar from "@mui/material/Snackbar";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { Box } from "@mui/material";
 import Chatting from "./views/chatting/Chatting";
+import { styled } from '@mui/material/styles';
+import Paper from '@mui/material/Paper';
 
 const mapStateToProps = (state) => {
   return {
     loading: state.commonReducer.loading,
     textAlert: state.commonReducer.textAlert,
-    modeLight: state.commonReducer.modeLight
+    modeLight: state.commonReducer.modeLight,
+    notiStack: state.commonReducer.notiStack
   };
 };
 
 const cx = classNames.bind(styles);
+
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+  ...theme.typography.body2,
+  textAlign: 'center',
+  marginBottom: '5px',
+  color: theme.palette.text.secondary,
+}));
 
 const App = (props) => {
   // const navigate = useNavigate();
@@ -123,6 +134,23 @@ const App = (props) => {
           >
             <strong>{props.textAlert}</strong>
           </Alert>
+        </Snackbar>
+        
+        <Snackbar
+          open={true}
+          anchorOrigin={{ vertical, horizontal }}
+        >
+          <Box flexDirection={'column-reverse'}>
+            {
+              props.notiStack.map(x => (
+                <Item sx={{ marginTop: '10px' }}>
+                  <Alert severity="info">
+                    <div dangerouslySetInnerHTML={{ __html: x.content}}></div>
+                  </Alert>
+                </Item>
+              ))
+            }
+          </Box>
         </Snackbar>
       </ThemeProvider>
     </>
