@@ -28,4 +28,9 @@ class UserRepository implements UserInterface
     {
         return $this->user->where('account', $account)->first();
     }
+
+    public function getById($id)
+    {
+        return $this->user->find($id);
+    }
 }

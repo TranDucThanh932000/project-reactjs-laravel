@@ -6,4 +6,5 @@ interface UserInterface
 {
     public function store($user);
     public function getByAccount($account);
+    public function getById($id);
 }

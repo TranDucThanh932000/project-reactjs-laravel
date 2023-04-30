@@ -61,7 +61,7 @@ const commonReducer = (state = initialState, action) => {
     case actionName.PUSH_NOTIFICATION:
       switch(action.payload.type) {
         case TypeNotification.ADD_FRIEND: {
-          state.notifications.push({
+          state.notifications.unshift({
             id: action.payload.id,
             userId: action.payload.user.id,
             userName: action.payload.user.name,
@@ -69,6 +69,18 @@ const commonReducer = (state = initialState, action) => {
             type: TypeNotification.ADD_FRIEND,
             status: StatusRead.UNREAD
           })
+          break;
+        }
+        case TypeNotification.FOLLOW: {
+          state.notifications.unshift({
+            id: action.payload.id,
+            userId: action.payload.user.id,
+            userName: action.payload.user.name,
+            userImg: '',
+            type: TypeNotification.FOLLOW,
+            status: StatusRead.UNREAD
+          })
+          break;
         }
         default: 
           break;
@@ -85,7 +97,7 @@ const commonReducer = (state = initialState, action) => {
       }
     case actionName.UPDATE_NOTIFICATION:
       let noti = state.notifications.find(x => {
-        return x.id == action.payload.id;
+        return x.id === action.payload.id;
       })
       noti.status = action.payload.status
 

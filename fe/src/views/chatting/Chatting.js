@@ -9,6 +9,7 @@ import {
   openAndCloseChatting,
   sendMessage,
   updateCurrentMsg,
+  openAndGetMsg
 } from "../../store/actions/chattingAction";
 import store from "../../store";
 import SendIcon from "@mui/icons-material/Send";
@@ -130,16 +131,47 @@ const Chatting = (props) => {
 
   React.useEffect(() => {
     if(props.currentUser) {
-      channel.bind(`private-message-${props.currentUser.id}`, function (data) {
-        store.dispatch(
-          sendMessage({
-            message: data.message,
-            currentUser: props.currentUser,
-          })
-        );
-      });
+      channel.bind(`private-message-${props.currentUser.id}`, handleCallbackChannel);
     }
+
   }, [props.currentUser]);
+
+  const handleCallbackChannel = React.useCallback((data) => {
+    let index = props.chatting.findIndex(x => {
+      return x.toUserId === data.message.user_id
+    });
+    if (index < 0) {
+      chattingService
+      .getMessageOfFriend(data.message.user_id)
+      .then((res) => {
+        let newUserMsg = {
+          toUserId: data.message.user_id,
+          info: res.info,
+          currentMsg: "",
+          msg: [],
+        };
+        res.msgs.forEach((msg) => {
+          newUserMsg.msg.push({
+            message: msg.content,
+            toOther: data.message.user_id == msg.to_user_id ? true : false,
+            created_at: msg.created_at,
+            id: msg.id,
+          });
+        });
+        store.dispatch(openAndGetMsg(newUserMsg));
+      })
+      .catch(() => {});
+    } else {
+      store.dispatch(
+        sendMessage({
+          message: data.message,
+          currentUser: props.currentUser,
+        })
+      );
+      let list = document.getElementById('end-' + (index + 1));
+      list.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, [props.currentUser, props.chatting.length])
 
   return (
     <>
@@ -151,7 +183,7 @@ const Chatting = (props) => {
             sx={{ right: `${15 + index * 300}px` }}
           >
             <div className={cx("chat-header")}>
-              <h3>Chat với {chat.toUserId}</h3>
+              <h3>{ chat.info.name }</h3>
               <IconButton
                 onClick={() => {
                   store.dispatch(openAndCloseChatting(chat.toUserId));

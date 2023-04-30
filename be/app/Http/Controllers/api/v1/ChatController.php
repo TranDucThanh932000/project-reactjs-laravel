@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\v1;
 use App\Events\Message;
 use App\Http\Controllers\Controller;
 use App\Repositories\Message\MessageInterface;
+use App\Repositories\User\UserInterface;
 use Exception;
 use Illuminate\Http\Request;
 use JWTAuth;
@@ -14,10 +15,12 @@ class ChatController extends Controller
 {
 
     private $message;
+    private $user;
 
-    public function __construct(MessageInterface $message)
+    public function __construct(MessageInterface $message, UserInterface $user)
     {
         $this->message = $message;
+        $this->user = $user;
     }
 
     public function store(Request $request)
@@ -61,9 +64,11 @@ class ChatController extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
         $msgs = $this->message->getMessageOfFriend($request->friendId, $user->id);
+        $friendInfo = $this->user->getById($request->friendId)->only(['id', 'name']);
 
         return response()->json([
-            'msgs' => $msgs
+            'msgs' => $msgs,
+            'info' => $friendInfo
         ], 200);
     }
 

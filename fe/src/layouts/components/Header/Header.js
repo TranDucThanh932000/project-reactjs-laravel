@@ -25,7 +25,7 @@ import {
   setNotification,
   updateNotification,
   updateNotiStack,
-  removeFirstNotiStack
+  removeFirstNotiStack,
 } from "../../../store/actions/commonAction";
 import {
   openAndCloseChatting,
@@ -41,13 +41,13 @@ import * as notification from "../../../services/notificationService";
 import Switch from "@mui/material/Switch";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import { Avatar, ListItemAvatar, ListItemText } from "@mui/material";
+import { Avatar, Button, ListItemAvatar, ListItemText } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import * as chattingService from "../../../services/chattingService";
 import Pusher from "pusher-js";
 import { StatusRead, TypeNotification } from "../../../utils/constants";
-import Brightness1Icon from '@mui/icons-material/Brightness1';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import Brightness1Icon from "@mui/icons-material/Brightness1";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 
 const cx = classNames.bind(styles);
 
@@ -156,20 +156,23 @@ const Header = (props) => {
       channel.bind(
         `private-notification-${props.currentUser.id}`,
         function (data) {
-          setCountNotificationUnread((prev) => prev + 1)
-          let content = '';
-          if (data.type == TypeNotification.ADD_FRIEND) {
-            content = `<span><b><a href="#" target="_blank">${data.user.name}</a></b> đã gửi lời mời kết bạn</span>`
+          setCountNotificationUnread((prev) => prev + 1);
+          let content = "";
+          if (data.type === TypeNotification.ADD_FRIEND) {
+            content = `<span><b><a href="#" target="_blank">${data.user.name}</a></b> đã gửi lời mời kết bạn</span>`;
+          }
+          if (data.type === TypeNotification.FOLLOW) {
+            content = `<span><b><a href="#" target="_blank">${data.user.name}</a></b> đã theo dõi bạn</span>`;
           }
           setTimeout(() => {
             store.dispatch(removeFirstNotiStack());
-          }, 5000)
+          }, 5000);
           store.dispatch(
             updateNotiStack({
               id: data.id,
-              content: content
+              content: content,
             })
-          )
+          );
           store.dispatch(
             pushNotification({
               id: data.id,
@@ -399,12 +402,13 @@ const Header = (props) => {
 
   const handleMarkStatusRead = (event, noti) => {
     event.stopPropagation();
-    noti.status = noti.status === StatusRead.READED ? StatusRead.UNREAD : StatusRead.READED;
-    store.dispatch(updateNotification(noti))
-    if(noti.status == StatusRead.READED) {
-      setCountNotificationUnread((prev) => prev - 1)
+    noti.status =
+      noti.status === StatusRead.READED ? StatusRead.UNREAD : StatusRead.READED;
+    store.dispatch(updateNotification(noti));
+    if (noti.status == StatusRead.READED) {
+      setCountNotificationUnread((prev) => prev - 1);
     } else {
-      setCountNotificationUnread((prev) => prev + 1)
+      setCountNotificationUnread((prev) => prev + 1);
     }
 
     notification
@@ -496,6 +500,7 @@ const Header = (props) => {
                         .then((res) => {
                           let newUserMsg = {
                             toUserId: x.id,
+                            info: res.info,
                             currentMsg: "",
                             msg: [],
                           };
@@ -556,33 +561,41 @@ const Header = (props) => {
                 "aria-labelledby": "basic-button",
               }}
             >
-              {props.notifications.map((x) => (
-                <MenuItem key={x.id} onClick={() => {console.log('123')}}>
-                  <ListItemAvatar>
-                    <Avatar>
-                      <ImageIcon />
-                    </Avatar>
-                  </ListItemAvatar>
-                  {x.type == TypeNotification.ADD_FRIEND && (
-                    <ListItemText
-                      secondary={`${x.userName} đã gửi lời kết bạn`}
-                    />
-                  )}
-                  {x.status == StatusRead.UNREAD ? (
-                    <Brightness1Icon
-                      style={{ marginLeft: "5px", color: '#c4c1c1' }}
-                      onClick={(e) => handleMarkStatusRead(e, x)}
-                    ></Brightness1Icon>
-                  )
-                    : (
+              <Box className={cx("menu-notification")}>
+                {props.notifications.map((x) => (
+                  <MenuItem key={x.id + '-' + x.userId} onClick={() => {}}>
+                    <ListItemAvatar>
+                      <Avatar>
+                        <ImageIcon />
+                      </Avatar>
+                    </ListItemAvatar>
+                    {x.type === TypeNotification.ADD_FRIEND && (
+                      <ListItemText
+                        secondary={`${x.userName} đã gửi lời kết bạn`}
+                      />
+                    )}
+                    {x.type === TypeNotification.FOLLOW && (
+                      <ListItemText
+                        secondary={`${x.userName} đã theo dõi bạn`}
+                      />
+                    )}
+                    {x.status === StatusRead.UNREAD ? (
+                      <Brightness1Icon
+                        style={{ marginLeft: "5px", color: "#c4c1c1" }}
+                        onClick={(e) => handleMarkStatusRead(e, x)}
+                      ></Brightness1Icon>
+                    ) : (
                       <RadioButtonUncheckedIcon
                         style={{ marginLeft: "5px" }}
                         onClick={(e) => handleMarkStatusRead(e, x)}
                       ></RadioButtonUncheckedIcon>
-                    )
-                }
-                </MenuItem>
-              ))}
+                    )}
+                  </MenuItem>
+                ))}
+              </Box>
+              <Box textAlign={"center"}>
+                <Button>Đánh dấu đã đọc tất cả</Button>
+              </Box>
             </Menu>
 
             <IconButton

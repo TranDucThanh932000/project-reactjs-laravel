@@ -3,3 +3,8 @@
 header {
     background-color: $commonBackgroundColor !important;
 }
+
+.menu-notification {
+    max-height: 450px;
+    overflow-y: scroll;
+}
