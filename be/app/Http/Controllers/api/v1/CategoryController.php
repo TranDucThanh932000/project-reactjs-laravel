@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\v1;
 use App\Http\Controllers\Controller;
 use App\Repositories\Categories\CategoriesInterface;
 use Illuminate\Http\Request;
+use App\Enums\StatusCode;
 
 class CategoryController extends Controller
 {
@@ -17,7 +18,7 @@ class CategoryController extends Controller
 
     public function index()
     {
-        return response()->json($this->category->get(), 200);
+        return response()->json($this->category->get(), StatusCode::OK);
     }
 
     /**

@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Http\Request;
 use JWTAuth;
 use Pusher\Pusher;
+use App\Enums\StatusCode;
 
 class ChatController extends Controller
 {
@@ -37,7 +38,7 @@ class ChatController extends Controller
     
             return response()->json([
                 'message' => $message
-            ], 200);
+            ], StatusCode::OK);
         } catch (Exception $e) {
             return response()->json([
                 'message' => 'error'
@@ -57,7 +58,7 @@ class ChatController extends Controller
 
         return response()->json([
             'usersContacted' => $usersContacted
-        ], 200);
+        ], StatusCode::OK);
     }
 
     public function getMsgFriend(Request $request)
@@ -69,7 +70,7 @@ class ChatController extends Controller
         return response()->json([
             'msgs' => $msgs,
             'info' => $friendInfo
-        ], 200);
+        ], StatusCode::OK);
     }
 
     public function authBroadCasting(Request $request)

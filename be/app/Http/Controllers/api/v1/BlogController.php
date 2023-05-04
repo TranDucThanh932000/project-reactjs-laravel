@@ -9,9 +9,10 @@ use App\Repositories\Medias\MediasInterface;
 use App\Traits\StorageImageTrait;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Enums\StatusCode;
+use JWTAuth;
 
 class BlogController extends Controller
 {
@@ -37,21 +38,26 @@ class BlogController extends Controller
 
         return response()->json([
             'blogs' => $blog
-        ], 200);
+        ], StatusCode::OK);
     }
 
     public function store(Request $request)
     {
         try {
             DB::beginTransaction();
+            $user = JWTAuth::parseToken()->authenticate();
             $blog = $this->blog->store([
-                'user_id' => Auth::User()->id,
+                'user_id' => $user->id,
                 'title' => $request->title,
                 'short_description' => $request->shortDescription,
                 'content' => $request->description
             ]);
             $listImage = collect([]);
             
+            return response()->json([
+                'blog' => $request->all()
+            ], StatusCode::OK);
+
             $listUpload = $this->storageTraitUpload($request, env('FOLDER_ID_BLOG'), file_get_contents(storage_path('app/public/KeyGGDrive.txt')));
             foreach($listUpload as $imageDrive) {
                 $listImage->push($this->media->store([
@@ -73,7 +79,7 @@ class BlogController extends Controller
     
             return response()->json([
                 'blog' => $blog
-            ], 200);
+            ], StatusCode::OK);
         } catch (Exception $e) {
             DB::rollBack();
 

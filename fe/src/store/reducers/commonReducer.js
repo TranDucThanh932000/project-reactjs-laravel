@@ -1,6 +1,7 @@
 import { actionName } from "../constants";
 import NewspaperIcon from '@mui/icons-material/Newspaper';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
+import { QrCode } from "@mui/icons-material";
 import { TypeNotification, StatusRead } from "../../utils/constants";
 
 const initialState = {
@@ -19,6 +20,11 @@ const initialState = {
       text: 'Số may mắn',
       url: '/lucky-number-today',
       icon: <StarOutlineIcon/>
+    },
+    {
+      text: 'Tạo QRCODE',
+      url: '/qr-code',
+      icon: <QrCode/>
     },
   ],
   currentUser: null,

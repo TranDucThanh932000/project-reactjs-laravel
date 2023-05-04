@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\v1;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\BlogLikes\BlogLikesInterface;
+use App\Enums\StatusCode;
 
 class BlogLikeController extends Controller
 {
@@ -48,7 +49,7 @@ class BlogLikeController extends Controller
         return response()->json([
             'status' => 'success',
             'newCount' => $blogLike->blog_likes_count
-        ], 200);
+        ], StatusCode::OK);
     }
 
     /**
@@ -102,6 +103,6 @@ class BlogLikeController extends Controller
         return response()->json([
             'status' => 'success',
             'newCount' => $blogLike->blog_likes_count
-        ], 200);
+        ], StatusCode::OK);
     }
 }

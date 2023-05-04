@@ -10,6 +10,7 @@ use App\Repositories\Friend\FriendInterface;
 use App\Repositories\Notification\NotificationInterface;
 use Illuminate\Http\Request;
 use JWTAuth;
+use App\Enums\StatusCode;
 
 class FriendController extends Controller
 {
@@ -41,7 +42,7 @@ class FriendController extends Controller
 
         return response()->json([
             'status' => $this->friend->addfriend($user->id, $request->friend)
-        ], 200);
+        ], StatusCode::OK);
     }
 
     public function destroy($id)
@@ -50,7 +51,7 @@ class FriendController extends Controller
 
         return response()->json([
             'status' => $this->friend->unfriend($user->id, $id)
-        ], 200);
+        ], StatusCode::OK);
     }
 
     public function cancelRequest(Request $request)
@@ -59,7 +60,7 @@ class FriendController extends Controller
 
         return response()->json([
             'status' => $this->friend->cancelRequest($user->id, $request->friend)
-        ], 200);
+        ], StatusCode::OK);
     }
 
     public function acceptRequest(Request $request)
@@ -68,6 +69,6 @@ class FriendController extends Controller
 
         return response()->json([
             'status' => $this->friend->acceptRequest($user->id, $request->friend)
-        ], 200);
+        ], StatusCode::OK);
     }
 }

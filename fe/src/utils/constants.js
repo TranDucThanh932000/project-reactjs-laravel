@@ -13,3 +13,8 @@ export const StatusRead = {
     UNREAD: 0,
     READED: 1
 }
+
+export const TypeInputQrCode = {
+    LINK: 1,
+    IMAGE: 3
+}

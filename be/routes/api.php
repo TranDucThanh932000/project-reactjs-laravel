@@ -11,6 +11,7 @@ use App\Http\Controllers\api\v1\FriendController;
 use App\Http\Controllers\api\v1\GoogleDriveController;
 use App\Http\Controllers\api\v1\LuckyNumberController;
 use App\Http\Controllers\api\v1\NotificationController;
+use App\Http\Controllers\api\v1\QrCodeController;
 
 //google drive
 Route::get('google/login',[GoogleDriveController::class,'googleLogin'])->name('google.login');
@@ -28,6 +29,7 @@ Route::resource('blogs', BlogController::class);
 // });
 Route::resource('categories', CategoryController::class);
 Route::get('follow/top5', [FollowerController::class, 'getTop5']);
+Route::post('/qr-code', [QrCodeController::class, 'store']);
 
 Route::group([
     'middleware' => ['jwt.auth', 'throttle:120'],

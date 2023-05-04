@@ -8,6 +8,7 @@ use App\Http\Requests\RegisterRequest;
 use App\Repositories\User\UserInterface;
 use Exception;
 use Illuminate\Http\Request;
+use App\Enums\StatusCode;
 
 class Authentication extends Controller
 {
@@ -39,7 +40,7 @@ class Authentication extends Controller
         $token = JWTAuth::parseToken()->getToken();
         try {
             $user = JWTAuth::parseToken()->authenticate();
-            return response()->json($user, 200);
+            return response()->json($user, StatusCode::OK);
         } catch (JWTException $e) {
             return response()->json(false, 401);
         }
@@ -56,7 +57,7 @@ class Authentication extends Controller
     
             JWTAuth::invalidate($token);
     
-            return response()->json('success', 200);
+            return response()->json('success', StatusCode::OK);
         } catch (Exception $e) {
             return response()->json('fail', 400);
         }
@@ -68,7 +69,7 @@ class Authentication extends Controller
             $refreshed = JWTAuth::refresh(JWTAuth::getToken());
             return response()->json([
                 'token' => $refreshed
-            ], 200);
+            ], StatusCode::OK);
         } catch (JWTException $e) {
             return response()->json(['error' => $e], 401);
         }
@@ -103,12 +104,12 @@ class Authentication extends Controller
             if($user) {
                 return response()->json([
                     'isAccountValid' => false
-                ], 200);
+                ], StatusCode::OK);
             }
             
             return response()->json([
                 'isAccountValid' => true
-            ], 200);
+            ], StatusCode::OK);
         } catch (Exception $e) {
             return response()->json('fail', 400);
         }

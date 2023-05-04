@@ -10,6 +10,7 @@ use App\Repositories\Follower\FollowerInterface;
 use App\Repositories\Notification\NotificationInterface;
 use Illuminate\Http\Request;
 use JWTAuth;
+use App\Enums\StatusCode;
 
 class FollowerController extends Controller
 {
@@ -44,7 +45,7 @@ class FollowerController extends Controller
 
         return response()->json([
             'status' => 'success'
-        ], 200);
+        ], StatusCode::OK);
     }
 
     public function destroy($id)
@@ -53,13 +54,13 @@ class FollowerController extends Controller
 
         return response()->json([
             'status' => $this->follower->unfollow($id, $user->id)
-        ], 200);
+        ], StatusCode::OK);
     }
 
     public function getTop5()
     {
         return response()->json([
             'top5' => $this->follower->getTop(5)
-        ], 200);
+        ], StatusCode::OK);
     }
 }
