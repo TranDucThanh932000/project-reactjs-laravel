@@ -4,7 +4,7 @@ namespace App\Http\Controllers\api\v1;
 
 use App\Enums\StatusCode;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\CreateQrCodeRequest;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Traits\StorageImageTrait;
 
@@ -12,7 +12,7 @@ class QrCodeController extends Controller
 {
     use StorageImageTrait;
 
-    public function store(Request $request)
+    public function store(CreateQrCodeRequest $request)
     {
         //text
         if(!empty($request->inputQrCode)) {

@@ -36,9 +36,17 @@ const QrCode = () => {
   ]);
   const [urlQrCode, setUrlQrCode] = useState("");
   const inputFile = useRef(null);
+  const [messageErrorInput, setMessageErrorInput] = useState("");
 
   const handleChangeInputQrCode = (e) => {
-    if (type == constant.TypeInputQrCode.LINK) setInputQrCode(e.target.value);
+    if (type == constant.TypeInputQrCode.LINK) {
+      setInputQrCode(e.target.value);
+      if(e.target.value.length > 255) {
+        setMessageErrorInput("Không dài quá 255 ký tự")
+      } else {
+        setMessageErrorInput("");
+      }
+    }
     setUrlQrCode("");
   };
 
@@ -46,6 +54,7 @@ const QrCode = () => {
     setType(e.target.value);
     setInputQrCode("");
     setUrlQrCode("");
+    setMessageErrorInput("");
   };
 
   const handleMakeQrCode = () => {
@@ -76,6 +85,11 @@ const QrCode = () => {
 
   const handleOnchangeInputFile = (event) => {
     const selectedImage = event.target.files[0];
+    if (!selectedImage) {
+      setInputQrCode("");
+      setUrlQrCode("");
+      return;
+    }
     if (selectedImage.size > 10485760 / 2) {
       store.dispatch(updateTextAlert("File không được lớn quá 5MB"));
       setTimeout(() => {
@@ -158,18 +172,23 @@ const QrCode = () => {
                 })}
               </NativeSelect>
               {type == constant.TypeInputQrCode.LINK ? (
-                <TextField
-                  id="standard-basic"
-                  label="Dữ liệu"
-                  variant="standard"
-                  value={inputQrCode}
-                  onChange={handleChangeInputQrCode}
-                  inputProps={{
-                    name: "input",
-                    id: "uncontrolled-native",
-                    type: "text",
-                  }}
-                />
+                <>
+                  <TextField
+                    id="standard-basic"
+                    label="Dữ liệu"
+                    variant="standard"
+                    value={inputQrCode}
+                    onChange={handleChangeInputQrCode}
+                    inputProps={{
+                      name: "input",
+                      id: "uncontrolled-native",
+                      type: "text",
+                    }}
+                  />
+                  <div className={cx('text-red')} style={{textAlign: 'left'}}>
+                    {messageErrorInput}
+                  </div>
+                </>
               ) : (
                 <>
                   <input
@@ -177,12 +196,14 @@ const QrCode = () => {
                     name="image"
                     id="image"
                     type="file"
-                    accept="image/*"
+                    accept="image/png, image/jpeg, image/jpg"
                     className={cx("d-none")}
                     ref={inputFile}
                   />
-                  <Box className={cx("box-img-qr")}>
-                    <img src={inputQrCode} onClick={handleClickInputFile} />
+                  <Box className={cx("box-img-qr")} onClick={handleClickInputFile}>
+                    <img src={inputQrCode} style={{ objectFit: inputQrCode ? "contain" : "cover" }}/>
+                    {!inputQrCode && <div className={cx("overlay1")}></div>}
+                    <div className={cx("overlay2")}>Chọn hình ảnh +</div>
                   </Box>
                 </>
               )}
@@ -192,6 +213,7 @@ const QrCode = () => {
                 sx={{
                   margin: "10px auto",
                 }}
+                disabled={!inputQrCode}
               >
                 Tạo QrCode
                 <QrCodeIcon></QrCodeIcon>
