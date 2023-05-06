@@ -15,6 +15,7 @@ import { Box } from "@mui/material";
 import Chatting from "./views/chatting/Chatting";
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
+import SpeedDialCompontent from './components/SpeedDial'
 
 const mapStateToProps = (state) => {
   return {
@@ -152,6 +153,10 @@ const App = (props) => {
             }
           </Box>
         </Snackbar>
+
+        <SpeedDialCompontent>
+        </SpeedDialCompontent>
+
       </ThemeProvider>
     </>
   );

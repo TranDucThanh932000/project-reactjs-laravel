@@ -12,6 +12,7 @@ use App\Http\Controllers\api\v1\GoogleDriveController;
 use App\Http\Controllers\api\v1\LuckyNumberController;
 use App\Http\Controllers\api\v1\NotificationController;
 use App\Http\Controllers\api\v1\QrCodeController;
+use App\Http\Controllers\api\v1\UserController;
 
 //google drive
 Route::get('google/login',[GoogleDriveController::class,'googleLogin'])->name('google.login');
@@ -43,6 +44,7 @@ Route::group([
     });
 
     Route::post('/logout', [Authentication::class, 'logout']);
+    Route::resource('user', UserController::class);
     Route::resource('follow', FollowerController::class);
     Route::resource('chat', ChatController::class);
     Route::resource('bloglikes', BlogLikeController::class);

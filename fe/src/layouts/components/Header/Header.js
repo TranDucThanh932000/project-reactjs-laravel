@@ -48,6 +48,7 @@ import Pusher from "pusher-js";
 import { StatusRead, TypeNotification } from "../../../utils/constants";
 import Brightness1Icon from "@mui/icons-material/Brightness1";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import InformationUser from "../../../components/Popup/informationUser";
 
 const cx = classNames.bind(styles);
 
@@ -309,8 +310,9 @@ const Header = (props) => {
       <MenuItem onClick={handleMenuClose}>
         Chào {props.currentUser.name} - {props.currentUser.id}
       </MenuItem>
-      <MenuItem onClick={handleMenuClose}>Thông tin cá nhân</MenuItem>
+      <InformationUser handleMenuClose={handleMenuClose}/>
       <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
+      
     </Menu>
   );
   const mobileMenuId = "primary-search-account-menu-mobile";

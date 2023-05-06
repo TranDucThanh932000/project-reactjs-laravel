@@ -2,7 +2,7 @@ import styles from "./LuckyNumberToday.module.scss";
 import classNames from "classnames/bind";
 import Box from "@mui/material/Box";
 import { useCallback, useEffect, useState } from "react";
-import { Button, Modal } from "@mui/material";
+import { Button, Modal, Typography } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
@@ -114,10 +114,10 @@ const LuckyNumberToday = () => {
   }, []);
 
   return (
-    <Box component="div" className={cx('d-flex', 'flex-column')}>
+    <Box component="div">
       <Box className={cx('justify-space-between', 'py-2')}>
         <Box>
-          <h1>Số may mắn hôm nay</h1>
+          <Typography sx={{ typography: { xs: 'h6', md: 'h4' } }}>Số may mắn hôm nay</Typography>
         </Box>
         <Box>
           <Button
@@ -125,7 +125,7 @@ const LuckyNumberToday = () => {
             onClick={handleShowPopupHistory}
             color="secondary"
           >
-            Số may mắn 10 ngày gần nhất
+            Lịch sử
           </Button>
           <Modal
             open={openPopupHistory}
