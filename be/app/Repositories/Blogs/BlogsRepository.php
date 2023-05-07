@@ -30,13 +30,31 @@ class BlogsRepository implements BlogsInterface
         })
         ->with(['user', 'blogMedias', 'blogLikes' => function ($q) use($user) {
             $q->where('user_id', $user ? $user->id : null);
-        }])->withCount('blogLikes')
+        }])
+        ->withCount('blogLikes')
         ->where('status', BlogStatus::PUBLIC)
         ->orderBy('blogs.created_at', 'desc')
         ->distinct()
         ->offset($from)
         ->take($amount)
+        ->select(['id', 'user_id', 'title', 'short_description', 'created_at', 'updated_at'])
         ->get();
+    }
+
+    public function getById($id)
+    {
+        $user = null;
+        if(auth()->guard('api')->check()) {
+            $user = JWTAuth::parseToken()->authenticate();
+        }
+
+        return $this->blog
+        ->with(['user', 'blogMedias', 'blogLikes' => function ($q) use($user) {
+            $q->where('user_id', $user ? $user->id : null);
+        }])
+        ->withCount('blogLikes')
+        ->where('status', BlogStatus::PUBLIC)
+        ->find($id);
     }
 
     public function store($blog)

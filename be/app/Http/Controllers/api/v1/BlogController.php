@@ -53,11 +53,6 @@ class BlogController extends Controller
                 'content' => $request->description
             ]);
             $listImage = collect([]);
-            
-            return response()->json([
-                'blog' => $request->all()
-            ], StatusCode::OK);
-
             $listUpload = $this->storageTraitUpload($request, env('FOLDER_ID_BLOG'), file_get_contents(storage_path('app/public/KeyGGDrive.txt')));
             foreach($listUpload as $imageDrive) {
                 $listImage->push($this->media->store([
@@ -91,7 +86,7 @@ class BlogController extends Controller
 
     public function show($id)
     {
-        //
+        return response()->json($this->blog->getById($id), StatusCode::OK);
     }
 
     public function edit($id)

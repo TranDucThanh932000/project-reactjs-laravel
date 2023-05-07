@@ -12,6 +12,7 @@ use App\Http\Controllers\api\v1\GoogleDriveController;
 use App\Http\Controllers\api\v1\LuckyNumberController;
 use App\Http\Controllers\api\v1\NotificationController;
 use App\Http\Controllers\api\v1\QrCodeController;
+use App\Http\Controllers\api\v1\UploadImageEditorController;
 use App\Http\Controllers\api\v1\UserController;
 
 //google drive
@@ -43,6 +44,7 @@ Route::group([
         Route::post('pusher/auth', [ChatController::class, 'authBroadCasting']);
     });
 
+    Route::post('/upload-image-editor', [UploadImageEditorController::class, 'uploadImageEditor']);
     Route::post('/logout', [Authentication::class, 'logout']);
     Route::resource('user', UserController::class);
     Route::resource('follow', FollowerController::class);

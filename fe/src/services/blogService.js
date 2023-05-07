@@ -32,3 +32,12 @@ export const createBlogs = async (data) => {
     }
 };
 
+export const getById = async (id) => {
+    try {
+        const res = await httpRequest.get(`/blogs/${id}`);
+        return res;
+    } catch (error) {
+        console.log(error);
+    }
+}
+

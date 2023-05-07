@@ -36,3 +36,9 @@ h1 {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
 }
+
+.detail-blog {
+    ol, ul {
+        list-style: inherit;
+    }
+}

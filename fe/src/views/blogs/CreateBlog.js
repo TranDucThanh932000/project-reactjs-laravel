@@ -18,6 +18,7 @@ import * as blogService from "../../services/blogService";
 import { Box } from "@mui/system";
 import { updateTextAlert } from "../../store/actions/commonAction";
 import store from '../../store'
+import TinyMCE from "../../components/TextEditor/TinyMCE";
 
 const cx = classNames.bind(styles);
 
@@ -28,13 +29,13 @@ const schema = Yup.object().shape({
   shortDescription: Yup.string()
     .required("Yêu cầu")
     .max(200, "Tối đa 200 ký tự"),
-  description: Yup.string().required("Yêu cầu").max(2000, "Tối đa 2000 ký tự"),
 });
 
 const CreateBlog = (props) => {
   const [open, setOpen] = React.useState(false);
   const [listFile, setListFile] = React.useState([]);
   const fileUpload = React.useRef(null);
+  const editorRef = React.useRef(null);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -77,12 +78,12 @@ const CreateBlog = (props) => {
         initialValues={{
           title: '',
           shortDescription: '',
-          description: '',
           images: [],
         }}
         validationSchema={schema}
         onSubmit={async (values, { setSubmitting }) => {
           setSubmitting(true);
+          values.description = editorRef.current.getContent();
           values.images = listFile;
           await handleUploadBlog(values);
           setSubmitting(false);
@@ -131,7 +132,7 @@ const CreateBlog = (props) => {
                   className={cx("mb-2")}
                   type="text"
                 />
-                <TextField
+                {/* <TextField
                   fullWidth
                   id="description"
                   name="description"
@@ -143,7 +144,7 @@ const CreateBlog = (props) => {
                   helperText={touched.description && errors.description}
                   className={cx("mb-2")}
                   type="text"
-                />
+                /> */}
                 <Grid container spacing={2}>
                   { listFile.map((x, index) => (
                     <Grid key={index} item md={6} xs={12}>
@@ -170,6 +171,7 @@ const CreateBlog = (props) => {
                   id="images" 
                   multiple
                   className="hidden"/>
+                <TinyMCE editorRef={editorRef}></TinyMCE>
                 {isSubmitting && <LinearProgress></LinearProgress>}
               </DialogContent>
               <DialogActions>
