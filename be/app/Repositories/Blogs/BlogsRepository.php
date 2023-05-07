@@ -37,7 +37,6 @@ class BlogsRepository implements BlogsInterface
         ->distinct()
         ->offset($from)
         ->take($amount)
-        ->select(['id', 'user_id', 'title', 'short_description', 'created_at', 'updated_at'])
         ->get();
     }
 
