@@ -318,7 +318,7 @@ function Blog(props) {
               multiple
               value={typeChoosed}
               onChange={handleChange}
-              input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+              input={<OutlinedInput id="select-multiple-chip" label="Thể loại" />}
               renderValue={(selected) => (
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                   <>

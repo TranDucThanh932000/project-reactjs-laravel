@@ -12,6 +12,8 @@ import {
   Chip,
   MenuItem,
   Select,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
@@ -172,59 +174,50 @@ const CreateBlog = (props) => {
                   className={cx("mb-2")}
                   type="text"
                 />
-                {/* <TextField
-                  fullWidth
-                  id="description"
-                  name="description"
-                  label="Mô tả"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.description}
-                  error={touched.description && Boolean(errors.description)}
-                  helperText={touched.description && errors.description}
-                  className={cx("mb-2")}
-                  type="text"
-                /> */}
                 <Grid className={cx("mb-2")} container spacing={2}>
                   <Grid item xs={12}>
-                    <Select
-                      labelId="demo-multiple-chip-label"
-                      id="selectTypeChoosed"
-                      multiple
-                      value={typeChoosed}
-                      onChange={handleChangeTypeChoosed}
-                      input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-                      renderValue={(selected) => (
-                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                          <>
-                            {selected.map((value) => (
-                              <Chip key={value.id} label={value.name} color="primary" 
-                              deleteIcon={
-                                <CancelIcon
-                                  onMouseDown={(event) => event.stopPropagation()}
-                                />
-                              }
-                              onDelete={() => handleDeleteSelection(value)}/>
-                            ))}
-                          </>
-                        </Box>
-                      )}
-                      style={{ width: '100%' }}
-                      MenuProps={props.MenuProps}
-                    >
-                      {
-                        props.listType.map((x) => (
-                          x.id !== '' &&
-                          <MenuItem
-                            key={x.id}
-                            value={x}
-                            style={getStyles(x.name, typeChoosed, theme)}
-                          >
-                            {x.name}
-                          </MenuItem>
-                        ))
-                      }
-                    </Select>
+                    <FormControl sx={{ width: '100%' }}>
+                      <InputLabel id="demo-multiple-chip-label">Thể loại</InputLabel>
+                      <Select
+                        labelId="demo-multiple-chip-label"
+                        id="selectTypeChoosed"
+                        multiple
+                        value={typeChoosed}
+                        onChange={handleChangeTypeChoosed}
+                        input={<OutlinedInput id="select-multiple-chip" label="Thể loại" />}
+                        label="Thể loại"
+                        renderValue={(selected) => (
+                          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                            <>
+                              {selected.map((value) => (
+                                <Chip key={value.id} label={value.name} color="primary" 
+                                deleteIcon={
+                                  <CancelIcon
+                                    onMouseDown={(event) => event.stopPropagation()}
+                                  />
+                                }
+                                onDelete={() => handleDeleteSelection(value)}/>
+                              ))}
+                            </>
+                          </Box>
+                        )}
+                        style={{ width: '100%' }}
+                        MenuProps={props.MenuProps}
+                      >
+                        {
+                          props.listType.map((x) => (
+                            x.id !== '' &&
+                            <MenuItem
+                              key={x.id}
+                              value={x}
+                              style={getStyles(x.name, typeChoosed, theme)}
+                            >
+                              {x.name}
+                            </MenuItem>
+                          ))
+                        }
+                      </Select>
+                    </FormControl>
                   </Grid>
                 </Grid>
                 <Grid className={cx("mb-2")} container spacing={2}>
@@ -253,7 +246,7 @@ const CreateBlog = (props) => {
                   id="images" 
                   multiple
                   className="hidden"/>
-                {"Nội dung bài viết: "}
+                <InputLabel>Nội dung bài viết</InputLabel>
                 <TinyMCE editorRef={editorRef}></TinyMCE>
                 {isSubmitting && <LinearProgress></LinearProgress>}
               </DialogContent>
