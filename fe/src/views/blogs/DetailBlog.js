@@ -32,6 +32,7 @@ const DetailBlog = (props) => {
     blogService.getById(blogId).then((res) => {
       setBlog(res);
     });
+    blogService.upView({blogId})
   }, []);
 
   const formatTime = useCallback((val) => {
@@ -79,6 +80,10 @@ const DetailBlog = (props) => {
           </p>
           <p>
             <b>
+                <RemoveRedEyeOutlinedIcon style={{verticalAlign: 'middle'}}></RemoveRedEyeOutlinedIcon>{" "}
+              <i>{blog.view}{" "}</i>
+            </b>
+            <b>
               {!blog.blog_likes.length ? (
                 <IconButton
                   aria-label="add to favorites"
@@ -95,11 +100,6 @@ const DetailBlog = (props) => {
                 </IconButton>
               )}
               <i>{blog.blog_likes_count}</i>
-            </b>
-            {" "}
-            <b>
-                <RemoveRedEyeOutlinedIcon style={{verticalAlign: 'middle'}}></RemoveRedEyeOutlinedIcon>{" "}
-              <i>{blog.view}{" "}</i>
             </b>
           </p>
           <br />

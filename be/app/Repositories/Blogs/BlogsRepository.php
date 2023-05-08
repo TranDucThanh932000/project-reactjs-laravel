@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Blogs;
 
+use App\Enums\BlogSortBy;
 use App\Models\Blog;
 use App\Enums\BlogStatus;
 use JWTAuth;
@@ -16,11 +17,16 @@ class BlogsRepository implements BlogsInterface
         $this->blog = $blog;
     }
 
-    public function get($from, $amount, $listCategory)
+    public function get($from, $amount, $listCategory, $sortBy)
     {
         $user = null;
         if(auth()->guard('api')->check()) {
             $user = JWTAuth::parseToken()->authenticate();
+        }
+
+        $listSort = [];
+        if($sortBy != '') {
+            $listSort = explode(',', $sortBy);
         }
         
         return $this->blog
@@ -28,12 +34,17 @@ class BlogsRepository implements BlogsInterface
             return $q->join('blog_categories', 'blog_categories.blog_id', '=', 'blogs.id')
             ->whereIn('blog_categories.category_id', $listCategory);
         })
-        ->with(['user', 'blogMedias', 'blogLikes' => function ($q) use($user) {
+        ->with(['user', 'blogMedias', 'blogLikes' => function ($q) use ($user) {
             $q->where('user_id', $user ? $user->id : null);
         }])
         ->withCount('blogLikes')
         ->where('status', BlogStatus::PUBLIC)
-        ->orderBy('blogs.created_at', 'desc')
+        ->when(count($listSort) > 0, function ($q) use ($listSort) {
+            foreach($listSort as $col) {
+                $q->orderBy($col, 'desc');
+            }
+        })
+        ->orderByDesc('blogs.created_at')
         ->distinct()
         ->offset($from)
         ->take($amount)
@@ -59,5 +70,16 @@ class BlogsRepository implements BlogsInterface
     public function store($blog)
     {
         return $this->blog->create($blog);
+    }
+
+    public function upView($id)
+    {
+        $blog = $this->blog->find($id);
+        if(!$blog) {
+            return false;
+        }
+        $blog->view++;
+        
+        return $blog->save();
     }
 }

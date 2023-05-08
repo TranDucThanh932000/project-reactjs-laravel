@@ -26,9 +26,9 @@ Route::get('/check-account', [Authentication::class, 'checkAccountExist']);
 Route::get('/lucky-number-today', [LuckyNumberController::class, 'getLuckyNumberToday']);
 Route::get('/lucky-number-latest', [LuckyNumberController::class, 'getLatestLuckyNumber']);
 Route::resource('blogs', BlogController::class);
-// Route::group(['prefix' => 'blogs',  'namespace' => 'Blog'], function() {
-    
-// });
+Route::group(['prefix' => 'blogs',  'namespace' => 'Blog'], function() {
+    Route::post('/up-view', [BlogController::class, 'upView']);
+});
 Route::resource('categories', CategoryController::class);
 Route::get('follow/top5', [FollowerController::class, 'getTop5']);
 Route::post('/qr-code', [QrCodeController::class, 'store']);

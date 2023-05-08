@@ -8,7 +8,12 @@ import {
   Button,
   TextField,
   Grid,
+  OutlinedInput,
+  Chip,
+  MenuItem,
+  Select,
 } from "@mui/material";
+import CancelIcon from '@mui/icons-material/Cancel';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -19,6 +24,7 @@ import { Box } from "@mui/system";
 import { updateTextAlert } from "../../store/actions/commonAction";
 import store from '../../store'
 import TinyMCE from "../../components/TextEditor/TinyMCE";
+import { useTheme } from "@mui/material/styles";
 
 const cx = classNames.bind(styles);
 
@@ -36,6 +42,17 @@ const CreateBlog = (props) => {
   const [listFile, setListFile] = React.useState([]);
   const fileUpload = React.useRef(null);
   const editorRef = React.useRef(null);
+  const [typeChoosed, setTypeChoosed] = React.useState([]);
+  const theme = useTheme();
+
+  function getStyles(name, typeChoosed, theme) {
+    return {
+      fontWeight:
+        typeChoosed.indexOf(name) === -1
+          ? theme.typography.fontWeightRegular
+          : theme.typography.fontWeightMedium,
+    };
+  }
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -69,6 +86,20 @@ const CreateBlog = (props) => {
     setListFile([...listFile, selectedImage])
   }
 
+  const handleChangeTypeChoosed = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setTypeChoosed(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value,
+    );
+  };
+
+  const handleDeleteSelection = async (chipToDelete) => {
+    setTypeChoosed((chips) => chips.filter((chip) => chip.id != chipToDelete.id));
+  };
+
   return (
     <div>
       <Button variant="outlined" onClick={handleClickOpen}>
@@ -83,6 +114,15 @@ const CreateBlog = (props) => {
         validationSchema={schema}
         onSubmit={async (values, { setSubmitting }) => {
           setSubmitting(true);
+          if(editorRef.current.getContent().length <= 0 || typeChoosed.length === 0) {
+            store.dispatch(updateTextAlert('Hãy nhập đầy đủ thông tin'));
+            setTimeout(() => {
+              store.dispatch(updateTextAlert(''));
+            }, 3000)
+            setSubmitting(false);
+            return;
+          }
+          values.categories = typeChoosed;
           values.description = editorRef.current.getContent();
           values.images = listFile;
           await handleUploadBlog(values);
@@ -145,7 +185,49 @@ const CreateBlog = (props) => {
                   className={cx("mb-2")}
                   type="text"
                 /> */}
-                <Grid container spacing={2}>
+                <Grid className={cx("mb-2")} container spacing={2}>
+                  <Grid item xs={12}>
+                    <Select
+                      labelId="demo-multiple-chip-label"
+                      id="selectTypeChoosed"
+                      multiple
+                      value={typeChoosed}
+                      onChange={handleChangeTypeChoosed}
+                      input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+                      renderValue={(selected) => (
+                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                          <>
+                            {selected.map((value) => (
+                              <Chip key={value.id} label={value.name} color="primary" 
+                              deleteIcon={
+                                <CancelIcon
+                                  onMouseDown={(event) => event.stopPropagation()}
+                                />
+                              }
+                              onDelete={() => handleDeleteSelection(value)}/>
+                            ))}
+                          </>
+                        </Box>
+                      )}
+                      style={{ width: '100%' }}
+                      MenuProps={props.MenuProps}
+                    >
+                      {
+                        props.listType.map((x) => (
+                          x.id !== '' &&
+                          <MenuItem
+                            key={x.id}
+                            value={x}
+                            style={getStyles(x.name, typeChoosed, theme)}
+                          >
+                            {x.name}
+                          </MenuItem>
+                        ))
+                      }
+                    </Select>
+                  </Grid>
+                </Grid>
+                <Grid className={cx("mb-2")} container spacing={2}>
                   { listFile.map((x, index) => (
                     <Grid key={index} item md={6} xs={12}>
                       <Box className={cx('boxUploadImage')} onClick={handleOpenUploadImg}>
@@ -171,6 +253,7 @@ const CreateBlog = (props) => {
                   id="images" 
                   multiple
                   className="hidden"/>
+                {"Nội dung bài viết: "}
                 <TinyMCE editorRef={editorRef}></TinyMCE>
                 {isSubmitting && <LinearProgress></LinearProgress>}
               </DialogContent>

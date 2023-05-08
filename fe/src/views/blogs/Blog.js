@@ -16,6 +16,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import CircularProgress from "@mui/material/CircularProgress";
 import CancelIcon from '@mui/icons-material/Cancel';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 import * as blogService from "../../services/blogService";
 import * as blogLikeService from "../../services/blogLikeService";
@@ -26,8 +27,11 @@ import { connect } from "react-redux";
 import classNames from "classnames/bind";
 import styles from "./Blog.module.scss";
 import {
+  Button,
+  Checkbox,
   Chip,
   FormControl,
+  FormControlLabel,
   Grid,
   InputLabel,
   MenuItem,
@@ -42,6 +46,7 @@ import Popper from "@mui/material/Popper";
 import CreateBlog from "./CreateBlog";
 import SkeletonBlog from "./Skeleton";
 import { Link, useNavigate } from "react-router-dom";
+import GroupCheckBox from "../../components/GroupCheckBox";
 
 const mapStateToProps = (state) => {
   return {
@@ -71,11 +76,81 @@ function Blog(props) {
   const [listType, setListType] = React.useState([]);
   const [typeChoosed, setTypeChoosed] = React.useState([]);
   const [resetItemLength, setResetItemLength] = React.useState(false);
+  //popper search
+  const [listChildrenGroupCheckBox, setListChildrenGroupCheckBox] = React.useState([
+    { key: 'view', label: "Nhiều lượt xem nhất", handleChange: () => { mostView() }, checked: false },
+    { key: 'blog_likes_count', label: "Nhiều like nhất", handleChange: () => { mostLike() }, checked: false },
+  ]);
+  const [sortBy, setSortBy] = React.useState("");
+  const [anchorElPopperSearch, setAnchorElPopperSearch] = React.useState(null);
+  const openPopperDetailSearch = Boolean(anchorElPopperSearch);
+  const idPopperSearch = openPopperDetailSearch ? 'simple-popper-2' : undefined;
   const navigate = useNavigate();
+
+  const handleClickPopperSearch = (event) => {
+    setAnchorElPopperSearch(anchorElPopperSearch ? null : event.currentTarget);
+  };
 
   const formatTime = React.useCallback((val) => {
     return moment(val, "YYYY-MM-DD hh:mm:ss").format("DD/MM/YYYY hh:mm");
   }, []);
+  
+  const sortByGroupCheckBox = async (listCheckBox) => {
+    let txtSearch = "";
+    listCheckBox.forEach(x => {
+      if(x.checked) {
+        txtSearch += (x.key + ",");
+      }
+    })
+    if(txtSearch.length > 0) {
+      txtSearch = txtSearch.substring(0, txtSearch.length - 1);
+    }
+    setSortBy(txtSearch);
+    store.dispatch(updateStatusLoading(true));
+    await handleLoadData(15, typeChoosed, false, txtSearch);
+    store.dispatch(updateStatusLoading(false));
+  }
+
+  const mostView = React.useCallback(() => {
+    let newValue = listChildrenGroupCheckBox.map(x => {
+      if(x.key === 'view') {
+        x.checked = !x.checked;
+      }
+      return x;
+    })
+    setListChildrenGroupCheckBox(newValue);
+    sortByGroupCheckBox(newValue);
+  }, [listChildrenGroupCheckBox]);
+
+  const mostLike = React.useCallback(() => {
+    let newValue = listChildrenGroupCheckBox.map(x => {
+      if(x.key === 'blog_likes_count') {
+        x.checked = !x.checked;
+      }
+      return x;
+    })
+    setListChildrenGroupCheckBox(newValue);
+    sortByGroupCheckBox(newValue);
+  }, [listChildrenGroupCheckBox]);
+
+  const handleChangeParentGroupCheckBox = React.useCallback((value) => {
+    let newValue = listChildrenGroupCheckBox.map(x => {
+      x.checked = value
+      return x;
+    })
+    setListChildrenGroupCheckBox(newValue);
+    sortByGroupCheckBox(newValue);
+  }, [listChildrenGroupCheckBox]);
+
+  const checkAllGroupCheckBox = () => {
+    let check = true;
+    listChildrenGroupCheckBox.forEach((x) => {
+      if (!x.checked) {
+        check = false;
+      }
+    });
+    return check;
+  };
 
   // const handleExpandClick = () => {
   //   setExpanded(!expanded);
@@ -106,8 +181,8 @@ function Blog(props) {
     store.dispatch(updateStatusLoading(false));
   };
 
-  const handleLoadData = async (amount, categories, isScroll) => {
-    await blogService.blogs(isScroll ? items.length : 0, amount, categories).then((res) => {
+  const handleLoadData = async (amount, categories, isScroll, sortBy) => {
+    await blogService.blogs(isScroll ? items.length : 0, amount, categories, sortBy).then((res) => {
       if (!res) {
         //too many request
         return;
@@ -148,7 +223,7 @@ function Blog(props) {
   React.useEffect(async () => {
     store.dispatch(updateStatusLoading(true));
     getListType();
-    await handleLoadData(15, '', false);
+    await handleLoadData(15, '', false, '');
     setDoneFirstLoad(true);
     store.dispatch(updateStatusLoading(false));
   }, []);
@@ -161,7 +236,7 @@ function Blog(props) {
     if (scrollY + windowHeight >= (scrollHeight - innerHeight * 0.1)) {
       //get more 6 blogs
       setLoadMore(true);
-      await handleLoadData(6, typeChoosed, true);
+      await handleLoadData(6, typeChoosed, true, sortBy);
       setLoadMore(false);
     }
   };
@@ -176,7 +251,7 @@ function Blog(props) {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [doneFirstLoad, loadMore, typeChoosed, resetItemLength]);
+  }, [doneFirstLoad, loadMore, typeChoosed, resetItemLength, sortBy]);
 
   const openPopper = Boolean(anchorEl);
   const id = openPopper ? "simple-popper" : undefined;
@@ -219,7 +294,7 @@ function Blog(props) {
       () => typeof value === "string" ? value.split(",") : value
     );
     store.dispatch(updateStatusLoading(true));
-    await handleLoadData(15, value, false);
+    await handleLoadData(15, value, false, sortBy);
     store.dispatch(updateStatusLoading(false));
   };
   //
@@ -227,15 +302,15 @@ function Blog(props) {
   const handleDeleteSelection = async (chipToDelete) => {
     setTypeChoosed((chips) => chips.filter((chip) => chip.id != chipToDelete.id));
     store.dispatch(updateStatusLoading(true));
-    await handleLoadData(6, typeChoosed.filter((chip) => chip.id != chipToDelete.id), false);
+    await handleLoadData(6, typeChoosed.filter((chip) => chip.id != chipToDelete.id), false, sortBy);
     store.dispatch(updateStatusLoading(false));
   };
 
   return (
     <div className={cx("wrapper")}>
       <Grid container spacing={2} sx={{ my: 2 }}>
-        <Grid item xs={12} md={6} className={cx('py-0')}>
-          <FormControl sx={{ width: 300 }}>
+        <Grid item xs={12} md={4} className={cx('py-0')}>
+          <FormControl sx={{ width: '100%' }}>
             <InputLabel id="demo-multiple-chip-label">Thể loại</InputLabel>
             <Select
               labelId="demo-multiple-chip-label"
@@ -275,10 +350,25 @@ function Blog(props) {
             </Select>
           </FormControl>
         </Grid>
+        <Grid item xs={12} md={4} className={cx('py-0')}>
+          <Button aria-describedby={idPopperSearch} type="button" onClick={handleClickPopperSearch} variant="outlined" endIcon={<ArrowDropDownIcon />} >
+            Bộ lọc chi tiết
+          </Button>
+          <Popper style={{zIndex: '100'}} id={idPopperSearch} open={openPopperDetailSearch} anchorEl={anchorElPopperSearch}>
+            <Box sx={{ border: '1px solid grey', p: 1, bgcolor: 'background.paper', borderRadius: '10px', boxShadow: '0px 0px 20px 3px rgba(0, 0, 0, 0.5)' }}>
+              <GroupCheckBox 
+              listChildren={listChildrenGroupCheckBox}
+              handleChangeParent={handleChangeParentGroupCheckBox}
+              labelParent={"Tất cả"}
+              checkAll={checkAllGroupCheckBox}
+              ></GroupCheckBox>
+            </Box>
+          </Popper>
+        </Grid>
         <Grid
           item
           xs={12}
-          md={6}
+          md={4}
           container
           direction="row"
           justifyContent={{xs: "", md: "flex-end"}}
@@ -286,7 +376,7 @@ function Blog(props) {
           className={cx('py-0')}
         >
           <Box>
-            <CreateBlog createBlog={handleCreateBlog}></CreateBlog>
+            <CreateBlog createBlog={handleCreateBlog} listType={listType} MenuProps={MenuProps}></CreateBlog>
           </Box>
         </Grid>
       </Grid>

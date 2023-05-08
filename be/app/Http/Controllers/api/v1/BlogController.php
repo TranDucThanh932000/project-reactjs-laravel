@@ -34,7 +34,7 @@ class BlogController extends Controller
         if (!empty($request->categories)) {
             $listCategory = explode('-', $request->categories);
         }
-        $blog = $this->blog->get($request->from, $request->amount, $listCategory);
+        $blog = $this->blog->get($request->from, $request->amount, $listCategory, $request->sortBy);
 
         return response()->json([
             'blogs' => $blog
@@ -70,6 +70,11 @@ class BlogController extends Controller
                 'name' => Auth::User()->name
             ];
             $blog->blog_medias = $listImage;
+
+            //save categories
+            $listCategory = explode('-', $request->categories);
+            $blog->blogCategories()->attach($listCategory);
+
             DB::commit();
     
             return response()->json([
@@ -102,5 +107,12 @@ class BlogController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function upView(Request $request)
+    {
+        $updateBlog = $this->blog->upView($request->blogId);
+
+        return response()->json($updateBlog, StatusCode::OK);
     }
 }

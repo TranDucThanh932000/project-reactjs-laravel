@@ -25,4 +25,8 @@ class Blog extends Model
     public function blogMedias() {
         return $this->belongsToMany(Media::class, 'blog_medias');
     }
+
+    public function blogCategories() {
+        return $this->belongsToMany(Category::class, 'blog_categories');
+    }
 }
