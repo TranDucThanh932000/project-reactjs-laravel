@@ -394,6 +394,7 @@ function Blog(props) {
                             bgcolor: colorAvatar[x.user.id % 10],
                           }}
                           aria-label="recipe"
+                          src={`https://docs.google.com/uc?id=${x.user.avatar}`}
                         >
                           {x.user.name[0]}
                         </Avatar>

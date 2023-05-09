@@ -478,3 +478,54 @@ body.loading .loading-div {
   -webkit-transition: all 0.3s ease-out;
   transition: all 0.3s ease-out;
 }
+
+.loading_2 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.loading_2__bar {
+  width: 8px;
+  height: 40px;
+  margin: 0 4px;
+  background-color: #555;
+  animation: loading_2 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.loading_2__bar:nth-child(1) {
+  animation-delay: -0.45s;
+  border-radius: 20px;
+  background-color: green;
+}
+
+.loading_2__bar:nth-child(2) {
+  animation-delay: -0.3s;
+  border-radius: 20px;
+  background-color: red;
+}
+
+.loading_2__bar:nth-child(3) {
+  animation-delay: -0.15s;
+  border-radius: 20px;
+  background-color: purple;
+}
+
+.loading_2__bar:nth-child(4) {
+  animation-delay: 0s;
+  border-radius: 20px;
+  background-color: yellow;
+}
+
+@keyframes loading_2 {
+  0% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1, 2.5);
+  }
+  40% {
+    transform: scale(1);
+  }
+}

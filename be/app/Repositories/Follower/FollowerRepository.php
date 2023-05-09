@@ -49,7 +49,7 @@ class FollowerRepository implements FollowerInterface
             ->limit($top)
             ->with([
             'user' => function ($q) {
-                $q->select('users.id', 'users.name');
+                $q->select('users.id', 'users.name', 'users.avatar');
             },
             //receiver
             'user.friend' => function($q) use ($userId) {

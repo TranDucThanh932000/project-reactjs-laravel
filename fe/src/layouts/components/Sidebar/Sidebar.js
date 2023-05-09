@@ -315,7 +315,7 @@ const Sidebar = (props) => {
                                 <Card sx={{ maxWidth: 345, minWidth: 250 }}>
                                   <CardMedia
                                     sx={{ height: 140 }}
-                                    image="https://png.pngtree.com/thumb_back/fh260/background/20200714/pngtree-modern-double-color-futuristic-neon-background-image_351866.jpg"
+                                    image={user.user.avatar ? `https://docs.google.com/uc?id=${user.user.avatar}` : "https://png.pngtree.com/thumb_back/fh260/background/20200714/pngtree-modern-double-color-futuristic-neon-background-image_351866.jpg"}
                                     title={user.user.name}
                                   />
                                   <CardContent>

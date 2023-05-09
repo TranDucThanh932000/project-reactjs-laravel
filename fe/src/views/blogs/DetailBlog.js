@@ -24,6 +24,7 @@ const mapStateToProps = (state) => {
 
 const DetailBlog = (props) => {
   const [blog, setBlog] = useState(null);
+  const [loading, setLoading] = useState(true);
   const { blogId } = useParams();
 
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const DetailBlog = (props) => {
   useEffect(() => {
     blogService.getById(blogId).then((res) => {
       setBlog(res);
+      setLoading(false);
     });
     blogService.upView({blogId})
   }, []);
@@ -63,7 +65,17 @@ const DetailBlog = (props) => {
 
   return (
     <>
-      {blog && (
+      {loading ? 
+      (
+        <div className={cx("loading_2")}>
+          <div className={cx("loading_2__bar")}></div>
+          <div className={cx("loading_2__bar")}></div>
+          <div className={cx("loading_2__bar")}></div>
+          <div className={cx("loading_2__bar")}></div>
+        </div>
+      )
+      :
+      (
         <Box className={cx("wrapper", "mt-2", "detail-blog")}>
           <h1 dangerouslySetInnerHTML={{ __html: blog.title }}></h1>
           <p>
