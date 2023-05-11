@@ -34,13 +34,14 @@ Route::get('follow/top5', [FollowerController::class, 'getTop5']);
 Route::post('/qr-code', [QrCodeController::class, 'store']);
 
 Route::group([
-    'middleware' => ['jwt.auth', 'throttle:120'],
+    'middleware' => ['jwt.auth', 'throttle:240'],
 ], function() {
     Route::group([
         'prefix' => 'chat',
     ], function() {
         Route::get('users-contacted', [ChatController::class, 'getUsersContacted']);
         Route::get('msg-friend', [ChatController::class, 'getMsgFriend']);
+        Route::post('pusher/user-auth', [ChatController::class, 'authOnline']);
         Route::post('pusher/auth', [ChatController::class, 'authBroadCasting']);
     });
 

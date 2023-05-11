@@ -84,7 +84,36 @@ class ChatController extends Controller
                 'cluster' => env('PUSHER_APP_CLUSTER'),
                 'useTLS' => true
             ]);
-            $auth = $pusher->socket_auth($channel_name, $socket_id);
+            // $auth = $pusher->socket_auth($channel_name, $socket_id);
+            $auth = $pusher->authorizeChannel($channel_name, $socket_id);
+
+            return response($auth);
+        } catch (Exception $e) {
+
+            return response('Unauthorized', 401);
+        }
+    }
+
+    public function authOnline(Request $request)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            $socket_id = $request->input('socket_id');
+    
+            $pusher = new Pusher(env('PUSHER_APP_KEY'), env('PUSHER_APP_SECRET'), env('PUSHER_APP_ID'), [
+                'cluster' => env('PUSHER_APP_CLUSTER'),
+                'useTLS' => true
+            ]);
+            
+            $user_data = [
+                'id' => (string) $user->id,
+                'user_info' => [
+                  'name' => $user->name,
+                ],
+                'watchlist' => []
+            ];
+            // $auth = $pusher->presence_auth('presence-online', $socket_id, $user->id, $user_data);
+            $auth = $pusher->authorizePresenceChannel('presence-online', $socket_id, $user->id, $user_data);
 
             return response($auth);
         } catch (Exception $e) {

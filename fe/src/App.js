@@ -1,12 +1,12 @@
 import styles from "./App.scss";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { publicRoutes } from "./routes";
 import { DefaultLayout } from "./layouts";
 import classNames from "classnames/bind";
 import * as authentication from "./services/authenticationService";
 import store from "./store";
-import { updateStatusLogin, updateStatusLoading, closeSidebar, updateCurrentUser } from "./store/actions/commonAction";
+import { updateStatusLogin, updateStatusLoading, closeSidebar, updateCurrentUser, updateListFriendOnline } from "./store/actions/commonAction";
 import { connect } from "react-redux";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
@@ -15,14 +15,17 @@ import { Box } from "@mui/material";
 import Chatting from "./views/chatting/Chatting";
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
-import SpeedDialCompontent from './components/SpeedDial'
+import SpeedDialCompontent from './components/SpeedDial';
+import Pusher from "pusher-js";
 
 const mapStateToProps = (state) => {
   return {
     loading: state.commonReducer.loading,
     textAlert: state.commonReducer.textAlert,
     modeLight: state.commonReducer.modeLight,
-    notiStack: state.commonReducer.notiStack
+    notiStack: state.commonReducer.notiStack,
+    currentUser: state.commonReducer.currentUser,
+    listFriendOnline: state.commonReducer.listFriendOnline
   };
 };
 
@@ -36,11 +39,27 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
+// const PUSHER_APP_KEY = process.env.PUSHER_APP_KEY;
+// const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
+// const PUSHER_APP_CLUSTER = process.env.PUSHER_APP_CLUSTER;
+
 const App = (props) => {
   // const navigate = useNavigate();
   const [showAlert, isShowAlert] = useState(false);
   const vertical = "top";
   const horizontal = "right";
+  const pusher = new Pusher('0c1bb67e922d5e222312', {
+    cluster: 'ap1',
+    authEndpoint: 'http://localhost:8000/api/v1/chat/pusher/user-auth',
+    auth: {
+      headers: {
+        "Authorization": "Bearer " + localStorage.getItem('loginToken'),
+        "Access-Control-Allow-Origin": "*"
+      },
+    },
+    encrypted: true,
+  })
+  const listFriendOnline = useRef(props.listFriendOnline);
 
   const darkTheme = createTheme({
     palette: {
@@ -80,6 +99,44 @@ const App = (props) => {
     }
     store.dispatch(updateStatusLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (props.currentUser) {
+      let channel = pusher.subscribe("presence-online")
+      channel.bind("pusher:subscription_succeeded", function (members) {
+        let newVal = [];
+        Object.keys(members.members).forEach(x => {
+          newVal.push(members.members[x]);
+        })
+        store.dispatch(updateListFriendOnline([...newVal]));
+        listFriendOnline.current = [...newVal];
+      });
+      channel.bind("pusher:member_added", function (member) {
+        let newVal = [...listFriendOnline.current];
+        newVal.push(member.info);
+        store.dispatch(updateListFriendOnline([
+          ...newVal
+        ]));
+        listFriendOnline.current = [...newVal];
+      });
+      channel.bind("pusher:member_removed", function (member) {
+        let newVal = [...listFriendOnline.current];
+
+        let index = newVal.findIndex(x => {
+          return x.id === member.id;
+        })
+        if (index >= 0) {
+          newVal.splice(index, 1);
+        }
+        store.dispatch(updateListFriendOnline([...newVal]));
+        listFriendOnline.current = [...newVal];
+      });
+    }
+
+    return () => {
+      pusher.unsubscribe("presence-online");
+    }
+  }, [props.currentUser])
 
   return (
     <>

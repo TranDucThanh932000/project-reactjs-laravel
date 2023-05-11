@@ -8,7 +8,7 @@ const initialState = {
 const chattingReducer = (state = initialState, action) => {
   switch (action.type) {
     case actionName.OPEN_AND_CLOSE_CHAT:
-      let updListChatting = JSON.parse(JSON.stringify(state.chatting));
+      let updListChatting = [...state.chatting];
       let index = updListChatting.findIndex(x => x.toUserId == action.payload);
       if(index >= 0) {
           updListChatting.splice(index, 1);
@@ -16,7 +16,7 @@ const chattingReducer = (state = initialState, action) => {
 
       return {
         ...state,
-        chatting: updListChatting,
+        chatting: [...updListChatting],
       };
     case actionName.OPEN_AND_GET_MSG: 
       state.chatting.push(action.payload)

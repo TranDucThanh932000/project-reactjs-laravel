@@ -529,3 +529,12 @@ body.loading .loading-div {
     transform: scale(1);
   }
 }
+
+.online::before {
+  content: "";
+  background-image: url('./assets/img/logo/green-dot.png');
+  background-size: cover;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+}

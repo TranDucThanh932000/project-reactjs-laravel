@@ -83,3 +83,10 @@ export const removeFirstNotiStack = () => {
         type: actionName.REMOVE_FIRST_NOTI_STACK,
     }
 }
+
+export const updateListFriendOnline = (payload) => {
+    return {
+        type: actionName.LIST_FRIEND_ONLINE,
+        payload
+    }
+}

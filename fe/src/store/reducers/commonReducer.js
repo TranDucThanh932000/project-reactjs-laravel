@@ -29,7 +29,8 @@ const initialState = {
   ],
   currentUser: null,
   notifications: [],
-  notiStack: []
+  notiStack: [],
+  listFriendOnline: []
 };
 
 const commonReducer = (state = initialState, action) => {
@@ -124,6 +125,12 @@ const commonReducer = (state = initialState, action) => {
       return {
         ...state,
         notiStack: JSON.parse(JSON.stringify(state.notiStack))
+      }
+    case actionName.LIST_FRIEND_ONLINE:
+
+      return {
+        ...state,
+        listFriendOnline: action.payload
       }
     default:
       return state;

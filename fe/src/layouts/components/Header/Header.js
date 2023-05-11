@@ -103,6 +103,7 @@ const mapStateToProps = (state) => {
     chatting: state.chattingReducer.chatting,
     currentUser: state.commonReducer.currentUser,
     notifications: state.commonReducer.notifications,
+    listFriendOnline: state.commonReducer.listFriendOnline
   };
 };
 
@@ -422,10 +423,6 @@ const Header = (props) => {
     await chattingService
       .getListUserContacted()
       .then((res) => {
-        res.usersContacted.forEach(x => {
-          x.statusOnline = false;
-          //status online
-        })
         store.dispatch(updateUsersContacted(res.usersContacted));
       })
       .catch(() => {});
@@ -561,7 +558,7 @@ const Header = (props) => {
                     <StyledBadge
                       overlap="circular"
                       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                      variant={x.statusOnline ? 'dot' : 'standard'}
+                      variant={props.listFriendOnline.findIndex(user => user.id == x.id) >= 0 ? 'dot' : 'standard'}
                     >
                       <Avatar alt={x.name} src={`https://docs.google.com/uc?id=${x.avatar}`} />
                     </StyledBadge>

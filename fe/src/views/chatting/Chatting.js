@@ -24,6 +24,7 @@ const mapStateToProps = (state) => {
   return {
     chatting: state.chattingReducer.chatting,
     currentUser: state.commonReducer.currentUser,
+    listFriendOnline: state.commonReducer.listFriendOnline
   };
 };
 
@@ -109,16 +110,44 @@ const Chatting = (props) => {
   };
 
   const handleKeyPress = (e, msg, toUserId, index) => {
+    console.log(msg);
     if (e.key === 'Enter' && msg) {
       handleClickSendMessage(msg, toUserId, index)
-    } else if (msg) {
+    } else {
+      console.log('trigger');
       // trigger event when input
       channel.trigger(`client-typing-from-${props.currentUser.id}-to-${toUserId}`, 'typing-event')
       //receiver message
-      props.chatting.forEach(x => {
+      // props.chatting.forEach((x, index) => {
+      //   channel.bind(`client-typing-from-${x.toUserId}-to-${props.currentUser.id}`, function (data) {
+      //     if(! arrTyping.includes(x.toUserId)) {
+      //       setArrTyping((prev) => [...prev, x.toUserId]);
+      //       let list = document.getElementById('end-' + (index + 1));
+      //       if(list) {
+      //         list.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      //       }
+      //       setTimeout(() => {
+      //         let newArr = arrTyping.filter(userId => userId == x.toUserId);
+      //         setArrTyping(newArr);
+      //       }, 2000);
+      //     }
+      //   })
+      // })
+    }
+  }
+
+  const handleCallbackChannel = React.useCallback((data) => {
+    if(props.currentUser) {
+      //receiver message
+      props.chatting.forEach((x, index) => {
+        console.log('bind: ' + `client-typing-from-${x.toUserId}-to-${props.currentUser.id}`)
         channel.bind(`client-typing-from-${x.toUserId}-to-${props.currentUser.id}`, function (data) {
           if(! arrTyping.includes(x.toUserId)) {
             setArrTyping((prev) => [...prev, x.toUserId]);
+            let list = document.getElementById('end-' + (index + 1));
+            if(list) {
+              list.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
             setTimeout(() => {
               let newArr = arrTyping.filter(userId => userId == x.toUserId);
               setArrTyping(newArr);
@@ -126,52 +155,58 @@ const Chatting = (props) => {
           }
         })
       })
+
+      let index = props.chatting.findIndex(x => {
+        return x.toUserId === data.message.user_id
+      });
+      if (index < 0) {
+        chattingService
+        .getMessageOfFriend(data.message.user_id)
+        .then((res) => {
+          let newUserMsg = {
+            toUserId: data.message.user_id,
+            info: res.info,
+            currentMsg: "",
+            msg: [],
+          };
+          res.msgs.forEach((msg) => {
+            newUserMsg.msg.push({
+              message: msg.content,
+              toOther: data.message.user_id == msg.to_user_id ? true : false,
+              created_at: msg.created_at,
+              id: msg.id,
+            });
+          });
+          store.dispatch(openAndGetMsg(newUserMsg));
+        })
+        .catch(() => {});
+      } else {
+        store.dispatch(
+          sendMessage({
+            message: data.message,
+            currentUser: props.currentUser,
+          })
+        );
+        let list = document.getElementById('end-' + (index + 1));
+        if (list) {
+          list.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+      }
     }
-  }
+  }, [props.currentUser, props.chatting.length, arrTyping])
 
   React.useEffect(() => {
     if(props.currentUser) {
       channel.bind(`private-message-${props.currentUser.id}`, handleCallbackChannel);
     }
 
-  }, [props.currentUser]);
-
-  const handleCallbackChannel = React.useCallback((data) => {
-    let index = props.chatting.findIndex(x => {
-      return x.toUserId === data.message.user_id
-    });
-    if (index < 0) {
-      chattingService
-      .getMessageOfFriend(data.message.user_id)
-      .then((res) => {
-        let newUserMsg = {
-          toUserId: data.message.user_id,
-          info: res.info,
-          currentMsg: "",
-          msg: [],
-        };
-        res.msgs.forEach((msg) => {
-          newUserMsg.msg.push({
-            message: msg.content,
-            toOther: data.message.user_id == msg.to_user_id ? true : false,
-            created_at: msg.created_at,
-            id: msg.id,
-          });
-        });
-        store.dispatch(openAndGetMsg(newUserMsg));
-      })
-      .catch(() => {});
-    } else {
-      store.dispatch(
-        sendMessage({
-          message: data.message,
-          currentUser: props.currentUser,
-        })
-      );
-      let list = document.getElementById('end-' + (index + 1));
-      list.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    return () => {
+      if(props.currentUser) {
+        channel.unbind(`private-message-${props.currentUser.id}`);
+      }
     }
-  }, [props.currentUser, props.chatting.length])
+
+  }, [props.currentUser, handleCallbackChannel]);
 
   return (
     <>
@@ -183,7 +218,7 @@ const Chatting = (props) => {
             sx={{ right: `${15 + index * 300}px` }}
           >
             <div className={cx("chat-header")}>
-              <h3>{ chat.info.name }</h3>
+              <h3 className={cx(props.listFriendOnline.findIndex(user => user.id == chat.toUserId) >= 0 ? "online" : "")}>{" " + chat.info.name }</h3>
               <IconButton
                 onClick={() => {
                   store.dispatch(openAndCloseChatting(chat.toUserId));
@@ -209,7 +244,7 @@ const Chatting = (props) => {
                     </li>
                   )
                 )}
-                <li className={cx(arrTyping.includes(chat.toUserId) ? '' : 'hidden')}>
+                <li className={cx(arrTyping.includes(chat.toUserId) ? ('typing-' + chat.toUserId) : 'hidden')}>
                   <div className={cx('typing-indicator')}></div>
                   <div className={cx('typing-indicator')}></div>
                   <div className={cx('typing-indicator')}></div>
@@ -227,7 +262,7 @@ const Chatting = (props) => {
                   handleChangeCurrentMsg(e, chat.toUserId);
                 }}
                 onKeyDown={(e) => {
-                  handleKeyPress(e, chat.currentMsg, chat.toUserId, (index + 1));
+                  handleKeyPress(e, e.target.value, chat.toUserId, (index + 1));
                 }}
               />
               <IconButton

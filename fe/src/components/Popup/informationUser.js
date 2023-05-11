@@ -82,7 +82,9 @@ const InformationUser = (props) => {
   };
 
   React.useEffect(() => {
-    setAvatar(`https://docs.google.com/uc?id=${props.currentUser.avatar}`);
+    if(props.currentUser) {
+      setAvatar(`https://docs.google.com/uc?id=${props.currentUser.avatar}`);
+    }
   }, [props.currentUser, open]);
 
   return (
