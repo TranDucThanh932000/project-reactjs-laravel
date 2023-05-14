@@ -110,11 +110,9 @@ const Chatting = (props) => {
   };
 
   const handleKeyPress = (e, msg, toUserId, index) => {
-    console.log(msg);
     if (e.key === 'Enter' && msg) {
       handleClickSendMessage(msg, toUserId, index)
     } else {
-      console.log('trigger');
       // trigger event when input
       channel.trigger(`client-typing-from-${props.currentUser.id}-to-${toUserId}`, 'typing-event')
       //receiver message

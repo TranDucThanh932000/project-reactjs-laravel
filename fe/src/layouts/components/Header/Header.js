@@ -479,6 +479,7 @@ const Header = (props) => {
               inputProps={{ "aria-label": "search" }}
             />
           </Search>
+            <input lang="ja-Hrkt" inputmode="kana"/>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             <IconButton>

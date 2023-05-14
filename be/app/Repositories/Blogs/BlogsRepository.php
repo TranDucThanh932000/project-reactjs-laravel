@@ -30,6 +30,7 @@ class BlogsRepository implements BlogsInterface
         }
         
         return $this->blog
+        ->select('id', 'user_id', 'title', 'short_description', 'created_at', 'updated_at', 'view')
         ->when(! empty($listCategory), function ($q) use ($listCategory) {
             return $q->join('blog_categories', 'blog_categories.blog_id', '=', 'blogs.id')
             ->whereIn('blog_categories.category_id', $listCategory);
