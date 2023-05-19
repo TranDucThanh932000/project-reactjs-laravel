@@ -3,6 +3,7 @@ import NewspaperIcon from '@mui/icons-material/Newspaper';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import { QrCode } from "@mui/icons-material";
 import { TypeNotification, StatusRead } from "../../utils/constants";
+import HeadphonesIcon from '@mui/icons-material/Headphones';
 
 const initialState = {
   loading: false,
@@ -25,6 +26,11 @@ const initialState = {
       text: 'Tạo QRCODE',
       url: '/qr-code',
       icon: <QrCode/>
+    },
+    {
+      text: 'Cùng nghe nhạc',
+      url: '/listen-together',
+      icon: <HeadphonesIcon/>
     },
   ],
   currentUser: null,

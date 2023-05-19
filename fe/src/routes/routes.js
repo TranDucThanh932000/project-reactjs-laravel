@@ -8,6 +8,7 @@ import Register from '../views/register/Register';
 import LuckyNumberToday from '../views/luckyNumberToday/LuckyNumberToday';
 import QrCode from '../views/qrCode'
 import DetailBlog from '../views/blogs/DetailBlog';
+import ListenTogether from '../views/listenTogether';
 
 const publicRoutes = [
     { path: config.routes.blog, component: Home },
@@ -16,6 +17,7 @@ const publicRoutes = [
     { path: config.routes.register, component: Register },
     { path: config.routes.luckyNumberToday, component: LuckyNumberToday },
     { path: config.routes.qrcode, component: QrCode },
+    { path: config.routes.listenTogether, component: ListenTogether },
 ];
 
 const privateRoutes = [];

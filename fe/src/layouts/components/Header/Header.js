@@ -479,7 +479,6 @@ const Header = (props) => {
               inputProps={{ "aria-label": "search" }}
             />
           </Search>
-          <input lang="en"/>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             <IconButton>
