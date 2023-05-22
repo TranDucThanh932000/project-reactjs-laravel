@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import classNames from "classnames/bind";
 import styles from "./ListenTogether.module.scss";
 import YouTube from "react-youtube";
+import axios from "axios";
+import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 
 const cx = classNames.bind(styles);
 
@@ -18,6 +20,7 @@ function ListenTogether() {
   const [listSong, setListSong] = useState([]);
   const connection = useRef(null);
   const [connected, setConnected] = useState(false);
+  const APIYoutubeKey = "AIzaSyBoRb3wU0c_ZzpStSumt9ygSsS1s2fXBf0";
 
   useEffect(() => {
     peerInstance.current = new Peer();
@@ -37,6 +40,22 @@ function ListenTogether() {
     };
   }, [connection, peerInstance]);
 
+  const handleGetInfoVideoYoutube = async (videoId) => {
+    return axios
+      .get(
+        `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${APIYoutubeKey}`
+      )
+      .then((res) => {
+        const videoInfo = res.data.items[0].snippet;
+        return {
+          videoId,
+          title: videoInfo.localized.title,
+          channel: videoInfo.channelTitle,
+          thumbnail: videoInfo.thumbnails.default.url
+        };
+      });
+  };
+
   const handleDisconnect = () => {
     videoId.current = null;
     connection.current = null;
@@ -47,7 +66,7 @@ function ListenTogether() {
 
   const handleConnection = useCallback(
     (conn) => {
-      conn.on("data", (data) => {
+      conn.on("data", async (data) => {
         if (data === "disconnect") {
           handleDisconnect();
           return;
@@ -55,7 +74,9 @@ function ListenTogether() {
         if (!videoId.current) {
           videoId.current = data;
         }
-        setListSong((prev) => [...prev, data]);
+        await handleGetInfoVideoYoutube(data).then((data) => {
+          setListSong((prev) => [...prev, data]);
+        });
       });
       setRemotePeerIdValue(conn.peer);
       setConnected(true);
@@ -138,7 +159,7 @@ function ListenTogether() {
     setListSong([...newList]);
   });
 
-  const handleAddSong = useCallback(() => {
+  const handleAddSong = useCallback(async () => {
     let id = parseYtbLinkToVideoId(urlYoutube);
     if (listSong.findIndex((x) => x === id) >= 0) {
       return;
@@ -153,7 +174,9 @@ function ListenTogether() {
     if (!videoId.current) {
       videoId.current = id;
     }
-    setListSong((prev) => [...prev, id]);
+    await handleGetInfoVideoYoutube(id).then((data) => {
+      setListSong((prev) => [...prev, data]);
+    });
     setUrlYoutube("");
   }, [urlYoutube, connection, listSong]);
 
@@ -167,6 +190,22 @@ function ListenTogether() {
       });
       handleDisconnect();
     }
+  };
+
+  const handlePlay = () => {
+    // let controlPanelObj = document.getElementById("control-panel");
+    // let infoBarObj = document.getElementById("info");
+    // Array.from(controlPanelObj.classList).find(function (element) {
+    //   return element !== "active"
+    //     ? controlPanelObj.classList.add("active")
+    //     : controlPanelObj.classList.remove("active");
+    // });
+
+    // Array.from(infoBarObj.classList).find(function (element) {
+    //   return element !== "active"
+    //     ? infoBarObj.classList.add("active")
+    //     : infoBarObj.classList.remove("active");
+    // });
   };
 
   return (
@@ -220,16 +259,81 @@ function ListenTogether() {
                   Thêm bài hát
                 </Button>
                 <br />
-                <ol>
-                  {listSong.map((song) => (
-                    <li
-                      key={song}
-                      className={cx(song === videoId.current ? "bolder" : "")}
-                    >
-                      {song}
-                    </li>
-                  ))}
-                </ol>
+                <div style={{ marginTop: "70px" }}>
+                  {listSong.map((song, index) =>
+                    index === 0 ? (
+                      <div className={cx("player")} key={index}>
+                        <div id="info" className={cx("info", "active")}>
+                          <span
+                            className={cx(
+                              videoId.current === song.videoId
+                                ? "name bolder"
+                                : "name"
+                            )}
+                          >
+                            {song.title}
+                          </span>
+                          <span
+                            className={cx(
+                              videoId.current === song.videoId
+                                ? "bolder artist"
+                                : "artist"
+                            )}
+                          >
+                            {" "}
+                            - {song.channel}
+                          </span>
+                          <div className={cx("progress-bar")}>
+                            <div className={cx("bar")}></div>
+                          </div>
+                        </div>
+                        <div
+                          id="control-panel"
+                          className={cx("control-panel", "active")}
+                        >
+                          <div className={cx("album-art", "image-spin")}
+                            style={{ backgroundImage: `url(${song.thumbnail})` }}
+                          ></div>
+                          <div className={cx("controls")}>
+                            <div className={cx("prev")}></div>
+                            <div
+                              id="play"
+                              className={cx("play")}
+                              onClick={handlePlay}
+                            ></div>
+                            <div className={cx("next")}></div>
+                          </div>
+                        </div>
+                        {
+                          listSong.length > 1 ? (<h3 className={cx("bolder")} style={{ marginTop: "10px" }}>Tiếp theo <KeyboardDoubleArrowDownIcon style={{ verticalAlign: 'middle' }}/></h3>) : <></>
+                        }
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: "5px" }}>
+                        <span
+                          className={cx(
+                            videoId.current === song.videoId
+                              ? "name bolder"
+                              : "name"
+                          )}
+                        >
+                          {song.title}
+                        </span>
+                        <span
+                          className={cx(
+                            videoId.current === song.videoId
+                              ? "bolder artist"
+                              : "artist"
+                          )}
+                        >
+                          {" "}
+                          - {song.channel}
+                        </span>
+                      </div>
+                    )
+                  )}
+                </div>
+
                 {listSong.length === 0 && (
                   <p className={cx("text-red")}>Chưa có sẵn bài hát nào</p>
                 )}
