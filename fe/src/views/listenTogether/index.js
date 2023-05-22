@@ -37,9 +37,21 @@ function ListenTogether() {
     };
   }, [connection, peerInstance]);
 
+  const handleDisconnect = () => {
+    videoId.current = null;
+    connection.current = null;
+    setRemotePeerIdValue("");
+    setListSong([]);
+    setConnected(false);
+  };
+
   const handleConnection = useCallback(
     (conn) => {
       conn.on("data", (data) => {
+        if(data === 'disconnect') {
+          handleDisconnect();
+          return;
+        }
         if (!videoId.current) {
           videoId.current = data;
         }
@@ -49,7 +61,7 @@ function ListenTogether() {
       setConnected(true);
       connection.current = conn;
     },
-    [connection, videoId, listSong]
+    [connection, videoId, listSong.length]
   );
 
   const parseYtbLinkToVideoId = useCallback((url) => {
@@ -66,7 +78,7 @@ function ListenTogether() {
       navigator.webkitGetUserMedia ||
       navigator.mozGetUserMedia;
 
-    getUserMedia({ video: true, audio: true }, (stream) => {
+    getUserMedia({ video: false, audio: true }, (stream) => {
       currentUserVideoRef.current.srcObject = stream;
       currentUserVideoRef.current.play();
       call.answer(stream);
@@ -89,7 +101,7 @@ function ListenTogether() {
       navigator.webkitGetUserMedia ||
       navigator.mozGetUserMedia;
 
-    getUserMedia({ video: true, audio: true }, (stream) => {
+    getUserMedia({ video: false, audio: true }, (stream) => {
       currentUserVideoRef.current.srcObject = stream;
       currentUserVideoRef.current.play();
 
@@ -119,7 +131,6 @@ function ListenTogether() {
     event.target.playVideo();
   };
 
-
   const handleEnd = useCallback((e) => {
     let newList = [...listSong];
     newList.shift();
@@ -132,14 +143,12 @@ function ListenTogether() {
     if(listSong.findIndex(x => x === id) >= 0) {
       return;
     }
+    const connect = peerInstance.current.connect(remotePeerIdValue);
+    connect.on("open", () => {
+      connect.send(id);
+    });
     if (!connected) {
-      const connect = peerInstance.current.connect(remotePeerIdValue);
-      connect.on("open", () => {
-        connect.send(id);
-      });
       connection.current = connect;
-    } else {
-      connection.current.send(id);
     }
     if (!videoId.current) {
       videoId.current = id;
@@ -152,8 +161,11 @@ function ListenTogether() {
     if (!connected) {
       call(remotePeerIdValue)
     } else {
-      connection.current = null;
-      setConnected(false);
+      const connect = peerInstance.current.connect(remotePeerIdValue);
+      connect.on("open", () => {
+        connect.send('disconnect');
+      });
+      handleDisconnect();
     }
   }
 
