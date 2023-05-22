@@ -48,7 +48,7 @@ function ListenTogether() {
   const handleConnection = useCallback(
     (conn) => {
       conn.on("data", (data) => {
-        if(data === 'disconnect') {
+        if (data === "disconnect") {
           handleDisconnect();
           return;
         }
@@ -140,7 +140,7 @@ function ListenTogether() {
 
   const handleAddSong = useCallback(() => {
     let id = parseYtbLinkToVideoId(urlYoutube);
-    if(listSong.findIndex(x => x === id) >= 0) {
+    if (listSong.findIndex((x) => x === id) >= 0) {
       return;
     }
     const connect = peerInstance.current.connect(remotePeerIdValue);
@@ -154,20 +154,20 @@ function ListenTogether() {
       videoId.current = id;
     }
     setListSong((prev) => [...prev, id]);
-    setUrlYoutube('');
+    setUrlYoutube("");
   }, [urlYoutube, connection, listSong]);
 
   const handleClickConnection = () => {
     if (!connected) {
-      call(remotePeerIdValue)
+      call(remotePeerIdValue);
     } else {
       const connect = peerInstance.current.connect(remotePeerIdValue);
       connect.on("open", () => {
-        connect.send('disconnect');
+        connect.send("disconnect");
       });
       handleDisconnect();
     }
-  }
+  };
 
   return (
     <div className={cx("wrapper")}>
@@ -183,48 +183,59 @@ function ListenTogether() {
             style={{ marginBottom: 8 }}
           />
           <br />
-          <Button style={{ marginBottom: 8 }} variant="outlined" onClick={handleClickConnection}>
-            {! connected ? "Kết nối" : "Ngắt kết nối"}
-          </Button>
-
-          <Box>
-            <Grid container>
-              <Grid item sm={12} md={6}>
-                <video ref={currentUserVideoRef}></video>
-              </Grid>
-              <Grid item sm={12} md={6}>
-                <video ref={remoteVideoRef}></video>
-              </Grid>
-            </Grid>
-          </Box>
-          <TextField
-            label="Đường dẫn Youtube"
-            variant="outlined"
-            type="text"
-            value={urlYoutube}
-            onChange={(e) => setUrlYoutube(e.target.value)}
-            style={{ marginBottom: 8 }}
-          />
-          <br />
           <Button
-            variant="outlined"
-            onClick={handleAddSong}
             style={{ marginBottom: 8 }}
+            variant="outlined"
+            onClick={handleClickConnection}
           >
-            Thêm bài hát
+            {!connected ? "Kết nối" : "Ngắt kết nối"}
           </Button>
-          <br />
-          <ol>
-            {listSong.map((song) => (
-              <li
-                key={song}
-                className={cx(song === videoId.current ? "bolder" : "")}
-              >
-                {song}
-              </li>
-            ))}
-          </ol>
-          {listSong.length === 0 && <p className={cx('text-red')}>Chưa có sẵn bài hát nào</p>}
+          <div>
+            {connected && (
+              <>
+                <Box>
+                  <Grid container>
+                    <Grid item sm={12} md={6}>
+                      <video ref={currentUserVideoRef}></video>
+                    </Grid>
+                    <Grid item sm={12} md={6}>
+                      <video ref={remoteVideoRef}></video>
+                    </Grid>
+                  </Grid>
+                </Box>
+                <TextField
+                  label="Đường dẫn Youtube"
+                  variant="outlined"
+                  type="text"
+                  value={urlYoutube}
+                  onChange={(e) => setUrlYoutube(e.target.value)}
+                  style={{ marginBottom: 8 }}
+                />
+                <br />
+                <Button
+                  variant="outlined"
+                  onClick={handleAddSong}
+                  style={{ marginBottom: 8 }}
+                >
+                  Thêm bài hát
+                </Button>
+                <br />
+                <ol>
+                  {listSong.map((song) => (
+                    <li
+                      key={song}
+                      className={cx(song === videoId.current ? "bolder" : "")}
+                    >
+                      {song}
+                    </li>
+                  ))}
+                </ol>
+                {listSong.length === 0 && (
+                  <p className={cx("text-red")}>Chưa có sẵn bài hát nào</p>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </Grid>
       <YouTube
