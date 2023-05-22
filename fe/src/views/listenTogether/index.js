@@ -47,6 +47,7 @@ function ListenTogether() {
       });
       setRemotePeerIdValue(conn.peer);
       setConnected(true);
+      connection.current = conn;
     },
     [connection, videoId, listSong]
   );
@@ -151,6 +152,7 @@ function ListenTogether() {
     if (!connected) {
       call(remotePeerIdValue)
     } else {
+      connection.current = null;
       setConnected(false);
     }
   }

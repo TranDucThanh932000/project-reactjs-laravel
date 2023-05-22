@@ -103,7 +103,7 @@ const mapStateToProps = (state) => {
     chatting: state.chattingReducer.chatting,
     currentUser: state.commonReducer.currentUser,
     notifications: state.commonReducer.notifications,
-    listFriendOnline: state.commonReducer.listFriendOnline
+    listFriendOnline: state.commonReducer.listFriendOnline,
   };
 };
 
@@ -126,29 +126,29 @@ const AppBar = styled(MuiAppBar, {
 }));
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
-  '& .MuiBadge-badge': {
-    backgroundColor: '#44b700',
-    color: '#44b700',
+  "& .MuiBadge-badge": {
+    backgroundColor: "#44b700",
+    color: "#44b700",
     boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-    '&::after': {
-      position: 'absolute',
+    "&::after": {
+      position: "absolute",
       top: 0,
       left: 0,
-      width: '100%',
-      height: '100%',
-      borderRadius: '50%',
-      animation: 'ripple 1.2s infinite ease-in-out',
-      border: '1px solid currentColor',
+      width: "100%",
+      height: "100%",
+      borderRadius: "50%",
+      animation: "ripple 1.2s infinite ease-in-out",
+      border: "1px solid currentColor",
       content: '""',
     },
   },
-  '@keyframes ripple': {
-    '0%': {
-      transform: 'scale(.8)',
+  "@keyframes ripple": {
+    "0%": {
+      transform: "scale(.8)",
       opacity: 1,
     },
-    '100%': {
-      transform: 'scale(2.4)',
+    "100%": {
+      transform: "scale(2.4)",
       opacity: 0,
     },
   },
@@ -340,9 +340,8 @@ const Header = (props) => {
       <MenuItem onClick={handleMenuClose}>
         Chào {props.currentUser.name} - {props.currentUser.id}
       </MenuItem>
-      <InformationUser handleMenuClose={handleMenuClose}/>
+      <InformationUser handleMenuClose={handleMenuClose} />
       <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
-      
     </Menu>
   );
   const mobileMenuId = "primary-search-account-menu-mobile";
@@ -494,98 +493,116 @@ const Header = (props) => {
                 />
               </FormGroup>
             </IconButton>
-            <IconButton
-              size="large"
-              aria-label="show 4 new mails"
-              id="basic-button"
-              aria-controls={openListMessage ? "basic-menu" : undefined}
-              aria-haspopup="true"
-              aria-expanded={openListMessage ? "true" : undefined}
-              onClick={handleClickListMessage}
-              className={cx("text-white")}
-            >
-              <Badge badgeContent={4} color="error">
-                <MailIcon />
-              </Badge>
-            </IconButton>
-            <Menu
-              id="basic-menu"
-              anchorEl={anchorMessage}
-              open={openListMessage}
-              onClose={() => {
-                setAnchorMessage(null);
-              }}
-              MenuListProps={{
-                "aria-labelledby": "basic-button",
-              }}
-            >
-              {props.usersContacted.map((x) => (
-                <MenuItem
-                  onClick={() => {
-                    if (
-                      props.chatting.findIndex(
-                        (user) => user.toUserId == x.id
-                      ) < 0
-                    ) {
-                      chattingService
-                        .getMessageOfFriend(x.id)
-                        .then((res) => {
-                          let newUserMsg = {
-                            toUserId: x.id,
-                            info: res.info,
-                            currentMsg: "",
-                            msg: [],
-                          };
-                          res.msgs.forEach((msg) => {
-                            newUserMsg.msg.push({
-                              message: msg.content,
-                              toOther: x.id == msg.to_user_id ? true : false,
-                              created_at: msg.created_at,
-                              id: msg.id,
-                            });
-                          });
-                          store.dispatch(openAndGetMsg(newUserMsg));
-                        })
-                        .catch(() => {});
-                    } else {
-                      store.dispatch(openAndCloseChatting(x.id));
-                    }
+            {props.currentUser && (
+              <>
+                <IconButton
+                  size="large"
+                  aria-label="show 4 new mails"
+                  id="basic-button"
+                  aria-controls={openListMessage ? "basic-menu" : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={openListMessage ? "true" : undefined}
+                  onClick={handleClickListMessage}
+                  className={cx("text-white")}
+                >
+                  <Badge badgeContent={4} color="error">
+                    <MailIcon />
+                  </Badge>
+                </IconButton>
+                <Menu
+                  id="basic-menu"
+                  anchorEl={anchorMessage}
+                  open={openListMessage}
+                  onClose={() => {
                     setAnchorMessage(null);
                   }}
-                  key={x.id}
+                  MenuListProps={{
+                    "aria-labelledby": "basic-button",
+                  }}
                 >
-                  <ListItemAvatar>
-                    <StyledBadge
-                      overlap="circular"
-                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                      variant={props.listFriendOnline.findIndex(user => user.id == x.id) >= 0 ? 'dot' : 'standard'}
+                  {props.usersContacted.map((x) => (
+                    <MenuItem
+                      onClick={() => {
+                        if (
+                          props.chatting.findIndex(
+                            (user) => user.toUserId == x.id
+                          ) < 0
+                        ) {
+                          chattingService
+                            .getMessageOfFriend(x.id)
+                            .then((res) => {
+                              let newUserMsg = {
+                                toUserId: x.id,
+                                info: res.info,
+                                currentMsg: "",
+                                msg: [],
+                              };
+                              res.msgs.forEach((msg) => {
+                                newUserMsg.msg.push({
+                                  message: msg.content,
+                                  toOther:
+                                    x.id == msg.to_user_id ? true : false,
+                                  created_at: msg.created_at,
+                                  id: msg.id,
+                                });
+                              });
+                              store.dispatch(openAndGetMsg(newUserMsg));
+                            })
+                            .catch(() => {});
+                        } else {
+                          store.dispatch(openAndCloseChatting(x.id));
+                        }
+                        setAnchorMessage(null);
+                      }}
+                      key={x.id}
                     >
-                      <Avatar alt={x.name} src={`https://docs.google.com/uc?id=${x.avatar}`} />
-                    </StyledBadge>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={x.name}
-                    secondary="Cách đây vài năm thôi"
-                  />
-                </MenuItem>
-              ))}
-            </Menu>
-
-            {/* notification */}
-            <IconButton
-              size="large"
-              aria-label="show 17 new notifications"
-              color="inherit"
-              id="basic-button"
-              aria-controls={openListNotification ? "basic-menu" : undefined}
-              aria-haspopup="true"
-              aria-expanded={openListNotification ? "true" : undefined}
-              onClick={handleClickListNotification}
-            >
-              <Badge badgeContent={countNotificationUnread} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+                      <ListItemAvatar>
+                        <StyledBadge
+                          overlap="circular"
+                          anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "right",
+                          }}
+                          variant={
+                            props.listFriendOnline.findIndex(
+                              (user) => user.id == x.id
+                            ) >= 0
+                              ? "dot"
+                              : "standard"
+                          }
+                        >
+                          <Avatar
+                            alt={x.name}
+                            src={`https://docs.google.com/uc?id=${x.avatar}`}
+                          />
+                        </StyledBadge>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={x.name}
+                        secondary="Cách đây vài năm thôi"
+                      />
+                    </MenuItem>
+                  ))}
+                </Menu>
+                {/* notification */}
+                <IconButton
+                  size="large"
+                  aria-label="show 17 new notifications"
+                  color="inherit"
+                  id="basic-button"
+                  aria-controls={
+                    openListNotification ? "basic-menu" : undefined
+                  }
+                  aria-haspopup="true"
+                  aria-expanded={openListNotification ? "true" : undefined}
+                  onClick={handleClickListNotification}
+                >
+                  <Badge badgeContent={countNotificationUnread} color="error">
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
+              </>
+            )}
             <Menu
               id="basic-menu"
               anchorEl={anchorNotification}
@@ -599,7 +616,7 @@ const Header = (props) => {
             >
               <Box className={cx("menu-notification")}>
                 {props.notifications.map((x) => (
-                  <MenuItem key={x.id + '-' + x.userId} onClick={() => {}}>
+                  <MenuItem key={x.id + "-" + x.userId} onClick={() => {}}>
                     <ListItemAvatar>
                       <Avatar>
                         <ImageIcon />

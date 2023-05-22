@@ -22,6 +22,7 @@ class UsersTableSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => '$2a$12$gJvbN4gaHLBXhQXWDeoHM.uoLWcrkvEKHOUeXrgSziQVMCl62K4Ju', // 123123123
             'remember_token' => Str::random(10),
+            'avatar' => null
         ]);
         User::factory()->count(30)->create();
     }

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\BlogStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -18,7 +19,8 @@ class BlogFactory extends Factory
             'title' => $this->faker->title(),
             'content' => Str::random(1000),
             'short_description' => Str::random(100),
-            'status' => 1
+            'status' => BlogStatus::PUBLIC,
+            'view' => 0
         ];
     }
 }
