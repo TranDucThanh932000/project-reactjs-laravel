@@ -15,7 +15,7 @@ function ListenTogether() {
   const currentUserVideoRef = useRef(null);
   const [remotePeerIdValue, setRemotePeerIdValue] = useState("");
   const peerInstance = useRef(null);
-  const [videoId, setVideoId] = useState("");
+  const videoId = useRef('');
   const [urlYoutube, setUrlYoutube] = useState("");
   const [listSong, setListSong] = useState([]);
   const connection = useRef(null);
@@ -67,8 +67,8 @@ function ListenTogether() {
   };
 
   const handleDisconnect = () => {
+    videoId.current = null;
     connection.current = null;
-    setVideoId(null);
     setRemotePeerIdValue("");
     setListSong([]);
     setConnected(false);
@@ -106,8 +106,8 @@ function ListenTogether() {
           setPlaying(data);
           return;
         }
-        if (!videoId) {
-          setVideoId(data);
+        if (!videoId.current) {
+          videoId.current = data;
         }
         await handleGetInfoVideoYoutube(data).then((data) => {
           setListSong((prev) => [...prev, data]);
@@ -117,7 +117,7 @@ function ListenTogether() {
       setConnected(true);
       connection.current = conn;
     },
-    [connection, videoId, listSong.length, playing]
+    [connection, videoId.current, listSong.length, playing]
   );
 
   const parseYtbLinkToVideoId = useCallback((url) => {
@@ -190,8 +190,9 @@ function ListenTogether() {
   const handleEnd = useCallback((e) => {
     let newList = [...listSong];
     newList.shift();
+    videoId.current = newList[0].videoId;
     setListSong([...newList]);
-    setVideoId(newList[0]);
+    getTimeVideo();
   });
 
   const handleAddSong = useCallback(async () => {
@@ -206,14 +207,14 @@ function ListenTogether() {
     if (!connected) {
       connection.current = connect;
     }
-    if (!videoId) {
-      setVideoId(id);
+    if (!videoId.current) {
+      videoId.current = id;
     }
     await handleGetInfoVideoYoutube(id).then((data) => {
       setListSong((prev) => [...prev, data]);
     });
     setUrlYoutube("");
-  }, [urlYoutube, connection, listSong]);
+  }, [urlYoutube, connection, listSong, videoId]);
 
   const handleClickConnection = () => {
     if (!connected) {
@@ -366,7 +367,7 @@ function ListenTogether() {
         </div>
       </Grid>
       <YouTube
-        videoId={videoId}
+        videoId={videoId.current}
         opts={opts}
         onReady={onPlayerReady}
         onEnd={handleEnd}
