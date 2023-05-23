@@ -4,12 +4,7 @@
   position: relative;
 
   .info {
-    position: absolute;
-    height: 60px;
-    top: 0;
     opacity: 0;
-    left: 10px;
-    right: 10px;
     background-color: rgba(255, 255, 255, 0.5);
     padding: 5px 15px 5px 0px;
     border-radius: 15px;
@@ -22,34 +17,35 @@
 
     .artist {
       color: #222;
-      font-size: 16px;
+      font-size: 18px;
       margin-bottom: 5px;
+      font-weight: bolder;
     }
 
     .name {
       color: #999;
-      font-size: 12px;
+      font-size: 16px;
       margin-bottom: 8px;
     }
 
-    .progress-bar {
-      background-color: #ddd;
-      height: 2px;
-      width: 100%;
-      position: relative;
+    // .progress-bar {
+    //   background-color: #ddd;
+    //   height: 2px;
+    //   width: 100%;
+    //   position: relative;
 
-      .bar {
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        background-color: red;
-        width: 10%;
-        transition: all 0.2s ease;
-      }
-    }
+    //   .bar {
+    //     position: absolute;
+    //     left: 0;
+    //     top: 0;
+    //     bottom: 0;
+    //     background-color: red;
+    //     width: 0%;
+    //     transition: all 0.2s ease;
+    //   }
+    // }
     &.active {
-      top: -60px;
+      top: -75px;
       opacity: 1;
       transition: all 0.5s ease;
     }
@@ -102,7 +98,7 @@
       background-size: 80px;
     }
 
-    .image-spin {
+    .image-spin-animation {
       animation: rotation 5s infinite linear;
       -webkit-animation: rotation 5s infinite linear;
       animation-fill-mode: forwards;

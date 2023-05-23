@@ -5,7 +5,7 @@ import classNames from "classnames/bind";
 import styles from "./ListenTogether.module.scss";
 import YouTube from "react-youtube";
 import axios from "axios";
-import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
+import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 
 const cx = classNames.bind(styles);
 
@@ -15,12 +15,15 @@ function ListenTogether() {
   const currentUserVideoRef = useRef(null);
   const [remotePeerIdValue, setRemotePeerIdValue] = useState("");
   const peerInstance = useRef(null);
-  const videoId = useRef("");
+  const [videoId, setVideoId] = useState("");
   const [urlYoutube, setUrlYoutube] = useState("");
   const [listSong, setListSong] = useState([]);
   const connection = useRef(null);
   const [connected, setConnected] = useState(false);
+  const [playing, setPlaying] = useState(true);
+  const youtubeIFrame = useRef(null);
   const APIYoutubeKey = "AIzaSyBoRb3wU0c_ZzpStSumt9ygSsS1s2fXBf0";
+  const [duration, setDuration] = useState(0);
 
   useEffect(() => {
     peerInstance.current = new Peer();
@@ -40,6 +43,13 @@ function ListenTogether() {
     };
   }, [connection, peerInstance]);
 
+  const getTimeVideo = () => {
+    youtubeIFrame.current.internalPlayer.getDuration().then((time) => {
+      let timeRounded = Math.round(time);
+      setDuration(timeRounded);
+    });
+  };
+
   const handleGetInfoVideoYoutube = async (videoId) => {
     return axios
       .get(
@@ -51,17 +61,33 @@ function ListenTogether() {
           videoId,
           title: videoInfo.localized.title,
           channel: videoInfo.channelTitle,
-          thumbnail: videoInfo.thumbnails.default.url
+          thumbnail: videoInfo.thumbnails.default.url,
         };
       });
   };
 
   const handleDisconnect = () => {
-    videoId.current = null;
     connection.current = null;
+    setVideoId(null);
     setRemotePeerIdValue("");
     setListSong([]);
     setConnected(false);
+  };
+
+  const handlePlay = () => {
+    const connect = peerInstance.current.connect(remotePeerIdValue);
+    if (playing) {
+      connect.on("open", () => {
+        connect.send(false);
+      });
+      youtubeIFrame.current.internalPlayer.pauseVideo();
+    } else {
+      connect.on("open", () => {
+        connect.send(true);
+      });
+      youtubeIFrame.current.internalPlayer.playVideo();
+    }
+    setPlaying(!playing);
   };
 
   const handleConnection = useCallback(
@@ -71,8 +97,17 @@ function ListenTogether() {
           handleDisconnect();
           return;
         }
-        if (!videoId.current) {
-          videoId.current = data;
+        if (data === true || data === false) {
+          if (data === true) {
+            youtubeIFrame.current.internalPlayer.playVideo();
+          } else {
+            youtubeIFrame.current.internalPlayer.pauseVideo();
+          }
+          setPlaying(data);
+          return;
+        }
+        if (!videoId) {
+          setVideoId(data);
         }
         await handleGetInfoVideoYoutube(data).then((data) => {
           setListSong((prev) => [...prev, data]);
@@ -82,7 +117,7 @@ function ListenTogether() {
       setConnected(true);
       connection.current = conn;
     },
-    [connection, videoId, listSong.length]
+    [connection, videoId, listSong.length, playing]
   );
 
   const parseYtbLinkToVideoId = useCallback((url) => {
@@ -155,8 +190,8 @@ function ListenTogether() {
   const handleEnd = useCallback((e) => {
     let newList = [...listSong];
     newList.shift();
-    videoId.current = newList[0];
     setListSong([...newList]);
+    setVideoId(newList[0]);
   });
 
   const handleAddSong = useCallback(async () => {
@@ -171,8 +206,8 @@ function ListenTogether() {
     if (!connected) {
       connection.current = connect;
     }
-    if (!videoId.current) {
-      videoId.current = id;
+    if (!videoId) {
+      setVideoId(id);
     }
     await handleGetInfoVideoYoutube(id).then((data) => {
       setListSong((prev) => [...prev, data]);
@@ -192,34 +227,34 @@ function ListenTogether() {
     }
   };
 
-  const handlePlay = () => {
-    // let controlPanelObj = document.getElementById("control-panel");
-    // let infoBarObj = document.getElementById("info");
-    // Array.from(controlPanelObj.classList).find(function (element) {
-    //   return element !== "active"
-    //     ? controlPanelObj.classList.add("active")
-    //     : controlPanelObj.classList.remove("active");
-    // });
+  const handlePause = (e) => {
+    e.target.pauseVideo();
+  };
 
-    // Array.from(infoBarObj.classList).find(function (element) {
-    //   return element !== "active"
-    //     ? infoBarObj.classList.add("active")
-    //     : infoBarObj.classList.remove("active");
-    // });
+  const formatSecondToHour = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    const formattedHours = String(hours).padStart(2, "0");
+    const formattedMinutes = String(minutes).padStart(2, "0");
+    const formattedSeconds = String(remainingSeconds).padStart(2, "0");
+
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
   };
 
   return (
     <div className={cx("wrapper")}>
-      <Grid container spacing={2} sx={{ m: 2 }}>
+      <Grid container sx={{ m: 2 }}>
         <div>
           <h1>ID của bạn là: {peerId}</h1>
           <TextField
-            label="Phòng"
+            label="ID Phòng"
             variant="outlined"
             type="text"
             value={remotePeerIdValue}
             onChange={(e) => setRemotePeerIdValue(e.target.value)}
-            style={{ marginBottom: 8 }}
+            style={{ marginBottom: 8, minWidth: "350px" }}
           />
           <br />
           <Button
@@ -248,7 +283,7 @@ function ListenTogether() {
                   type="text"
                   value={urlYoutube}
                   onChange={(e) => setUrlYoutube(e.target.value)}
-                  style={{ marginBottom: 8 }}
+                  style={{ marginBottom: 8, minWidth: "350px" }}
                 />
                 <br />
                 <Button
@@ -259,40 +294,35 @@ function ListenTogether() {
                   Thêm bài hát
                 </Button>
                 <br />
-                <div style={{ marginTop: "70px" }}>
+                <div>
                   {listSong.map((song, index) =>
                     index === 0 ? (
                       <div className={cx("player")} key={index}>
-                        <div id="info" className={cx("info", "active")}>
-                          <span
-                            className={cx(
-                              videoId.current === song.videoId
-                                ? "name bolder"
-                                : "name"
-                            )}
-                          >
-                            {song.title}
+                        <div
+                          id="info"
+                          className={cx("info", playing ? "active" : "")}
+                        >
+                          <span className={cx("artist")}>{song.title}</span>
+                          <span className={cx("name")}>
+                            {song.channel} - {formatSecondToHour(duration)}
                           </span>
-                          <span
-                            className={cx(
-                              videoId.current === song.videoId
-                                ? "bolder artist"
-                                : "artist"
-                            )}
-                          >
-                            {" "}
-                            - {song.channel}
-                          </span>
-                          <div className={cx("progress-bar")}>
-                            <div className={cx("bar")}></div>
-                          </div>
                         </div>
                         <div
                           id="control-panel"
-                          className={cx("control-panel", "active")}
+                          className={cx(
+                            "control-panel",
+                            playing ? "active" : ""
+                          )}
                         >
-                          <div className={cx("album-art", "image-spin")}
-                            style={{ backgroundImage: `url(${song.thumbnail})` }}
+                          <div
+                            className={cx(
+                              "album-art",
+                              "image-spin",
+                              playing ? "image-spin-animation" : ""
+                            )}
+                            style={{
+                              backgroundImage: `url(${song.thumbnail})`,
+                            }}
                           ></div>
                           <div className={cx("controls")}>
                             <div className={cx("prev")}></div>
@@ -304,31 +334,24 @@ function ListenTogether() {
                             <div className={cx("next")}></div>
                           </div>
                         </div>
-                        {
-                          listSong.length > 1 ? (<h3 className={cx("bolder")} style={{ marginTop: "10px" }}>Tiếp theo <KeyboardDoubleArrowDownIcon style={{ verticalAlign: 'middle' }}/></h3>) : <></>
-                        }
+                        {listSong.length > 1 ? (
+                          <h3
+                            className={cx("bolder")}
+                            style={{ marginTop: "10px" }}
+                          >
+                            Tiếp theo{" "}
+                            <KeyboardDoubleArrowDownIcon
+                              style={{ verticalAlign: "middle" }}
+                            />
+                          </h3>
+                        ) : (
+                          <></>
+                        )}
                       </div>
                     ) : (
-                      <div style={{ marginTop: "5px" }}>
-                        <span
-                          className={cx(
-                            videoId.current === song.videoId
-                              ? "name bolder"
-                              : "name"
-                          )}
-                        >
-                          {song.title}
-                        </span>
-                        <span
-                          className={cx(
-                            videoId.current === song.videoId
-                              ? "bolder artist"
-                              : "artist"
-                          )}
-                        >
-                          {" "}
-                          - {song.channel}
-                        </span>
+                      <div style={{ marginTop: "5px" }} key={index}>
+                        <span className={cx("name")}>{song.title}</span>
+                        <span className={cx("artist")}> - {song.channel}</span>
                       </div>
                     )
                   )}
@@ -343,10 +366,13 @@ function ListenTogether() {
         </div>
       </Grid>
       <YouTube
-        videoId={videoId.current}
+        videoId={videoId}
         opts={opts}
         onReady={onPlayerReady}
         onEnd={handleEnd}
+        onPause={handlePause}
+        onStateChange={getTimeVideo}
+        ref={youtubeIFrame}
       ></YouTube>
     </div>
   );
