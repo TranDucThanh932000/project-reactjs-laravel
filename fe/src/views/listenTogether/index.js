@@ -187,10 +187,19 @@ function ListenTogether() {
     event.target.playVideo();
   };
 
-  const handleEnd = useCallback((e) => {
+  const handleEnd = useCallback(() => {
     let newList = [...listSong];
     newList.shift();
-    videoId.current = newList[0].videoId;
+    if (newList.length === 0) {
+      videoId.current = null;
+      setListSong([]);
+      return;
+    }
+    if(videoId.current === newList[0].videoId) {
+      youtubeIFrame.current.internalPlayer.playVideo();
+    } else {
+      videoId.current = newList[0].videoId;
+    }
     setListSong([...newList]);
     getTimeVideo();
   });
