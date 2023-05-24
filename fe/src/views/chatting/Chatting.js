@@ -30,18 +30,7 @@ const mapStateToProps = (state) => {
 
 const Chatting = (props) => {
   const messagesEndRef = React.useRef(null);
-  const [pusher, setPusher] = React.useState(new Pusher("0c1bb67e922d5e222312", {
-    cluster: "ap1",
-    authEndpoint: process.env.REACT_APP_BASE_URL + 'chat/pusher/auth',
-    auth: {
-      headers: {
-        "Authorization": "Bearer " + localStorage.getItem('loginToken'),
-        "Access-Control-Allow-Origin": "*"
-      }
-    },
-    encrypted: true,
-  }));
-  const [channel, setChannel] = React.useState(pusher.subscribe("private-chat"));
+  const [channel, setChannel] = React.useState(null);
   const [arrTyping, setArrTyping] = React.useState([]);
 
   React.useEffect(() => {
@@ -138,7 +127,6 @@ const Chatting = (props) => {
     if(props.currentUser) {
       //receiver message
       props.chatting.forEach((x, index) => {
-        console.log('bind: ' + `client-typing-from-${x.toUserId}-to-${props.currentUser.id}`)
         channel.bind(`client-typing-from-${x.toUserId}-to-${props.currentUser.id}`, function (data) {
           if(! arrTyping.includes(x.toUserId)) {
             setArrTyping((prev) => [...prev, x.toUserId]);
@@ -195,16 +183,32 @@ const Chatting = (props) => {
 
   React.useEffect(() => {
     if(props.currentUser) {
+      var pusher = new Pusher("0c1bb67e922d5e222312", {
+        cluster: "ap1",
+        authEndpoint: process.env.REACT_APP_BASE_URL + 'chat/pusher/auth',
+        auth: {
+          headers: {
+            "Authorization": "Bearer " + props.currentUser.token,
+            "Access-Control-Allow-Origin": "*"
+          }
+        },
+        encrypted: true,
+      })
+      setChannel(pusher.subscribe("private-chat"));
+    }
+  }, [props.currentUser]);
+
+  React.useEffect(() => {
+    if(props.currentUser && channel) {
       channel.bind(`private-message-${props.currentUser.id}`, handleCallbackChannel);
     }
 
     return () => {
-      if(props.currentUser) {
+      if(props.currentUser && channel) {
         channel.unbind(`private-message-${props.currentUser.id}`);
       }
     }
-
-  }, [props.currentUser, handleCallbackChannel]);
+  }, [props.currentUser, handleCallbackChannel, channel]);
 
   return (
     <>

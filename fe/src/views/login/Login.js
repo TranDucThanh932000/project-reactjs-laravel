@@ -41,6 +41,7 @@ const Login = () => {
         ...values
       })
       store.dispatch(updateStatusLogin(true));
+      res.user.token = res.token;
       store.dispatch(updateCurrentUser(res.user));
       store.dispatch(openSidebar(true));
       localStorage.setItem('loginToken', res.token);

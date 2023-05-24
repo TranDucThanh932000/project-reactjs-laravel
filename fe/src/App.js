@@ -48,17 +48,6 @@ const App = (props) => {
   const [showAlert, isShowAlert] = useState(false);
   const vertical = "top";
   const horizontal = "right";
-  const pusher = new Pusher('0c1bb67e922d5e222312', {
-    cluster: 'ap1',
-    authEndpoint: process.env.REACT_APP_BASE_URL + 'chat/pusher/user-auth',
-    auth: {
-      headers: {
-        "Authorization": "Bearer " + localStorage.getItem('loginToken'),
-        "Access-Control-Allow-Origin": "*"
-      },
-    },
-    encrypted: true,
-  })
   const listFriendOnline = useRef(props.listFriendOnline);
 
   const darkTheme = createTheme({
@@ -91,6 +80,7 @@ const App = (props) => {
         window.location.href = "/login";
       } else {
         store.dispatch(updateStatusLogin(true));
+        user.token = localStorage.getItem("loginToken");
         store.dispatch(updateCurrentUser(user));
         if (window.location.href.includes("login")) {
           window.location.href = "/";
@@ -100,8 +90,20 @@ const App = (props) => {
     store.dispatch(updateStatusLoading(false));
   }, []);
 
-  useEffect(() => {
+  useEffect(async () => {
     if (props.currentUser) {
+      var pusher = new Pusher('0c1bb67e922d5e222312', {
+        cluster: 'ap1',
+        authEndpoint: process.env.REACT_APP_BASE_URL + 'chat/pusher/user-auth',
+        auth: {
+          headers: {
+            "Authorization": "Bearer " + props.currentUser.token,
+            "Access-Control-Allow-Origin": "*"
+          },
+        },
+        encrypted: true,
+      })
+
       let channel = pusher.subscribe("presence-online")
       channel.bind("pusher:subscription_succeeded", function (members) {
         let newVal = [];
@@ -134,7 +136,9 @@ const App = (props) => {
     }
 
     return () => {
-      pusher.unsubscribe("presence-online");
+      if(pusher) {
+        pusher.unsubscribe("presence-online");
+      }
     }
   }, [props.currentUser])
 

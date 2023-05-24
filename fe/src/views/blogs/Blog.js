@@ -28,10 +28,8 @@ import classNames from "classnames/bind";
 import styles from "./Blog.module.scss";
 import {
   Button,
-  Checkbox,
   Chip,
   FormControl,
-  FormControlLabel,
   Grid,
   InputLabel,
   MenuItem,
@@ -67,7 +65,7 @@ const cx = classNames.bind(styles);
 // }));
 
 function Blog(props) {
-  const [expanded, setExpanded] = React.useState(false);
+  // const [expanded, setExpanded] = React.useState(false);
   const [items, setItems] = React.useState([]);
   const [loadMore, setLoadMore] = React.useState(false);
   const [doneFirstLoad, setDoneFirstLoad] = React.useState(false);
