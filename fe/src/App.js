@@ -50,7 +50,7 @@ const App = (props) => {
   const horizontal = "right";
   const pusher = new Pusher('0c1bb67e922d5e222312', {
     cluster: 'ap1',
-    authEndpoint: 'http://localhost:8000/api/v1/chat/pusher/user-auth',
+    authEndpoint: process.env.REACT_APP_BASE_URL + 'chat/pusher/user-auth',
     auth: {
       headers: {
         "Authorization": "Bearer " + localStorage.getItem('loginToken'),

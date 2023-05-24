@@ -168,7 +168,7 @@ const Header = (props) => {
   const [pusher, setPusher] = React.useState(
     new Pusher("0c1bb67e922d5e222312", {
       cluster: "ap1",
-      authEndpoint: "http://localhost:8000/api/v1/chat/pusher/auth",
+      authEndpoint: process.env.REACT_APP_BASE_URL + "chat/pusher/auth",
       auth: {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("loginToken"),
