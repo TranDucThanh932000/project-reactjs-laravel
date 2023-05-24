@@ -3,7 +3,6 @@
 namespace App\Repositories\Follower;
 
 use App\Models\Follower;
-use App\Models\Friend;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use JWTAuth;
@@ -11,12 +10,10 @@ use JWTAuth;
 class FollowerRepository implements FollowerInterface
 {
     private $follower;
-    private $friend;
 
-    public function __construct(Follower $follower, Friend $friend)
+    public function __construct(Follower $follower)
     {
         $this->follower = $follower;
-        $this->friend = $friend;
     }
 
     public function follow($user, $follower)
@@ -43,9 +40,10 @@ class FollowerRepository implements FollowerInterface
             } catch (Exception $ex) {
             }
 
-            $listTopFollower = $this->follower->select(DB::raw('user_id, count(follower) as countFollower, SUM(CASE WHEN follower = ' . intval($userId) . ' THEN 1 ELSE 0 END) > 0 as followed'))
+            $listTopFollower = $this->follower
+            ->select(DB::raw('user_id, count(follower) as countfollower, SUM(CASE WHEN follower = ' . intval($userId) . ' THEN 1 ELSE 0 END) > 0 as followed'))
             ->groupBy('user_id')
-            ->orderBy('countFollower', 'desc')
+            ->orderBy('countfollower', 'desc')
             ->limit($top)
             ->with([
             'user' => function ($q) {
