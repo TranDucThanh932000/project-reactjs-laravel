@@ -163,27 +163,23 @@ const Header = (props) => {
   const openListMessage = Boolean(anchorMessage);
   const [anchorNotification, setAnchorNotification] = React.useState(null);
   const openListNotification = Boolean(anchorNotification);
-  const [countNotificationUnread, setCountNotificationUnread] =
-    React.useState(0);
-  const [pusher, setPusher] = React.useState(
-    new Pusher("0c1bb67e922d5e222312", {
-      cluster: "ap1",
-      authEndpoint: process.env.REACT_APP_BASE_URL + "chat/pusher/auth",
-      auth: {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("loginToken"),
-          "Access-Control-Allow-Origin": "*",
-        },
-      },
-      encrypted: true,
-    })
-  );
-  const [channel, setChannel] = React.useState(
-    pusher.subscribe("private-notification")
-  );
+  const [countNotificationUnread, setCountNotificationUnread] = React.useState(0);
 
   React.useEffect(() => {
     if (props.currentUser) {
+      var pusher = new Pusher("0c1bb67e922d5e222312", {
+        cluster: "ap1",
+        authEndpoint: process.env.REACT_APP_BASE_URL + "chat/pusher/auth",
+        auth: {
+          headers: {
+            "Authorization": "Bearer " + props.currentUser.token,
+            "Access-Control-Allow-Origin": "*",
+          },
+        },
+        encrypted: true,
+      });
+      var channel = pusher.subscribe("private-notification");
+
       channel.bind(
         `private-notification-${props.currentUser.id}`,
         function (data) {
@@ -230,6 +226,12 @@ const Header = (props) => {
       notification.countNotification().then((data) => {
         setCountNotificationUnread(data);
       });
+    }
+
+    return () => {
+      if(pusher) {
+        pusher.unsubscribe("private-notification");
+      }
     }
   }, [props.currentUser]);
 

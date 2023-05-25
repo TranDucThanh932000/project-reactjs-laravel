@@ -103,7 +103,9 @@ const Chatting = (props) => {
       handleClickSendMessage(msg, toUserId, index)
     } else {
       // trigger event when input
-      channel.trigger(`client-typing-from-${props.currentUser.id}-to-${toUserId}`, 'typing-event')
+      if(e.key.length === 1) {
+        channel.trigger(`client-typing-from-${props.currentUser.id}-to-${toUserId}`, 'typing-event')
+      }
       //receiver message
       // props.chatting.forEach((x, index) => {
       //   channel.bind(`client-typing-from-${x.toUserId}-to-${props.currentUser.id}`, function (data) {
