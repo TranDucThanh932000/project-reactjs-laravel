@@ -206,9 +206,9 @@ function ListenTogether() {
 
   const handleAddSong = useCallback(async () => {
     let id = parseYtbLinkToVideoId(urlYoutube);
-    if (listSong.findIndex((x) => x === id) >= 0) {
-      return;
-    }
+    // if (listSong.findIndex((x) => x === id) >= 0) {
+    //   return;
+    // }
     const connect = peerInstance.current.connect(remotePeerIdValue);
     connect.on("open", () => {
       connect.send(id);
