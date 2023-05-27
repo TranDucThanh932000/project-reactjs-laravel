@@ -18,3 +18,8 @@ export const TypeInputQrCode = {
     LINK: 1,
     IMAGE: 3
 }
+
+export const Level = {
+    NONE: 0,
+    VIP: 1
+}

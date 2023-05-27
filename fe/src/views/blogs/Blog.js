@@ -15,18 +15,19 @@ import ShareIcon from "@mui/icons-material/Share";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import CircularProgress from "@mui/material/CircularProgress";
-import CancelIcon from '@mui/icons-material/Cancel';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import CancelIcon from "@mui/icons-material/Cancel";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 import * as blogService from "../../services/blogService";
 import * as blogLikeService from "../../services/blogLikeService";
-import * as categoryService from '../../services/categoryService'
+import * as categoryService from "../../services/categoryService";
 import store from "../../store";
 import { connect } from "react-redux";
 
 import classNames from "classnames/bind";
 import styles from "./Blog.module.scss";
 import {
+  Badge,
   Button,
   Chip,
   FormControl,
@@ -35,8 +36,12 @@ import {
   MenuItem,
   OutlinedInput,
   Select,
+  Tooltip,
 } from "@mui/material";
-import { updateStatusLoading, updateTextAlert } from "../../store/actions/commonAction";
+import {
+  updateStatusLoading,
+  updateTextAlert,
+} from "../../store/actions/commonAction";
 import { useTheme } from "@mui/material/styles";
 import moment from "moment";
 import { Box } from "@mui/system";
@@ -45,10 +50,13 @@ import CreateBlog from "./CreateBlog";
 import SkeletonBlog from "./Skeleton";
 import { Link, useNavigate } from "react-router-dom";
 import GroupCheckBox from "../../components/GroupCheckBox";
+import StarPurple500OutlinedIcon from "@mui/icons-material/StarPurple500Outlined";
+import { styled } from "@mui/material/styles";
+import { Level } from "../../utils/constants";
 
 const mapStateToProps = (state) => {
   return {
-    logged: state.commonReducer.logged
+    logged: state.commonReducer.logged,
   };
 };
 const cx = classNames.bind(styles);
@@ -70,19 +78,45 @@ function Blog(props) {
   const [loadMore, setLoadMore] = React.useState(false);
   const [doneFirstLoad, setDoneFirstLoad] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const colorAvatar = ["red", "pink", "grey", "blue", "green", "yellow", "orange", "gray", "#123333", "#678123"];
+  const colorAvatar = [
+    "red",
+    "pink",
+    "grey",
+    "blue",
+    "green",
+    "yellow",
+    "orange",
+    "gray",
+    "#123333",
+    "#678123",
+  ];
   const [listType, setListType] = React.useState([]);
   const [typeChoosed, setTypeChoosed] = React.useState([]);
   const [resetItemLength, setResetItemLength] = React.useState(false);
   //popper search
-  const [listChildrenGroupCheckBox, setListChildrenGroupCheckBox] = React.useState([
-    { key: 'view', label: "Nhiều lượt xem nhất", handleChange: () => { mostView() }, checked: false },
-    { key: 'blog_likes_count', label: "Nhiều like nhất", handleChange: () => { mostLike() }, checked: false },
-  ]);
+  const [listChildrenGroupCheckBox, setListChildrenGroupCheckBox] =
+    React.useState([
+      {
+        key: "view",
+        label: "Nhiều lượt xem nhất",
+        handleChange: () => {
+          mostView();
+        },
+        checked: false,
+      },
+      {
+        key: "blog_likes_count",
+        label: "Nhiều like nhất",
+        handleChange: () => {
+          mostLike();
+        },
+        checked: false,
+      },
+    ]);
   const [sortBy, setSortBy] = React.useState("");
   const [anchorElPopperSearch, setAnchorElPopperSearch] = React.useState(null);
   const openPopperDetailSearch = Boolean(anchorElPopperSearch);
-  const idPopperSearch = openPopperDetailSearch ? 'simple-popper-2' : undefined;
+  const idPopperSearch = openPopperDetailSearch ? "simple-popper-2" : undefined;
   const navigate = useNavigate();
 
   const handleClickPopperSearch = (event) => {
@@ -92,53 +126,56 @@ function Blog(props) {
   const formatTime = React.useCallback((val) => {
     return moment(val, "YYYY-MM-DD hh:mm:ss").format("DD/MM/YYYY hh:mm");
   }, []);
-  
+
   const sortByGroupCheckBox = async (listCheckBox) => {
     let txtSearch = "";
-    listCheckBox.forEach(x => {
-      if(x.checked) {
-        txtSearch += (x.key + ",");
+    listCheckBox.forEach((x) => {
+      if (x.checked) {
+        txtSearch += x.key + ",";
       }
-    })
-    if(txtSearch.length > 0) {
+    });
+    if (txtSearch.length > 0) {
       txtSearch = txtSearch.substring(0, txtSearch.length - 1);
     }
     setSortBy(txtSearch);
     store.dispatch(updateStatusLoading(true));
     await handleLoadData(15, typeChoosed, false, txtSearch);
     store.dispatch(updateStatusLoading(false));
-  }
+  };
 
   const mostView = React.useCallback(() => {
-    let newValue = listChildrenGroupCheckBox.map(x => {
-      if(x.key === 'view') {
+    let newValue = listChildrenGroupCheckBox.map((x) => {
+      if (x.key === "view") {
         x.checked = !x.checked;
       }
       return x;
-    })
+    });
     setListChildrenGroupCheckBox(newValue);
     sortByGroupCheckBox(newValue);
   }, [listChildrenGroupCheckBox]);
 
   const mostLike = React.useCallback(() => {
-    let newValue = listChildrenGroupCheckBox.map(x => {
-      if(x.key === 'blog_likes_count') {
+    let newValue = listChildrenGroupCheckBox.map((x) => {
+      if (x.key === "blog_likes_count") {
         x.checked = !x.checked;
       }
       return x;
-    })
+    });
     setListChildrenGroupCheckBox(newValue);
     sortByGroupCheckBox(newValue);
   }, [listChildrenGroupCheckBox]);
 
-  const handleChangeParentGroupCheckBox = React.useCallback((value) => {
-    let newValue = listChildrenGroupCheckBox.map(x => {
-      x.checked = value
-      return x;
-    })
-    setListChildrenGroupCheckBox(newValue);
-    sortByGroupCheckBox(newValue);
-  }, [listChildrenGroupCheckBox]);
+  const handleChangeParentGroupCheckBox = React.useCallback(
+    (value) => {
+      let newValue = listChildrenGroupCheckBox.map((x) => {
+        x.checked = value;
+        return x;
+      });
+      setListChildrenGroupCheckBox(newValue);
+      sortByGroupCheckBox(newValue);
+    },
+    [listChildrenGroupCheckBox]
+  );
 
   const checkAllGroupCheckBox = () => {
     let check = true;
@@ -155,8 +192,8 @@ function Blog(props) {
   // };
 
   const handleFavorite = async (val, index) => {
-    if(! props.logged) {
-      navigate('/login');
+    if (!props.logged) {
+      navigate("/login");
       return;
     }
     const newItems = [...items];
@@ -180,27 +217,29 @@ function Blog(props) {
   };
 
   const handleLoadData = async (amount, categories, isScroll, sortBy) => {
-    await blogService.blogs(isScroll ? items.length : 0, amount, categories, sortBy).then((res) => {
-      if (!res) {
-        //too many request
-        return;
-      }
-      //setItems((prev) => prev.push(...res.blogs));
-      //như trên không chạy, khả năng do nó k thấy sự thay đổi địa chỉ nên không rerender
-      //còn concat này nó đẩy thêm data mới vào và tạo ra 1 mảng có địa chỉ mới
-      if (isScroll) {
-        setItems((prev) => prev.concat(res.blogs));
-      } else {
-        setItems(() => [].concat(res.blogs));
-      }
-      setResetItemLength((prev) => !prev);
-      if (res.blogs.length === 0) {
-        store.dispatch(updateTextAlert('Không còn bài viết nào!'));
-        setTimeout(() => {
-          store.dispatch(updateTextAlert(''));
-        }, 3000)
-      }
-    });
+    await blogService
+      .blogs(isScroll ? items.length : 0, amount, categories, sortBy)
+      .then((res) => {
+        if (!res) {
+          //too many request
+          return;
+        }
+        //setItems((prev) => prev.push(...res.blogs));
+        //như trên không chạy, khả năng do nó k thấy sự thay đổi địa chỉ nên không rerender
+        //còn concat này nó đẩy thêm data mới vào và tạo ra 1 mảng có địa chỉ mới
+        if (isScroll) {
+          setItems((prev) => prev.concat(res.blogs));
+        } else {
+          setItems(() => [].concat(res.blogs));
+        }
+        setResetItemLength((prev) => !prev);
+        if (res.blogs.length === 0) {
+          store.dispatch(updateTextAlert("Không còn bài viết nào!"));
+          setTimeout(() => {
+            store.dispatch(updateTextAlert(""));
+          }, 3000);
+        }
+      });
   };
 
   const handleCreateBlog = (val) => {
@@ -209,19 +248,21 @@ function Blog(props) {
 
   const getListType = () => {
     categoryService.getListType().then((res) => {
-      setListType([{
-        id: '',
-        name: 'Tất cả'
-      }, 
-      ...res]);
-    })
-  }
+      setListType([
+        {
+          id: "",
+          name: "Tất cả",
+        },
+        ...res,
+      ]);
+    });
+  };
 
   //load 15 blog last of any category
   React.useEffect(async () => {
     store.dispatch(updateStatusLoading(true));
     getListType();
-    await handleLoadData(15, '', false, '');
+    await handleLoadData(15, "", false, "");
     setDoneFirstLoad(true);
     store.dispatch(updateStatusLoading(false));
   }, []);
@@ -231,7 +272,7 @@ function Blog(props) {
     const scrollY = window.scrollY || window.pageYOffset;
     const scrollHeight = document.documentElement.scrollHeight;
     const windowHeight = window.innerHeight;
-    if (scrollY + windowHeight >= (scrollHeight - innerHeight * 0.1)) {
+    if (scrollY + windowHeight >= scrollHeight - innerHeight * 0.1) {
       //get more 6 blogs
       setLoadMore(true);
       await handleLoadData(6, typeChoosed, true, sortBy);
@@ -281,15 +322,15 @@ function Blog(props) {
       target: { value },
     } = event;
 
-    if(value[value.length - 1].id === '') {
+    if (value[value.length - 1].id === "") {
       value = [listType[0]];
-    } else if(value.length > 1 && value[0].id === '') {
+    } else if (value.length > 1 && value[0].id === "") {
       value = [value[1]];
     }
 
     setTypeChoosed(
       // On autofill we get a stringified value.
-      () => typeof value === "string" ? value.split(",") : value
+      () => (typeof value === "string" ? value.split(",") : value)
     );
     store.dispatch(updateStatusLoading(true));
     await handleLoadData(15, value, false, sortBy);
@@ -298,17 +339,53 @@ function Blog(props) {
   //
 
   const handleDeleteSelection = async (chipToDelete) => {
-    setTypeChoosed((chips) => chips.filter((chip) => chip.id != chipToDelete.id));
+    setTypeChoosed((chips) =>
+      chips.filter((chip) => chip.id != chipToDelete.id)
+    );
     store.dispatch(updateStatusLoading(true));
-    await handleLoadData(6, typeChoosed.filter((chip) => chip.id != chipToDelete.id), false, sortBy);
+    await handleLoadData(
+      6,
+      typeChoosed.filter((chip) => chip.id != chipToDelete.id),
+      false,
+      sortBy
+    );
     store.dispatch(updateStatusLoading(false));
   };
+
+  const StyledBadge = styled(Badge)(({ theme }) => ({
+    "& .MuiBadge-badge": {
+      backgroundColor: "#44b700",
+      color: "#44b700",
+      boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+      "&::after": {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        borderRadius: "50%",
+        animation: "ripple 1.2s infinite ease-in-out",
+        border: "1px solid currentColor",
+        content: '""',
+      },
+    },
+    "@keyframes ripple": {
+      "0%": {
+        transform: "scale(.8)",
+        opacity: 1,
+      },
+      "100%": {
+        transform: "scale(2.4)",
+        opacity: 0,
+      },
+    },
+  }));
 
   return (
     <div className={cx("wrapper")}>
       <Grid container spacing={2} sx={{ my: 2 }}>
-        <Grid item xs={12} md={4} className={cx('py-0')}>
-          <FormControl sx={{ width: '100%' }}>
+        <Grid item xs={12} md={4} className={cx("py-0")}>
+          <FormControl sx={{ width: "100%" }}>
             <InputLabel id="demo-multiple-chip-label">Thể loại</InputLabel>
             <Select
               labelId="demo-multiple-chip-label"
@@ -316,49 +393,72 @@ function Blog(props) {
               multiple
               value={typeChoosed}
               onChange={handleChange}
-              input={<OutlinedInput id="select-multiple-chip" label="Thể loại" />}
+              input={
+                <OutlinedInput id="select-multiple-chip" label="Thể loại" />
+              }
               renderValue={(selected) => (
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                   <>
                     {selected.map((value) => (
-                      <Chip key={value.id} label={value.name} color="primary" 
-                      deleteIcon={
-                        <CancelIcon
-                          onMouseDown={(event) => event.stopPropagation()}
-                        />
-                      }
-                      onDelete={() => handleDeleteSelection(value)}/>
+                      <Chip
+                        key={value.id}
+                        label={value.name}
+                        color="primary"
+                        deleteIcon={
+                          <CancelIcon
+                            onMouseDown={(event) => event.stopPropagation()}
+                          />
+                        }
+                        onDelete={() => handleDeleteSelection(value)}
+                      />
                     ))}
                   </>
                 </Box>
               )}
               MenuProps={MenuProps}
             >
-              {
-                listType.map((x) => (
-                  <MenuItem
-                    key={x.id}
-                    value={x}
-                    style={getStyles(x.name, typeChoosed, theme)}
-                  >
-                    {x.name}
-                  </MenuItem>
-                ))
-              }
+              {listType.map((x) => (
+                <MenuItem
+                  key={x.id}
+                  value={x}
+                  style={getStyles(x.name, typeChoosed, theme)}
+                >
+                  {x.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={12} md={4} className={cx('py-0')}>
-          <Button aria-describedby={idPopperSearch} type="button" onClick={handleClickPopperSearch} variant="outlined" endIcon={<ArrowDropDownIcon />} >
+        <Grid item xs={12} md={4} className={cx("py-0")}>
+          <Button
+            aria-describedby={idPopperSearch}
+            type="button"
+            onClick={handleClickPopperSearch}
+            variant="outlined"
+            endIcon={<ArrowDropDownIcon />}
+          >
             Bộ lọc chi tiết
           </Button>
-          <Popper style={{zIndex: '100'}} id={idPopperSearch} open={openPopperDetailSearch} anchorEl={anchorElPopperSearch}>
-            <Box sx={{ border: '1px solid grey', p: 1, bgcolor: 'background.paper', borderRadius: '10px', boxShadow: '0px 0px 20px 3px rgba(0, 0, 0, 0.5)' }}>
-              <GroupCheckBox 
-              listChildren={listChildrenGroupCheckBox}
-              handleChangeParent={handleChangeParentGroupCheckBox}
-              labelParent={"Tất cả"}
-              checkAll={checkAllGroupCheckBox}
+          <Popper
+            style={{ zIndex: "100" }}
+            id={idPopperSearch}
+            open={openPopperDetailSearch}
+            anchorEl={anchorElPopperSearch}
+          >
+            <Box
+              sx={{
+                border: "1px solid grey",
+                p: 1,
+                bgcolor: "background.paper",
+                borderRadius: "10px",
+                boxShadow: "0px 0px 20px 3px rgba(0, 0, 0, 0.5)",
+              }}
+            >
+              <GroupCheckBox
+                listChildren={listChildrenGroupCheckBox}
+                handleChangeParent={handleChangeParentGroupCheckBox}
+                labelParent={"Tất cả"}
+                checkAll={checkAllGroupCheckBox}
               ></GroupCheckBox>
             </Box>
           </Popper>
@@ -369,12 +469,16 @@ function Blog(props) {
           md={4}
           container
           direction="row"
-          justifyContent={{xs: "", md: "flex-end"}}
+          justifyContent={{ xs: "", md: "flex-end" }}
           marginTop={{ xs: "10px", md: "0" }}
-          className={cx('py-0')}
+          className={cx("py-0")}
         >
           <Box>
-            <CreateBlog createBlog={handleCreateBlog} listType={listType} MenuProps={MenuProps}></CreateBlog>
+            <CreateBlog
+              createBlog={handleCreateBlog}
+              listType={listType}
+              MenuProps={MenuProps}
+            ></CreateBlog>
           </Box>
         </Grid>
       </Grid>
@@ -383,19 +487,39 @@ function Blog(props) {
         {items.length
           ? items.map((x, index) => {
               return (
-                <Grid key={index} item className={cx('item')}>
+                <Grid key={index} item className={cx("item")}>
                   <Card sx={{ maxWidth: "100%" }}>
                     <CardHeader
                       avatar={
-                        <Avatar
-                          sx={{
-                            bgcolor: colorAvatar[x.user.id % 10],
+                        <Badge
+                          overlap="circular"
+                          anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "right",
                           }}
-                          aria-label="recipe"
-                          src={`https://docs.google.com/uc?id=${x.user.avatar}`}
+                          badgeContent={
+                            x.user.level !== Level.NONE ? (
+                              <Tooltip title="VIP">
+                                <StarPurple500OutlinedIcon
+                                  style={{ color: "red" }}
+                                />
+                              </Tooltip>
+                            ) : (
+                              <></>
+                            )
+                          }
                         >
-                          {x.user.name[0]}
-                        </Avatar>
+                          <Avatar
+                            sx={{
+                              bgcolor: colorAvatar[x.user.id % 10],
+                            }}
+                            aria-label="recipe"
+                            alt=""
+                            src={`https://docs.google.com/uc?id=${x.user.avatar}`}
+                          >
+                            {x.user.name[0]}
+                          </Avatar>{" "}
+                        </Badge>
                       }
                       action={
                         <IconButton aria-label="settings">
@@ -406,44 +530,48 @@ function Blog(props) {
                       subheader={formatTime(x.updated_at)}
                     />
                     <Link to={`/${x.id}`}>
-                    <CardContent>
-                      <Box>
-                        <Grid container spacing={2}>
-                          {x.blog_medias.length > 0 &&
-                            x.blog_medias.map((img) => (
-                              <Grid key={img.id} item sm={12} md={6}>
-                                <CardMedia
-                                  component="img"
-                                  height="194"
-                                  image={`https://docs.google.com/uc?id=${img.url}`}
-                                  alt="Image"
-                                  aria-describedby={img.id}
-                                  className={cx(
-                                    "image-blog",
-                                    "border-radius-1"
-                                  )}
-                                />
-                              </Grid>
-                            ))}
-                        </Grid>
-                      </Box>
-                      <Popper id={id} open={openPopper} anchorEl={anchorEl}>
-                        <Box
-                          sx={{ border: 1, p: 1, bgcolor: "background.paper" }}
-                        >
-                          {x.id}
+                      <CardContent>
+                        <Box>
+                          <Grid container spacing={2}>
+                            {x.blog_medias.length > 0 &&
+                              x.blog_medias.map((img) => (
+                                <Grid key={img.id} item sm={12} md={6}>
+                                  <CardMedia
+                                    component="img"
+                                    height="194"
+                                    image={`https://docs.google.com/uc?id=${img.url}`}
+                                    alt="Image"
+                                    aria-describedby={img.id}
+                                    className={cx(
+                                      "image-blog",
+                                      "border-radius-1"
+                                    )}
+                                  />
+                                </Grid>
+                              ))}
+                          </Grid>
                         </Box>
-                      </Popper>
-                    </CardContent>
-                    <CardContent>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        className={cx("word-break")}
-                      >
-                        {x.short_description}
-                      </Typography>
-                    </CardContent>
+                        <Popper id={id} open={openPopper} anchorEl={anchorEl}>
+                          <Box
+                            sx={{
+                              border: 1,
+                              p: 1,
+                              bgcolor: "background.paper",
+                            }}
+                          >
+                            {x.id}
+                          </Box>
+                        </Popper>
+                      </CardContent>
+                      <CardContent>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          className={cx("word-break")}
+                        >
+                          {x.short_description}
+                        </Typography>
+                      </CardContent>
                     </Link>
                     <CardActions disableSpacing>
                       {!x.blog_likes.length ? (
