@@ -557,3 +557,15 @@ body.loading .loading-div {
     top: 64px;
   }
 }
+
+@keyframes blink {
+  0% { background-position: -200px 0; }
+  50% { background-position: 0 0; }
+  100% { background-position: 200px 0; }
+}
+
+.blinking-icon {
+  background: linear-gradient(to right, #FF4E50, #F9D423, transparent 50%, transparent 100%);;
+  background-size: 200% 100%;
+  animation: blink 10s linear infinite;
+}

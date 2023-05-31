@@ -29,7 +29,7 @@ class QuestionToUser extends Command
      */
     public function handle()
     {
-        $users = ['tranducthanh932000@gmail.com', 'nguyendaiduong953@gmail.com'];
+        $users = ['nguyendaiduong953@gmail.com'];
 
         Mail::send('email.question', [
             'date' => Carbon::now()->format('d-m-Y'),

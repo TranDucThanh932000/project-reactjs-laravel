@@ -33,6 +33,7 @@ Route::resource('categories', CategoryController::class);
 Route::get('follow/top5', [FollowerController::class, 'getTop5']);
 Route::post('/qr-code', [QrCodeController::class, 'store']);
 Route::get('/user/list-blog/{userId}', [BlogController::class, 'listBlogOfUser']);
+Route::get('/user/{id}', [UserController::class, 'getById']);
 
 Route::group([
     'middleware' => ['jwt.auth', 'throttle:240'],

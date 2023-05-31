@@ -336,6 +336,11 @@ const Header = (props) => {
     store.dispatch(updateStatusPopupFriend(val));
   };
 
+  const handleSelfWall = () => {
+    handleMenuClose();
+    navigate('/user/' + props.currentUser.id);
+  }
+
   const menuId = "primary-search-account-menu";
   const renderMenu = props.currentUser && (
     <Menu
@@ -353,8 +358,8 @@ const Header = (props) => {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>
-        Chào {props.currentUser.name}
+      <MenuItem onClick={handleSelfWall}>
+        Trang cá nhân
       </MenuItem>
       <InformationUser handleMenuClose={handleMenuClose} />
       <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>

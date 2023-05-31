@@ -37,3 +37,12 @@ export const getListBlogOfUser = async (id) => {
         console.log(error);
     }
 }
+
+export const getById = async (id) => {
+    try {
+        const res = await httpRequest.get(`user/${id}`);
+        return res;
+    } catch (error) {
+        console.log(error);
+    }
+}

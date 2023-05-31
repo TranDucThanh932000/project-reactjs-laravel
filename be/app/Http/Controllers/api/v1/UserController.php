@@ -31,4 +31,19 @@ class UserController extends Controller
         return response()->json($this->user->updateInfor($request), StatusCode::OK);
     }
 
+    public function getById(Request $request)
+    {
+        $user = $this->user->getById($request->id);
+        if(! $user) {
+            return response()->json([], StatusCode::BAD_REQUEST);
+        }
+        return response()->json([
+            'avatar' => $user->avatar,
+            'id' => $user->id,
+            'name' => $user->name,
+            'level' => $user->level,
+            'description' => $user->description
+        ], StatusCode::OK);
+    }
+
 }
