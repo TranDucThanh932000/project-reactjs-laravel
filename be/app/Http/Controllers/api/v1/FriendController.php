@@ -71,4 +71,19 @@ class FriendController extends Controller
             'status' => $this->friend->acceptRequest($user->id, $request->friend)
         ], StatusCode::OK);
     }
+
+    public function listFriend(Request $request)
+    {
+        $dataRaw = $this->friend->getAllFriend($request->id);
+        $dataResp = [];
+        foreach($dataRaw as $item) {
+            if($item->user_id == $request->id) {
+                $dataResp[] = $item->friendEntity;
+            } else {
+                $dataResp[] = $item->user;
+            }
+        }
+
+        return response()->json($dataResp, StatusCode::OK);
+    }
 }

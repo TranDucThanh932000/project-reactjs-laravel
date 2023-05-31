@@ -26,6 +26,8 @@ import {
   updateNotification,
   updateNotiStack,
   removeFirstNotiStack,
+  updateStatusPopupFriend,
+  updateListFriend
 } from "../../../store/actions/commonAction";
 import {
   openAndCloseChatting,
@@ -41,14 +43,17 @@ import * as notification from "../../../services/notificationService";
 import Switch from "@mui/material/Switch";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import { Avatar, Button, ListItemAvatar, ListItemText } from "@mui/material";
+import { Avatar, Button, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, SwipeableDrawer } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import * as chattingService from "../../../services/chattingService";
+import * as userService from '../../../services/userService'
 import Pusher from "pusher-js";
 import { StatusRead, TypeNotification } from "../../../utils/constants";
 import Brightness1Icon from "@mui/icons-material/Brightness1";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import InformationUser from "../../../components/Popup/informationUser";
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import GroupIcon from '@mui/icons-material/Group';
 
 const cx = classNames.bind(styles);
 
@@ -104,6 +109,8 @@ const mapStateToProps = (state) => {
     currentUser: state.commonReducer.currentUser,
     notifications: state.commonReducer.notifications,
     listFriendOnline: state.commonReducer.listFriendOnline,
+    listFriend: state.commonReducer.listFriend,
+    openListFriend: state.commonReducer.openListFriend
   };
 };
 
@@ -226,6 +233,9 @@ const Header = (props) => {
       notification.countNotification().then((data) => {
         setCountNotificationUnread(data);
       });
+      userService.getListFriend(props.currentUser.id).then((data) => {
+        store.dispatch(updateListFriend(data));
+      })
     }
 
     return () => {
@@ -322,6 +332,10 @@ const Header = (props) => {
     }
   };
 
+  const handleShowListFriend = (val) => {
+    store.dispatch(updateStatusPopupFriend(val));
+  };
+
   const menuId = "primary-search-account-menu";
   const renderMenu = props.currentUser && (
     <Menu
@@ -340,7 +354,7 @@ const Header = (props) => {
       onClose={handleMenuClose}
     >
       <MenuItem onClick={handleMenuClose}>
-        Chào {props.currentUser.name} - {props.currentUser.id}
+        Chào {props.currentUser.name}
       </MenuItem>
       <InformationUser handleMenuClose={handleMenuClose} />
       <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
@@ -376,8 +390,17 @@ const Header = (props) => {
           />
         </FormGroup>
       </MenuItem>
+      <MenuItem onClick={() => handleShowListFriend(!props.openListFriend)}>
+        <IconButton
+          size="large"
+          color="inherit"
+        >
+          <GroupIcon />
+        </IconButton>
+        <p>Bạn bè</p>
+      </MenuItem>
       <MenuItem>
-        <IconButton size="large" aria-label="show 4 new mails" color="inherit">
+        <IconButton size="large" aria-label="show new message" color="inherit">
           <Badge badgeContent={4} color="error">
             <MailIcon />
           </Badge>
@@ -452,6 +475,62 @@ const Header = (props) => {
       .then(() => {});
   };
 
+  const handleChooseFriendBtn = (event, id) => {
+    friend.current = id;
+    event.stopPropagation();
+    setAnchorElItemFriend(event.currentTarget);
+  }
+
+  const [anchorElItemFriend, setAnchorElItemFriend] = React.useState(null);
+  const openFriendOpenFriend = Boolean(anchorElItemFriend);
+  const friend = React.useRef(0);
+
+  const handleCloseOpenFriend = (event) => {
+    event.preventDefault();
+    setAnchorElItemFriend(null);
+  };
+
+  const handleChooseMessage = (id) => {
+    if (
+      props.chatting.findIndex(
+        (user) => user.toUserId == id
+      ) < 0
+    ) {
+      chattingService
+        .getMessageOfFriend(id)
+        .then((res) => {
+          let newUserMsg = {
+            toUserId: id,
+            info: res.info,
+            currentMsg: "",
+            msg: [],
+          };
+          res.msgs.forEach((msg) => {
+            newUserMsg.msg.push({
+              message: msg.content,
+              toOther:
+                id == msg.to_user_id ? true : false,
+              created_at: msg.created_at,
+              id: msg.id,
+            });
+          });
+          store.dispatch(openAndGetMsg(newUserMsg));
+        })
+        .catch(() => {});
+    } else {
+      store.dispatch(openAndCloseChatting(id));
+    }
+    setAnchorMessage(null);
+    setAnchorElItemFriend(null);
+    handleShowListFriend(false);
+  }
+
+  const handleChooseFriend = (event, id) => {
+    friend.current = id;
+    event.stopPropagation();
+    handleChooseMessage(id);
+  };
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="fixed" open={props.open}>
@@ -497,6 +576,77 @@ const Header = (props) => {
             </IconButton>
             {props.currentUser && (
               <>
+                <IconButton
+                  size="large"
+                  aria-controls={props.openListFriend ? "basic-menu" : undefined}
+                  onClick={() => handleShowListFriend(!props.openListFriend)}
+                  className={cx("text-white")}
+                >
+                  <GroupIcon />
+                </IconButton>
+                <SwipeableDrawer
+                  anchor={'right'}
+                  // onClick={() => handleShowListFriend(!props.openListFriend)}
+                  open={props.openListFriend}
+                  onClose={() => handleShowListFriend(false)}
+                  onOpen={() => handleShowListFriend(true)}
+                  className={cx("draw-list-friend")}
+                >
+                  <List>
+                    {props.listFriend.map((friend, index) => (
+                      <ListItem key={index} disablePadding onClick={(e) => handleChooseFriend(e, friend.id)}>
+                        <ListItemButton>
+                          <ListItemAvatar>
+                            <StyledBadge
+                              overlap="circular"
+                              anchorOrigin={{
+                                vertical: "bottom",
+                                horizontal: "right",
+                              }}
+                              variant={
+                                props.listFriendOnline.findIndex(
+                                  (user) => user.id == friend.id
+                                ) >= 0
+                                  ? "dot"
+                                  : "standard"
+                              }
+                            >
+                              <Avatar
+                                alt={friend.name}
+                                src={`https://docs.google.com/uc?id=${friend.avatar}`}
+                              />
+                            </StyledBadge>
+                          </ListItemAvatar>
+                          <ListItemText primary={friend.name} />
+                          <div>
+                            <IconButton
+                              id="basic-button"
+                              aria-controls={openFriendOpenFriend ? 'basic-menu' : undefined}
+                              aria-haspopup="true"
+                              aria-expanded={openFriendOpenFriend ? 'true' : undefined}
+                              onClick={(e) => handleChooseFriendBtn(e, friend.id)}
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
+                          </div>
+                        </ListItemButton>
+                      </ListItem>
+                    ))}
+                  </List>
+                  <Menu
+                    id="basic-menu"
+                    anchorEl={anchorElItemFriend}
+                    open={openFriendOpenFriend}
+                    onClose={handleCloseOpenFriend}
+                    MenuListProps={{
+                      'aria-labelledby': 'basic-button',
+                    }}
+                  >
+                    <MenuItem onClick={() => handleChooseMessage(friend.current)}>Nhắn tin</MenuItem>
+                    <MenuItem onClick={() => navigate(`/user/${friend.current}`)}>Xem trang cá nhân</MenuItem>
+                  </Menu>
+                </SwipeableDrawer>
+
                 <IconButton
                   size="large"
                   aria-label="show 4 new mails"

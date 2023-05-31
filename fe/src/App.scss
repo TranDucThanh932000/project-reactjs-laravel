@@ -550,3 +550,10 @@ body.loading .loading-div {
   width: 16px;
   height: 16px;
 }
+
+.draw-list-friend  {
+  .MuiDrawer-paper {
+    min-width: 320px;
+    top: 64px;
+  }
+}

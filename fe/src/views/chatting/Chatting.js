@@ -51,13 +51,13 @@ const Chatting = (props) => {
     return result;
   }
   
-  const generateUniqueKey = (length, existingKeys) => {
-    let key = generateRandomKey(length);
-    while (existingKeys.includes(key)) {
-      key = generateRandomKey(length);
-    }
-    return key;
-  }
+  // const generateUniqueKey = (length) => {
+  //   let key = generateRandomKey(length);
+  //   while (existingKeys.includes(key)) {
+  //     key = generateRandomKey(length);
+  //   }
+  //   return key;
+  // }
 
   const handleClickSendMessage = async (message, toUserId, index) => {
     await store.dispatch(
@@ -67,7 +67,7 @@ const Chatting = (props) => {
           user_id: props.currentUser.id,
           to_user_id: toUserId,
           created_at: new Date(),
-          id: generateUniqueKey(16, generateRandomKey(16)),
+          id: generateRandomKey(16),
         },
         currentUser: props.currentUser,
       })

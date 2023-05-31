@@ -5,7 +5,8 @@ const routes = {
     register: '/register',
     luckyNumberToday: '/lucky-number-today',
     qrcode: '/qr-code',
-    listenTogether: '/listen-together'
+    listenTogether: '/listen-together',
+    wall: '/user/:id'
 };
 
 export default routes;

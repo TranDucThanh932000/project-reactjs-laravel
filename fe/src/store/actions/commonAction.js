@@ -90,3 +90,17 @@ export const updateListFriendOnline = (payload) => {
         payload
     }
 }
+
+export const updateListFriend = (payload) => {
+    return {
+        type: actionName.UPDATE_FRIEND,
+        payload
+    }
+}
+
+export const updateStatusPopupFriend = (payload) => {
+    return {
+        type: actionName.UPDATE_STATUS_POPUP_FRIEND,
+        payload
+    }
+}

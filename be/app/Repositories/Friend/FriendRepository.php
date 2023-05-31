@@ -54,4 +54,19 @@ class FriendRepository implements FriendInterface
 
         return $relationship->save();
     }
+
+    public function getAllFriend($id)
+    {
+        return $this->friend
+        ->where('status', StatusFriend::ACCEPTED)
+        ->where(function($q) use ($id) {
+            return $q->where('user_id', $id)->orWhere('friend', $id);
+        })
+        ->with(['friendEntity' => function($q) {
+            return $q->select('id', 'name', 'avatar');
+        }, 'user' => function($q) {
+            return $q->select('id', 'name', 'avatar');
+        }])
+        ->get();
+    }
 }

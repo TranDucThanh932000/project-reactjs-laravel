@@ -429,7 +429,7 @@ function Blog(props) {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={12} md={4} className={cx("py-0")}>
+        <Grid item xs={12} md={4} className={cx("py-0")} marginTop={{ xs: "10px", md: "0" }}>
           <Button
             aria-describedby={idPopperSearch}
             type="button"
@@ -487,7 +487,7 @@ function Blog(props) {
         {items.length
           ? items.map((x, index) => {
               return (
-                <Grid key={index} item className={cx("item")}>
+                <Grid key={index} item className={cx("item")} style={{height: 'min-content'}}>
                   <Card sx={{ maxWidth: "100%" }}>
                     <CardHeader
                       avatar={

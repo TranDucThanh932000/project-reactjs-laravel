@@ -83,4 +83,17 @@ class BlogsRepository implements BlogsInterface
         
         return $blog->save();
     }
+
+    public function getBlogOfUser($userId)
+    {
+        return $this->blog
+        ->select('id', 'user_id', 'title', 'short_description', 'created_at', 'updated_at', 'view')
+        ->with(['user', 'blogMedias'])
+        ->withCount('blogLikes')
+        ->where('status', BlogStatus::PUBLIC)
+        ->where('user_id', $userId)
+        ->orderByDesc('blogs.created_at')
+        ->distinct()
+        ->get();
+    }
 }

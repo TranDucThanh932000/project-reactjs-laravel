@@ -36,7 +36,9 @@ const initialState = {
   currentUser: null,
   notifications: [],
   notiStack: [],
-  listFriendOnline: []
+  listFriendOnline: [],
+  openListFriend: false,
+  listFriend: []
 };
 
 const commonReducer = (state = initialState, action) => {
@@ -137,6 +139,18 @@ const commonReducer = (state = initialState, action) => {
       return {
         ...state,
         listFriendOnline: action.payload
+      }
+    case actionName.UPDATE_FRIEND:
+      
+      return {
+        ...state,
+        listFriend: action.payload
+      }
+    case actionName.UPDATE_STATUS_POPUP_FRIEND:
+
+      return {
+        ...state,
+        openListFriend: action.payload
       }
     default:
       return state;

@@ -115,4 +115,11 @@ class BlogController extends Controller
 
         return response()->json($updateBlog, StatusCode::OK);
     }
+
+    public function listBlogOfUser(Request $request)
+    {
+        $userId = $request->userId;
+
+        return $this->blog->getBlogOfUser($userId);
+    }
 }

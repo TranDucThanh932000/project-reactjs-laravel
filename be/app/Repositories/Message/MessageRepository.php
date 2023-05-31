@@ -29,7 +29,7 @@ class MessageRepository implements MessageInterface
 
     public function usersContacted($userId)
     {
-        $users= [];
+        $users = [];
         $messages = new Collection(DB::select('select distinct user_id from messages where to_user_id = ?', [$userId]));
         if (! empty($messages)) {
             $users = $this->user->whereIn('id', $messages->pluck('user_id')->toArray())->get();

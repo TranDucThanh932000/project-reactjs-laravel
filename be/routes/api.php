@@ -32,6 +32,7 @@ Route::group(['prefix' => 'blogs',  'namespace' => 'Blog'], function() {
 Route::resource('categories', CategoryController::class);
 Route::get('follow/top5', [FollowerController::class, 'getTop5']);
 Route::post('/qr-code', [QrCodeController::class, 'store']);
+Route::get('/user/list-blog/{userId}', [BlogController::class, 'listBlogOfUser']);
 
 Route::group([
     'middleware' => ['jwt.auth', 'throttle:240'],
@@ -53,6 +54,7 @@ Route::group([
     Route::resource('bloglikes', BlogLikeController::class);
     Route::post('/friend/cancel-request', [FriendController::class, 'cancelRequest']);
     Route::post('/friend/accept-request', [FriendController::class, 'acceptRequest']);
+    Route::get('/friend/list-friend/{id}', [FriendController::class, 'listFriend']);
     Route::resource('friend', FriendController::class);
     Route::post('notification/mark-status-read', [NotificationController::class, 'markStatusRead']);
     Route::get('notification/count-noti-unread', [NotificationController::class, 'countNotificationUnRead']);
