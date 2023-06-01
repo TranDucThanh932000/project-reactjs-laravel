@@ -662,7 +662,7 @@ const Header = (props) => {
                   onClick={handleClickListMessage}
                   className={cx("text-white")}
                 >
-                  <Badge badgeContent={4} color="error">
+                  <Badge color="error">
                     <MailIcon />
                   </Badge>
                 </IconButton>

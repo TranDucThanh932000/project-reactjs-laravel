@@ -7,6 +7,7 @@ export const changeInfor = async (data) => {
     formData.append('name', data.name);
     formData.append('email', data.email);
     formData.append('password', data.password);
+    formData.append('description', data.description);
     formData.append('images[]', data.images);
     try {
         const res = await httpRequest.post(`user/${data.id}`, formData, {

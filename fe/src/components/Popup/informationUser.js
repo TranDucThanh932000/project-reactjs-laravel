@@ -36,6 +36,7 @@ const schema = Yup.object().shape({
     .max(32, "Tối đa 32 ký tự"),
   email: Yup.string().required("Yêu cầu").email("Chưa đúng định dạng email"),
   password: Yup.string().min(6, "Ít nhất 6 ký tự").max(16, "Tối đa 16 ký tự"),
+  description: Yup.string().max(255, "Tối đa 255 ký tự")
 });
 
 const InformationUser = (props) => {
@@ -57,7 +58,8 @@ const InformationUser = (props) => {
         ...props.currentUser, 
         name: values.name,
         email: values.email,
-        avatar: res.avatar
+        avatar: res.avatar,
+        description: values.description
       }));
       props.handleMenuClose();
       handleClose();
@@ -96,6 +98,7 @@ const InformationUser = (props) => {
             name: props.currentUser.name,
             email: props.currentUser.email,
             password: "",
+            description: props.currentUser.description
           }}
           validationSchema={schema}
           onSubmit={async (values, { setSubmitting }) => {
@@ -171,6 +174,18 @@ const InformationUser = (props) => {
                     helperText={touched.password && errors.password}
                     className={cx("mb-2")}
                     type="password"
+                  />
+                  <TextField
+                    fullWidth
+                    id="description"
+                    name="description"
+                    label="Mô tả ngắn gọn bản thân"
+                    value={values.description}
+                    error={touched.description && Boolean(errors.description)}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={cx("mb-2")}
+                    type="text"
                   />
                   <Grid container spacing={2}>
                     <Grid item xs={12}>

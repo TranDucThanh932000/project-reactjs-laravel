@@ -44,6 +44,7 @@ class UserRepository implements UserInterface
         $userUpdate = $this->user->find($request->id);
         $userUpdate->name = $request->name;
         $userUpdate->email = $request->email;
+        $userUpdate->description = $request->description;
         if($request['avatar']) {
             $userUpdate->avatar = $request['avatar'];
         }
