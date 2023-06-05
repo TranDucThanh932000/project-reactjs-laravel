@@ -9,4 +9,5 @@ interface FriendInterface
     public function unFriend($currentUser, $friend);
     public function acceptRequest($currentUser, $friend);
     public function getAllFriend($id);
+    public function getStatusFriend($currentUser, $friend);
 }

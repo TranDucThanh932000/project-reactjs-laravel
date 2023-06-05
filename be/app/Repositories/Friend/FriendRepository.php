@@ -69,4 +69,14 @@ class FriendRepository implements FriendInterface
         }])
         ->get();
     }
+
+    public function getStatusFriend($currentUser, $friend)
+    {
+        return $this->friend->where(function($q) use ($currentUser, $friend) {
+            $q->where('user_id', $currentUser)->where('friend', $friend);
+        })
+        ->orWhere(function($q) use ($currentUser, $friend) {
+            $q->where('user_id', $friend)->where('friend', $currentUser);
+        })->first();
+    }
 }

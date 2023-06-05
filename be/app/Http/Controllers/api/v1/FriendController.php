@@ -86,4 +86,11 @@ class FriendController extends Controller
 
         return response()->json($dataResp, StatusCode::OK);
     }
+
+    public function checkStatus(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        return response()->json($this->friend->getStatusFriend($user->id, $request->friend), StatusCode::OK);
+    }
 }

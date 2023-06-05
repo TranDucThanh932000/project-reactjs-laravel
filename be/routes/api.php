@@ -56,6 +56,7 @@ Route::group([
     Route::post('/friend/cancel-request', [FriendController::class, 'cancelRequest']);
     Route::post('/friend/accept-request', [FriendController::class, 'acceptRequest']);
     Route::get('/friend/list-friend/{id}', [FriendController::class, 'listFriend']);
+    Route::get('/friend/status/{friend}', [FriendController::class, 'checkStatus']);
     Route::resource('friend', FriendController::class);
     Route::post('notification/mark-status-read', [NotificationController::class, 'markStatusRead']);
     Route::get('notification/count-noti-unread', [NotificationController::class, 'countNotificationUnRead']);

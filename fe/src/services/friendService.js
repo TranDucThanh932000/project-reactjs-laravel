@@ -41,3 +41,12 @@ export const acceptRequest = async (friend) => {
         console.log(error);
     }
 };
+
+export const checkRelationship = async (friend) => {
+    try {
+        const res = await httpRequest.get(`/friend/status/${friend}`)
+        return res;
+    } catch (error) {
+        console.log(error);
+    }
+}

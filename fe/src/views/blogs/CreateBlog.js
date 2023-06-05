@@ -27,6 +27,13 @@ import { updateTextAlert } from "../../store/actions/commonAction";
 import store from '../../store'
 import TinyMCE from "../../components/TextEditor/TinyMCE";
 import { useTheme } from "@mui/material/styles";
+import { connect } from "react-redux";
+
+const mapStateToProps = (state) => {
+  return {
+    currentUser: state.commonReducer.currentUser
+  };
+};
 
 const cx = classNames.bind(styles);
 
@@ -104,9 +111,12 @@ const CreateBlog = (props) => {
 
   return (
     <div>
-      <Button variant="outlined" onClick={handleClickOpen}>
-        Tạo bài viết
-      </Button>
+      {
+        props.currentUser &&       
+        <Button variant="outlined" onClick={handleClickOpen}>
+          Tạo bài viết
+        </Button>
+      }
       <Formik
         initialValues={{
           title: '',
@@ -269,4 +279,4 @@ const CreateBlog = (props) => {
   );
 };
 
-export default CreateBlog;
+export default connect(mapStateToProps)(CreateBlog);

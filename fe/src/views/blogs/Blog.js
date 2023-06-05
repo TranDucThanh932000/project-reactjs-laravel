@@ -1,20 +1,11 @@
 import * as React from "react";
 // import { styled } from "@mui/material/styles";
-import Card from "@mui/material/Card";
-import CardHeader from "@mui/material/CardHeader";
-import CardMedia from "@mui/material/CardMedia";
-import CardContent from "@mui/material/CardContent";
-import CardActions from "@mui/material/CardActions";
 // import Collapse from "@mui/material/Collapse";
-import Avatar from "@mui/material/Avatar";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 // import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import CircularProgress from "@mui/material/CircularProgress";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
@@ -33,30 +24,47 @@ import {
   FormControl,
   Grid,
   InputLabel,
+  LinearProgress,
+  Menu,
   MenuItem,
   OutlinedInput,
   Select,
   Tooltip,
+  CircularProgress,
+  Avatar,
+  IconButton,
+  CardActions,
+  CardContent,
+  CardMedia,
+  CardHeader,
+  Card,
+  Typography,
+  Popper
+
 } from "@mui/material";
 import {
   updateStatusLoading,
   updateTextAlert,
 } from "../../store/actions/commonAction";
-import { useTheme } from "@mui/material/styles";
 import moment from "moment";
 import { Box } from "@mui/system";
-import Popper from "@mui/material/Popper";
 import CreateBlog from "./CreateBlog";
 import SkeletonBlog from "./Skeleton";
 import { Link, useNavigate } from "react-router-dom";
 import GroupCheckBox from "../../components/GroupCheckBox";
 import StarPurple500OutlinedIcon from "@mui/icons-material/StarPurple500Outlined";
-import { styled } from "@mui/material/styles";
-import { Level } from "../../utils/constants";
+import { styled, useTheme } from "@mui/material/styles";
+import { Level, StatusFriend } from "../../utils/constants";
+import * as friendService from '../../services/friendService';
+import * as chattingService from '../../services/chattingService';
+import { openAndCloseChatting, openAndGetMsg } from '../../store/actions/chattingAction';
 
+const LOADING_STATUS_FRIEND = 9999;
 const mapStateToProps = (state) => {
   return {
     logged: state.commonReducer.logged,
+    chatting: state.chattingReducer.chatting,
+    currentUser: state.commonReducer.currentUser
   };
 };
 const cx = classNames.bind(styles);
@@ -117,6 +125,13 @@ function Blog(props) {
   const [anchorElPopperSearch, setAnchorElPopperSearch] = React.useState(null);
   const openPopperDetailSearch = Boolean(anchorElPopperSearch);
   const idPopperSearch = openPopperDetailSearch ? "simple-popper-2" : undefined;
+  const [anchorOption, setAnchorOption] = React.useState(null);
+  const openOption = Boolean(anchorOption);
+  const userChoosed = React.useRef(0);
+  const [relationship, setRelationship] = React.useState({
+    status: LOADING_STATUS_FRIEND
+  });
+
   const navigate = useNavigate();
 
   const handleClickPopperSearch = (event) => {
@@ -352,34 +367,152 @@ function Blog(props) {
     store.dispatch(updateStatusLoading(false));
   };
 
-  const StyledBadge = styled(Badge)(({ theme }) => ({
-    "& .MuiBadge-badge": {
-      backgroundColor: "#44b700",
-      color: "#44b700",
-      boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-      "&::after": {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        borderRadius: "50%",
-        animation: "ripple 1.2s infinite ease-in-out",
-        border: "1px solid currentColor",
-        content: '""',
-      },
-    },
-    "@keyframes ripple": {
-      "0%": {
-        transform: "scale(.8)",
-        opacity: 1,
-      },
-      "100%": {
-        transform: "scale(2.4)",
-        opacity: 0,
-      },
-    },
-  }));
+  const handleChooseOptionUser = async (e, id) => {
+    userChoosed.current = id;
+    e.stopPropagation();
+    setAnchorOption(e.currentTarget);
+    if (props.currentUser) {
+      await friendService.checkRelationship(id)
+      .then((data) => {
+        if(!data.status) {
+          setRelationship({
+            status: 0
+          });
+        } else {
+          setRelationship(data);
+        }
+      })
+    }
+  }
+
+  const handleCloseOption = (e) => {
+    setRelationship({
+      status: LOADING_STATUS_FRIEND
+    });
+    e.preventDefault();
+    setAnchorOption(null);
+  }
+
+  const handleSendMessage = async (id) => {
+    if(!props.currentUser) {
+      navigate('/login');
+      return;
+    }
+    if (
+      props.chatting.findIndex(
+        (user) => user.toUserId == id
+      ) < 0
+    ) {
+      chattingService
+        .getMessageOfFriend(id)
+        .then((res) => {
+          let newUserMsg = {
+            toUserId: id,
+            info: res.info,
+            currentMsg: "",
+            msg: [],
+          };
+          res.msgs.forEach((msg) => {
+            newUserMsg.msg.push({
+              message: msg.content,
+              toOther:
+                id == msg.to_user_id ? true : false,
+              created_at: msg.created_at,
+              id: msg.id,
+            });
+          });
+          store.dispatch(openAndGetMsg(newUserMsg));
+        })
+        .catch(() => {});
+    } else {
+      store.dispatch(openAndCloseChatting(id));
+    }
+    setAnchorOption(null);
+  }
+
+  // const StyledBadge = styled(Badge)(({ theme }) => ({
+  //   "& .MuiBadge-badge": {
+  //     backgroundColor: "#44b700",
+  //     color: "#44b700",
+  //     boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+  //     "&::after": {
+  //       position: "absolute",
+  //       top: 0,
+  //       left: 0,
+  //       width: "100%",
+  //       height: "100%",
+  //       borderRadius: "50%",
+  //       animation: "ripple 1.2s infinite ease-in-out",
+  //       border: "1px solid currentColor",
+  //       content: '""',
+  //     },
+  //   },
+  //   "@keyframes ripple": {
+  //     "0%": {
+  //       transform: "scale(.8)",
+  //       opacity: 1,
+  //     },
+  //     "100%": {
+  //       transform: "scale(2.4)",
+  //       opacity: 0,
+  //     },
+  //   },
+  // }));
+
+  const handleAddFriend = (id) => {
+    setRelationship({
+      status: LOADING_STATUS_FRIEND
+    });
+    if(!props.currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    friendService.addFriend(id)
+    .then(() => {
+      setRelationship({
+        status: StatusFriend.WAITTING,
+        friend: id,
+        user_id: props.currentUser.id
+      });
+    });
+  }
+
+  const handleUnFriend = (friend) => {
+    setRelationship({
+      status: LOADING_STATUS_FRIEND
+    });
+    friendService.unFriend(friend)
+    .then(() => {
+      setRelationship({
+        status: 0
+      });
+    })
+  }
+
+  const handleCancelRequestFriend = (friend) => {
+    setRelationship({
+      status: LOADING_STATUS_FRIEND
+    });
+    friendService.cancelRequest(friend)
+    .then(() => {
+      setRelationship({
+        status: 0
+      });
+    })
+  }
+
+  const handleAcceptRequestFriend = (friend) => {
+    setRelationship({
+      status: LOADING_STATUS_FRIEND
+    });
+    friendService.acceptRequest(friend)
+    .then(() => {
+      setRelationship({
+        status: StatusFriend.ACCEPTED
+      });
+    })
+  }
 
   return (
     <div className={cx("wrapper")}>
@@ -516,18 +649,26 @@ function Blog(props) {
                             aria-label="recipe"
                             alt=""
                             src={`https://docs.google.com/uc?id=${x.user.avatar}`}
+                            onClick={() => navigate('/user/' + x.user.id)}
+                            className={cx('cursor-pointer')}
                           >
                             {x.user.name[0]}
                           </Avatar>{" "}
                         </Badge>
                       }
                       action={
-                        <IconButton aria-label="settings">
+                        <IconButton 
+                          aria-label="basic-menu"
+                          aria-controls={openOption ? 'basic-menu' : undefined}
+                          aria-haspopup="true"
+                          aria-expanded={openOption ? 'true' : undefined}
+                          onClick={(e) => handleChooseOptionUser(e, x.user.id)}
+                        >
                           <MoreVertIcon />
                         </IconButton>
                       }
-                      title={x.user.name}
-                      subheader={formatTime(x.updated_at)}
+                      title={<Typography className={cx('cursor-pointer')} onClick={() => navigate(`/user/${x.user.id}`)}>{x.user.name}</Typography>}
+                      subheader={<Typography style={{ fontFamily: '"Roboto","Helvetica","Arial",sans-serif', opacity: 0.6 }}>{formatTime(x.updated_at)}</Typography>}
                     />
                     <Link to={`/${x.id}`}>
                       <CardContent>
@@ -615,6 +756,33 @@ function Blog(props) {
             })
           : doneFirstLoad && <h1>Chưa có bài viết nào!!!</h1>}
       </Grid>
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorOption}
+        open={openOption}
+        onClose={handleCloseOption}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        {
+          (!props.currentUser || (props.currentUser.id != userChoosed.current)) &&
+          <div>
+            {relationship.status === LOADING_STATUS_FRIEND ?             
+            <MenuItem >
+              <Box sx={{ width: '100%' }}>
+                <LinearProgress />
+              </Box>
+            </MenuItem> : <></>}
+            {relationship.status === 0 ? <MenuItem onClick={() => handleAddFriend(userChoosed.current)}>Gửi lời kết bạn</MenuItem> : <></>}
+            {relationship.status === StatusFriend.ACCEPTED ? <MenuItem onClick={() => {handleUnFriend(userChoosed.current)}}>Hủy kết bạn</MenuItem> : <></>}
+            {(relationship.status === StatusFriend.WAITTING && relationship.friend != userChoosed.current) ? <MenuItem onClick={() => {handleAcceptRequestFriend(userChoosed.current)}}>Chấp nhận kết bạn</MenuItem> : <></>}
+            {(relationship.status === StatusFriend.WAITTING && relationship.friend == userChoosed.current) ? <MenuItem onClick={() => {handleCancelRequestFriend(userChoosed.current)}}>Hủy gửi mời kết bạn</MenuItem> : <></>}
+            <MenuItem onClick={() => handleSendMessage(userChoosed.current)}>Nhắn tin</MenuItem>
+          </div>
+        }
+        <MenuItem onClick={() => navigate(`/user/${userChoosed.current}`)}>Xem trang cá nhân</MenuItem>
+      </Menu>
       {loadMore && (
         <Box
           alignItems="center"
