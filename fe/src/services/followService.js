@@ -28,3 +28,12 @@ export const unfollow = async (follower) => {
         console.log(error);
     }
 };
+
+export const checkStatusFollowing = async (follower) => {
+    try {
+        const res = await httpRequest.get(`/follow/status/${follower}`);
+        return res;
+    } catch (error) {
+        console.log(error);
+    } 
+}

@@ -63,4 +63,9 @@ class FollowerRepository implements FollowerInterface
 
         return $listTopFollower;
     }
+
+    public function checkStatusFollowing($currentUser, $follower)
+    {
+        return $this->follower->where('user_id', $currentUser)->where('follower', $follower)->count();   
+    }
 }

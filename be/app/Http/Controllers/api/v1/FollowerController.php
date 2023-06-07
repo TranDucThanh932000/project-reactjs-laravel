@@ -63,4 +63,11 @@ class FollowerController extends Controller
             'top5' => $this->follower->getTop(5)
         ], StatusCode::OK);
     }
+
+    public function checkStatusFollowing(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        return response()->json($this->follower->checkStatusFollowing($request->follower, $user->id), StatusCode::OK);
+    }
 }

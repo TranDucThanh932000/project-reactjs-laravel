@@ -38,7 +38,8 @@ const initialState = {
   notiStack: [],
   listFriendOnline: [],
   openListFriend: false,
-  listFriend: []
+  listFriend: [],
+  listFollowerRanking: []
 };
 
 const commonReducer = (state = initialState, action) => {
@@ -151,6 +152,12 @@ const commonReducer = (state = initialState, action) => {
       return {
         ...state,
         openListFriend: action.payload
+      }
+    case actionName.UPDATE_LIST_RANKING_FOLLOWER:
+
+      return {
+        ...state,
+        listFollowerRanking: [...action.payload]
       }
     default:
       return state;

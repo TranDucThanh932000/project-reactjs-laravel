@@ -7,4 +7,5 @@ interface FollowerInterface
     public function follow($user, $follower);
     public function unfollow($user, $follower);
     public function getTop($top);
+    public function checkStatusFollowing($currentUser, $follower);
 }

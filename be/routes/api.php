@@ -50,6 +50,7 @@ Route::group([
     Route::post('/upload-image-editor', [UploadImageEditorController::class, 'uploadImageEditor']);
     Route::post('/logout', [Authentication::class, 'logout']);
     Route::resource('user', UserController::class);
+    Route::get('/follow/status/{follower}', [FollowerController::class, 'checkStatusFollowing']);
     Route::resource('follow', FollowerController::class);
     Route::resource('chat', ChatController::class);
     Route::resource('bloglikes', BlogLikeController::class);

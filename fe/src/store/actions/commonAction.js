@@ -104,3 +104,10 @@ export const updateStatusPopupFriend = (payload) => {
         payload
     }
 }
+
+export const updateListRankingFollower = (payload) => {
+    return {
+        type: actionName.UPDATE_LIST_RANKING_FOLLOWER,
+        payload
+    }
+}

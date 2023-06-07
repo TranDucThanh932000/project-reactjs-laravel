@@ -45,6 +45,7 @@ import {
 import {
   updateStatusLoading,
   updateTextAlert,
+  updateListRankingFollower
 } from "../../store/actions/commonAction";
 import moment from "moment";
 import { Box } from "@mui/system";
@@ -57,14 +58,17 @@ import { styled, useTheme } from "@mui/material/styles";
 import { Level, StatusFriend } from "../../utils/constants";
 import * as friendService from '../../services/friendService';
 import * as chattingService from '../../services/chattingService';
+import * as followService from '../../services/followService';
 import { openAndCloseChatting, openAndGetMsg } from '../../store/actions/chattingAction';
 
 const LOADING_STATUS_FRIEND = 9999;
+const LOADING_STATUS_FOLLOW_FRIEND = 9999;
 const mapStateToProps = (state) => {
   return {
     logged: state.commonReducer.logged,
     chatting: state.chattingReducer.chatting,
-    currentUser: state.commonReducer.currentUser
+    currentUser: state.commonReducer.currentUser,
+    listFollowerRanking: state.commonReducer.listFollowerRanking
   };
 };
 const cx = classNames.bind(styles);
@@ -131,6 +135,7 @@ function Blog(props) {
   const [relationship, setRelationship] = React.useState({
     status: LOADING_STATUS_FRIEND
   });
+  const [followStatus, setFollowStatus] = React.useState(LOADING_STATUS_FOLLOW_FRIEND);
 
   const navigate = useNavigate();
 
@@ -372,16 +377,27 @@ function Blog(props) {
     e.stopPropagation();
     setAnchorOption(e.currentTarget);
     if (props.currentUser) {
-      await friendService.checkRelationship(id)
-      .then((data) => {
-        if(!data.status) {
-          setRelationship({
-            status: 0
-          });
-        } else {
-          setRelationship(data);
-        }
-      })
+      if (props.currentUser.id == id) return;
+      await Promise.all([
+        friendService.checkRelationship(id)
+        .then((data) => {
+          if(!data.status) {
+            setRelationship({
+              status: 0
+            });
+          } else {
+            setRelationship(data);
+          }
+        }),
+        followService.checkStatusFollowing(id)
+        .then((data) => {
+          if(data) {
+            setFollowStatus(true);
+          } else {
+            setFollowStatus(false);
+          }
+        })
+      ])
     }
   }
 
@@ -389,6 +405,7 @@ function Blog(props) {
     setRelationship({
       status: LOADING_STATUS_FRIEND
     });
+    setFollowStatus(LOADING_STATUS_FOLLOW_FRIEND);
     e.preventDefault();
     setAnchorOption(null);
   }
@@ -476,6 +493,18 @@ function Blog(props) {
         user_id: props.currentUser.id
       });
     });
+
+    let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
+    let index = newListFL.findIndex(x => x.user_id == id);
+    newListFL[index].user.friend = [];
+    newListFL[index].user.is_add_friend = [
+      {
+        user_id: props.currentUser.id,
+        friend: id,
+        status: StatusFriend.WAITTING
+      }
+    ];
+    store.dispatch(updateListRankingFollower(newListFL));
   }
 
   const handleUnFriend = (friend) => {
@@ -488,6 +517,12 @@ function Blog(props) {
         status: 0
       });
     })
+
+    let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
+    let index = newListFL.findIndex(x => x.user_id == friend);
+    newListFL[index].user.friend = [];
+    newListFL[index].user.is_add_friend = [];
+    store.dispatch(updateListRankingFollower(newListFL));
   }
 
   const handleCancelRequestFriend = (friend) => {
@@ -500,6 +535,12 @@ function Blog(props) {
         status: 0
       });
     })
+
+    let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
+    let index = newListFL.findIndex(x => x.user_id == friend);
+    newListFL[index].user.friend = [];
+    newListFL[index].user.is_add_friend = [];
+    store.dispatch(updateListRankingFollower(newListFL));
   }
 
   const handleAcceptRequestFriend = (friend) => {
@@ -512,6 +553,44 @@ function Blog(props) {
         status: StatusFriend.ACCEPTED
       });
     })
+
+    let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
+    let index = newListFL.findIndex(x => x.user_id == friend);
+    newListFL[index].user.friend = [];
+    newListFL[index].user.is_add_friend = [
+      {
+        user_id: friend,
+        friend: props.currentUser.id,
+        status: StatusFriend.ACCEPTED
+      }
+    ];
+    store.dispatch(updateListRankingFollower(newListFL));
+  }
+
+  const handleFollow = (friend) => {
+    setFollowStatus(LOADING_STATUS_FOLLOW_FRIEND);
+    followService.follow(friend)
+    .then(() => {
+      setFollowStatus(true);
+    });
+
+    let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
+    let index = newListFL.findIndex(x => x.user_id == friend);
+    newListFL[index].followed = true;
+    store.dispatch(updateListRankingFollower(newListFL));
+  }
+
+  const handleUnFollow = (friend) => {
+    setFollowStatus(LOADING_STATUS_FOLLOW_FRIEND);
+    followService.unfollow(friend)
+    .then(() => {
+      setFollowStatus(false);
+    });
+
+    let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
+    let index = newListFL.findIndex(x => x.user_id == friend);
+    newListFL[index].followed = false;
+    store.dispatch(updateListRankingFollower(newListFL));
   }
 
   return (
@@ -778,6 +857,16 @@ function Blog(props) {
             {relationship.status === StatusFriend.ACCEPTED ? <MenuItem onClick={() => {handleUnFriend(userChoosed.current)}}>Hủy kết bạn</MenuItem> : <></>}
             {(relationship.status === StatusFriend.WAITTING && relationship.friend != userChoosed.current) ? <MenuItem onClick={() => {handleAcceptRequestFriend(userChoosed.current)}}>Chấp nhận kết bạn</MenuItem> : <></>}
             {(relationship.status === StatusFriend.WAITTING && relationship.friend == userChoosed.current) ? <MenuItem onClick={() => {handleCancelRequestFriend(userChoosed.current)}}>Hủy gửi mời kết bạn</MenuItem> : <></>}
+            {
+            followStatus === LOADING_STATUS_FOLLOW_FRIEND ?
+              <MenuItem >
+                <Box sx={{ width: '100%' }}>
+                  <LinearProgress />
+                </Box>
+              </MenuItem>
+              :
+              followStatus === false ? <MenuItem onClick={() => handleFollow(userChoosed.current)}>Theo dõi</MenuItem> : <MenuItem onClick={() => handleUnFollow(userChoosed.current)}>Hủy theo dõi</MenuItem>
+            }
             <MenuItem onClick={() => handleSendMessage(userChoosed.current)}>Nhắn tin</MenuItem>
           </div>
         }

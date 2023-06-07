@@ -13,7 +13,10 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { connect } from "react-redux";
-import { closeSidebar } from "../../../store/actions/commonAction";
+import { 
+  closeSidebar, 
+  updateListRankingFollower 
+} from "../../../store/actions/commonAction"; 
 import store from "../../../store";
 import { NavLink, useNavigate } from "react-router-dom";
 import styles from "./Sidebar.module.scss";
@@ -25,7 +28,7 @@ import Looks4Icon from "@mui/icons-material/Looks4";
 import Looks5Icon from "@mui/icons-material/Looks5";
 import * as followService from "../../../services/followService";
 import * as friendService from "../../../services/friendService";
-import { Card, CardActions, CardContent, CardMedia, Tooltip, Typography } from "@mui/material";
+import { Card, CardActions, CardContent, CardMedia, CircularProgress, Tooltip, Typography } from "@mui/material";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AddAlertIcon from '@mui/icons-material/AddAlert';
 import HoverPopover from "material-ui-popup-state/HoverPopover";
@@ -93,14 +96,16 @@ const mapStateToProps = (state) => {
   return {
     open: state.commonReducer.openSidebar,
     sideBarItems: state.commonReducer.sideBarItems,
-    currentUser: state.commonReducer.currentUser
+    currentUser: state.commonReducer.currentUser,
+    listFollowerRanking: state.commonReducer.listFollowerRanking
   };
 };
 
 const Sidebar = (props) => {
   const theme = useTheme();
-  const [listFollowerRanking, setListFollowerRanking] = React.useState([]);
   const navigate = useNavigate();
+  const [loadingStatusFriend, setLoadingStatusFriend] = React.useState(false);
+  const [loadingFollowing, setLoadingFollowing] = React.useState(false);
 
   const handleDrawerClose = () => {
     store.dispatch(closeSidebar());
@@ -108,7 +113,7 @@ const Sidebar = (props) => {
 
   React.useEffect(() => {
     followService.getTop5Follower().then((res) => {
-      setListFollowerRanking(res.top5);
+      store.dispatch(updateListRankingFollower([...(res.top5)]));
     });
   }, [props.currentUser]);
 
@@ -130,29 +135,34 @@ const Sidebar = (props) => {
   };
 
   const handleFollow = (userId) => {
+    setLoadingFollowing(true);
     followService.follow(userId)
     .then(() => {
-      let newListFL = JSON.parse(JSON.stringify(listFollowerRanking));
+      let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
       let index = newListFL.findIndex(x => x.user_id == userId);
       newListFL[index].followed = true;
-      setListFollowerRanking(newListFL);
+      store.dispatch(updateListRankingFollower(newListFL));
+      setLoadingFollowing(false);
     })
   }
 
   const handleUnFollow = (userId) => {
+    setLoadingFollowing(true);
     followService.unfollow(userId)
     .then(() => {
-      let newListFL = JSON.parse(JSON.stringify(listFollowerRanking));
+      let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
       let index = newListFL.findIndex(x => x.user_id == userId);
       newListFL[index].followed = false;
-      setListFollowerRanking(newListFL);
+      store.dispatch(updateListRankingFollower(newListFL));
+      setLoadingFollowing(false);
     })
   }
 
   const handleAddFriend = (friend) => {
+    setLoadingStatusFriend(true);
     friendService.addFriend(friend)
     .then(() => {
-      let newListFL = JSON.parse(JSON.stringify(listFollowerRanking));
+      let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
       let index = newListFL.findIndex(x => x.user_id == friend);
       newListFL[index].user.friend = [];
       newListFL[index].user.is_add_friend = [
@@ -162,36 +172,42 @@ const Sidebar = (props) => {
           status: StatusFriend.WAITTING
         }
       ];
-      setListFollowerRanking(newListFL);
+      store.dispatch(updateListRankingFollower(newListFL));
+      setLoadingStatusFriend(false);
     })
   }
 
   const handleUnFriend = (friend) => {
+    setLoadingStatusFriend(true);
     friendService.unFriend(friend)
     .then(() => {
-      let newListFL = JSON.parse(JSON.stringify(listFollowerRanking));
+      let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
       let index = newListFL.findIndex(x => x.user_id == friend);
       newListFL[index].user.friend = [];
       newListFL[index].user.is_add_friend = [];
-      setListFollowerRanking(newListFL);
+      store.dispatch(updateListRankingFollower(newListFL));
+      setLoadingStatusFriend(false);
     })
   }
 
   const handleCancelRequestFriend = (friend) => {
+    setLoadingStatusFriend(true);
     friendService.cancelRequest(friend)
     .then(() => {
-      let newListFL = JSON.parse(JSON.stringify(listFollowerRanking));
+      let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
       let index = newListFL.findIndex(x => x.user_id == friend);
       newListFL[index].user.friend = [];
       newListFL[index].user.is_add_friend = [];
-      setListFollowerRanking(newListFL);
+      store.dispatch(updateListRankingFollower(newListFL));
+      setLoadingStatusFriend(false);
     })
   }
 
   const handleAcceptRequestFriend = (friend) => {
+    setLoadingStatusFriend(true);
     friendService.acceptRequest(friend)
     .then(() => {
-      let newListFL = JSON.parse(JSON.stringify(listFollowerRanking));
+      let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
       let index = newListFL.findIndex(x => x.user_id == friend);
       newListFL[index].user.friend = [];
       newListFL[index].user.is_add_friend = [
@@ -201,7 +217,8 @@ const Sidebar = (props) => {
           status: StatusFriend.ACCEPTED
         }
       ];
-      setListFollowerRanking(newListFL);
+      store.dispatch(updateListRankingFollower(newListFL));
+      setLoadingStatusFriend(false);
     })
   }
 
@@ -268,7 +285,7 @@ const Sidebar = (props) => {
               Top người theo dõi
             </List>
             <List>
-              {listFollowerRanking.map((user, index) => (
+              {props.listFollowerRanking.map((user, index) => (
                 <div key={index}>
                   <PopupState variant="popover" popupId="demo-popup-popover">
                       {(popupState) => (
@@ -278,6 +295,7 @@ const Sidebar = (props) => {
                                 aria-haspopup="true"
                                 disablePadding
                                 sx={{ display: "block" }}
+                                onClick={() => { navigate('/user/' + user.user.id) }}
                               >
                                 <ListItemButton
                                   sx={{
@@ -329,25 +347,33 @@ const Sidebar = (props) => {
                                   </CardContent>
                                   <CardActions>
                                     {
-                                      !user.followed ? (
-                                        <IconButton
-                                        disabled={props.currentUser && user.user_id == props.currentUser.id ? true : false}
-                                        onClick={() => {
-                                          if (props.currentUser) {
-                                            handleFollow(user.user_id)
-                                          } else {
-                                            navigate("/login");
-                                          }
-                                        }}>
-                                          <AddAlertIcon></AddAlertIcon>
-                                        </IconButton>
-                                      ) : (
-                                        <IconButton color="primary" onClick={() => handleUnFollow(user.user_id)}>
-                                          <AddAlertIcon></AddAlertIcon>
-                                        </IconButton>
+                                      loadingFollowing ? (
+                                        <CircularProgress />
+                                      ) : 
+                                      (
+                                        !user.followed ? (
+                                          <IconButton
+                                          disabled={props.currentUser && user.user_id == props.currentUser.id ? true : false}
+                                          onClick={() => {
+                                            if (props.currentUser) {
+                                              handleFollow(user.user_id)
+                                            } else {
+                                              navigate("/login");
+                                            }
+                                          }}>
+                                            <AddAlertIcon></AddAlertIcon>
+                                          </IconButton>
+                                        ) : (
+                                          <IconButton color="primary" onClick={() => handleUnFollow(user.user_id)}>
+                                            <AddAlertIcon></AddAlertIcon>
+                                          </IconButton>
+                                        )
                                       )
                                     }
                                     {
+                                      loadingStatusFriend ? (
+                                        <CircularProgress />
+                                      ) : 
                                       ((user.user.friend.length > 0 || user.user.is_add_friend.length > 0)) 
                                       ? 
                                       (

@@ -240,7 +240,7 @@ const CreateBlog = (props) => {
                   ))}
                   <Grid item md={6} xs={12}>
                     {
-                      listFile.length < 10 && 
+                      listFile.length < 4 && 
                       <Box className={cx('boxUploadImage')} onClick={handleOpenUploadImg}>
                         <AddPhotoAlternateIcon></AddPhotoAlternateIcon>
                       </Box>
