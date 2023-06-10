@@ -574,3 +574,11 @@ body.loading .loading-div {
 .cursor-pointer {
   cursor: pointer;
 }
+
+#transition-popper-header {
+  .MuiBox-root {
+      border: none !important;
+      border-radius: 20px;
+      box-shadow: 0 0 10px gray, 0 0 1px gray;
+  }
+}

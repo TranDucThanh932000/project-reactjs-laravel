@@ -97,7 +97,8 @@ const mapStateToProps = (state) => {
     open: state.commonReducer.openSidebar,
     sideBarItems: state.commonReducer.sideBarItems,
     currentUser: state.commonReducer.currentUser,
-    listFollowerRanking: state.commonReducer.listFollowerRanking
+    listFollowerRanking: state.commonReducer.listFollowerRanking,
+    modeLight: state.commonReducer.modeLight
   };
 };
 
@@ -246,6 +247,7 @@ const Sidebar = (props) => {
               to={item.url}
               key={index}
               className={(nav) => cx({ active: nav.isActive })}
+              style={{ color: props.modeLight == 'dark' ? 'white' : 'black' }}
             >
               <ListItem
                 key={item.text}

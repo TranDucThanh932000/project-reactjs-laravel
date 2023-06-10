@@ -96,4 +96,9 @@ class BlogsRepository implements BlogsInterface
         ->distinct()
         ->get();
     }
+
+    public function searchByTitle($txtSearch)
+    {
+        return $this->blog->select(['id', 'title'])->where('title', 'like', '%' . $txtSearch . '%')->limit(5)->get();
+    }
 }

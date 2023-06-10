@@ -54,4 +54,15 @@ class UserRepository implements UserInterface
         $userUpdate->save();
         return $userUpdate;
     }
+
+    public function searchByName($txtSearch)
+    {
+        return $this->user
+        ->select(['name', 'id', 'avatar'])
+        ->withCount('followers')
+        ->where('name', 'like', '%' . $txtSearch . '%')
+        ->orderBy('followers_count', 'DESC')
+        ->limit(5)
+        ->get();
+    }
 }

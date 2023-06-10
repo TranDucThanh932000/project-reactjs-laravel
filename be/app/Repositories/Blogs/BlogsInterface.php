@@ -9,4 +9,5 @@ interface BlogsInterface
     public function store($blog);
     public function upView($id);
     public function getBlogOfUser($userId);
+    public function searchByTitle($txtSearch);
 }

@@ -398,14 +398,26 @@ function Blog(props) {
           }
         })
       ])
+    } else {
+      setRelationship({
+        status: 0
+      });
+      setFollowStatus(false);
     }
   }
 
   const handleCloseOption = (e) => {
-    setRelationship({
-      status: LOADING_STATUS_FRIEND
-    });
-    setFollowStatus(LOADING_STATUS_FOLLOW_FRIEND);
+    if (props.currentUser) {
+      setRelationship({
+        status: LOADING_STATUS_FRIEND
+      });
+      setFollowStatus(LOADING_STATUS_FOLLOW_FRIEND);
+    } else {
+      setRelationship({
+        status: 0
+      });
+      setFollowStatus(false);
+    }
     e.preventDefault();
     setAnchorOption(null);
   }
@@ -568,6 +580,11 @@ function Blog(props) {
   }
 
   const handleFollow = (friend) => {
+    if(!props.currentUser) {
+      navigate('/login');
+      return;
+    }
+
     setFollowStatus(LOADING_STATUS_FOLLOW_FRIEND);
     followService.follow(friend)
     .then(() => {
@@ -853,7 +870,7 @@ function Blog(props) {
                 <LinearProgress />
               </Box>
             </MenuItem> : <></>}
-            {relationship.status === 0 ? <MenuItem onClick={() => handleAddFriend(userChoosed.current)}>Gửi lời kết bạn</MenuItem> : <></>}
+            {relationship.status === 0 ? <MenuItem onClick={() => handleAddFriend(userChoosed.current)}>Kết bạn</MenuItem> : <></>}
             {relationship.status === StatusFriend.ACCEPTED ? <MenuItem onClick={() => {handleUnFriend(userChoosed.current)}}>Hủy kết bạn</MenuItem> : <></>}
             {(relationship.status === StatusFriend.WAITTING && relationship.friend != userChoosed.current) ? <MenuItem onClick={() => {handleAcceptRequestFriend(userChoosed.current)}}>Chấp nhận kết bạn</MenuItem> : <></>}
             {(relationship.status === StatusFriend.WAITTING && relationship.friend == userChoosed.current) ? <MenuItem onClick={() => {handleCancelRequestFriend(userChoosed.current)}}>Hủy gửi mời kết bạn</MenuItem> : <></>}

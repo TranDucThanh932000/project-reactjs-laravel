@@ -1,17 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import * as userService from "../../services/userService";
+import * as friendService from "../../services/friendService";
+import * as followService from "../../services/followService";
 import classNames from "classnames/bind";
 import styles from "./Wall.module.scss";
 import {
   Avatar,
   Badge,
   Box,
+  Button,
   Card,
   CardActions,
   CardContent,
   CardHeader,
   CardMedia,
+  CircularProgress,
   Grid,
   IconButton,
   Tooltip,
@@ -20,10 +24,25 @@ import {
 import StarPurple500OutlinedIcon from "@mui/icons-material/StarPurple500Outlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ShareIcon from "@mui/icons-material/Share";
-import { Level } from "../../utils/constants";
+import { Level, StatusFriend } from "../../utils/constants";
 import moment from "moment";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
+import store from "../../store";
+import { connect } from "react-redux";
+import {
+  updateListRankingFollower
+} from "../../store/actions/commonAction";
+import { openAndCloseChatting, openAndGetMsg } from '../../store/actions/chattingAction';
+import * as chattingService from '../../services/chattingService';
+import { useNavigate } from "react-router-dom";
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import PersonAddDisabledIcon from '@mui/icons-material/PersonAddDisabled';
+import AddAlertIcon from '@mui/icons-material/AddAlert';
+import MessageIcon from '@mui/icons-material/Message';
+import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
 
 const colorAvatar = [
   "red",
@@ -38,31 +57,251 @@ const colorAvatar = [
   "#678123",
 ];
 
+const LOADING_STATUS_FRIEND = 9999;
+const LOADING_STATUS_FOLLOW_FRIEND = 9999;
+const mapStateToProps = (state) => {
+  return {
+    currentUser: state.commonReducer.currentUser,
+    listFollowerRanking: state.commonReducer.listFollowerRanking,
+    chatting: state.chattingReducer.chatting,
+  };
+};
+
 const cx = classNames.bind(styles);
 
-function Wall() {
+function Wall(props) {
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [listBlog, setListBlog] = useState([]);
   const [user, setUser] = useState({});
+  const [relationship, setRelationship] = useState({
+    status: LOADING_STATUS_FRIEND
+  });
+  const [followStatus, setFollowStatus] = useState(LOADING_STATUS_FOLLOW_FRIEND);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([
-      userService.getListBlogOfUser(id).then((data) => {
-        setListBlog(data);
-      }),
-      userService.getById(id).then((data) => {
-        setUser(data);
-      }),
-    ]).then(() => {
-      setLoading(false);
-    });
-  }, [id]);
+    if(props.currentUser) {
+      Promise.all([
+        userService.getListBlogOfUser(id).then((data) => {
+          setListBlog(data);
+        }),
+        userService.getById(id).then((data) => {
+          setUser(data);
+        }),
+        friendService.checkRelationship(id)
+        .then((data) => {
+          if(!data.status) {
+            setRelationship({
+              status: 0
+            });
+          } else {
+            setRelationship(data);
+          }
+        }),
+        followService.checkStatusFollowing(id)
+        .then((data) => {
+          if(data) {
+            setFollowStatus(true);
+          } else {
+            setFollowStatus(false);
+          }
+        })
+      ]).then(() => {
+        setLoading(false);
+      });
+    } else {
+      setRelationship({
+        status: 0
+      });
+      setFollowStatus(false);
+      Promise.all([
+        userService.getListBlogOfUser(id).then((data) => {
+          setListBlog(data);
+        }),
+        userService.getById(id).then((data) => {
+          setUser(data);
+        })
+      ]).then(() => {
+        setLoading(false);
+      });
+    }
+  }, [id, props.currentUser]);
 
   const formatTime = useCallback((val) => {
     return moment(val, "YYYY-MM-DD hh:mm:ss").format("DD/MM/YYYY hh:mm");
   }, []);
+
+  const handleAddFriend = (id) => {
+    setRelationship({
+      status: LOADING_STATUS_FRIEND
+    });
+    if(!props.currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    friendService.addFriend(id)
+    .then(() => {
+      setRelationship({
+        status: StatusFriend.WAITTING,
+        friend: id,
+        user_id: props.currentUser.id
+      });
+    });
+
+    let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
+    let index = newListFL.findIndex(x => x.user_id == id);
+    if(index >= 0) {
+      newListFL[index].user.friend = [];
+      newListFL[index].user.is_add_friend = [
+        {
+          user_id: props.currentUser.id,
+          friend: id,
+          status: StatusFriend.WAITTING
+        }
+      ];
+      store.dispatch(updateListRankingFollower(newListFL));
+    }
+  }
+
+  const handleUnFriend = (friend) => {
+    setRelationship({
+      status: LOADING_STATUS_FRIEND
+    });
+    friendService.unFriend(friend)
+    .then(() => {
+      setRelationship({
+        status: 0
+      });
+    })
+
+    let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
+    let index = newListFL.findIndex(x => x.user_id == friend);
+    if(index >= 0) {
+      newListFL[index].user.friend = [];
+      newListFL[index].user.is_add_friend = [];
+      store.dispatch(updateListRankingFollower(newListFL));
+    }
+  }
+
+  const handleCancelRequestFriend = (friend) => {
+    setRelationship({
+      status: LOADING_STATUS_FRIEND
+    });
+    friendService.cancelRequest(friend)
+    .then(() => {
+      setRelationship({
+        status: 0
+      });
+    })
+
+    let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
+    let index = newListFL.findIndex(x => x.user_id == friend);
+    if(index >= 0) {
+      newListFL[index].user.friend = [];
+      newListFL[index].user.is_add_friend = [];
+      store.dispatch(updateListRankingFollower(newListFL));
+    }
+  }
+
+  const handleAcceptRequestFriend = (friend) => {
+    setRelationship({
+      status: LOADING_STATUS_FRIEND
+    });
+    friendService.acceptRequest(friend)
+    .then(() => {
+      setRelationship({
+        status: StatusFriend.ACCEPTED
+      });
+    })
+
+    let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
+    let index = newListFL.findIndex(x => x.user_id == friend);
+    if(index >= 0) {
+      newListFL[index].user.friend = [];
+      newListFL[index].user.is_add_friend = [
+        {
+          user_id: friend,
+          friend: props.currentUser.id,
+          status: StatusFriend.ACCEPTED
+        }
+      ];
+      store.dispatch(updateListRankingFollower(newListFL));
+    }
+  }
+
+  const handleFollow = (friend) => {
+    if(!props.currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    setFollowStatus(LOADING_STATUS_FOLLOW_FRIEND);
+    followService.follow(friend)
+    .then(() => {
+      setFollowStatus(true);
+    });
+
+    let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
+    let index = newListFL.findIndex(x => x.user_id == friend);
+    if(index >= 0) {
+      newListFL[index].followed = true;
+      store.dispatch(updateListRankingFollower(newListFL));
+    }
+  }
+
+  const handleUnFollow = (friend) => {
+    setFollowStatus(LOADING_STATUS_FOLLOW_FRIEND);
+    followService.unfollow(friend)
+    .then(() => {
+      setFollowStatus(false);
+    });
+
+    let newListFL = JSON.parse(JSON.stringify(props.listFollowerRanking));
+    let index = newListFL.findIndex(x => x.user_id == friend);
+    if(index >= 0) {
+      newListFL[index].followed = false;
+      store.dispatch(updateListRankingFollower(newListFL));
+    }
+  }
+
+  const handleSendMessage = async (id) => {
+    if(!props.currentUser) {
+      navigate('/login');
+      return;
+    }
+    if (
+      props.chatting.findIndex(
+        (user) => user.toUserId == id
+      ) < 0
+    ) {
+      chattingService
+        .getMessageOfFriend(id)
+        .then((res) => {
+          let newUserMsg = {
+            toUserId: id,
+            info: res.info,
+            currentMsg: "",
+            msg: [],
+          };
+          res.msgs.forEach((msg) => {
+            newUserMsg.msg.push({
+              message: msg.content,
+              toOther:
+                id == msg.to_user_id ? true : false,
+              created_at: msg.created_at,
+              id: msg.id,
+            });
+          });
+          store.dispatch(openAndGetMsg(newUserMsg));
+        })
+        .catch(() => {});
+    } else {
+      store.dispatch(openAndCloseChatting(id));
+    }
+  }
 
   return (
     <>
@@ -117,6 +356,31 @@ function Wall() {
                   title={<h2>{user.name}</h2>}
                   subheader={user.description}
                 ></CardHeader>
+                <CardActions style={{ flexDirection: 'row-reverse' }}>
+                  {
+                    (!props.currentUser || (props.currentUser.id != id)) &&
+                    <div>
+                      {relationship.status === LOADING_STATUS_FRIEND ?             
+                        <Box sx={{ width: '100%' }}>
+                          <CircularProgress />
+                        </Box>
+                      : <></>}
+                      {relationship.status === 0 ? <Button startIcon={<PersonAddIcon />} variant="outlined" onClick={() => handleAddFriend(id)}>Kết bạn</Button> : <></>}
+                      {relationship.status === StatusFriend.ACCEPTED ? <Button startIcon={<PersonRemoveIcon />} variant="outlined" onClick={() => {handleUnFriend(id)}}>Hủy kết bạn</Button> : <></>}
+                      {(relationship.status === StatusFriend.WAITTING && relationship.friend != id) ? <Button startIcon={<HowToRegIcon />} variant="outlined" onClick={() => {handleAcceptRequestFriend(id)}}>Chấp nhận kết bạn</Button> : <></>}
+                      {(relationship.status === StatusFriend.WAITTING && relationship.friend == id) ? <Button startIcon={<PersonAddDisabledIcon />} variant="outlined" onClick={() => {handleCancelRequestFriend(id)}}>Hủy gửi mời kết bạn</Button> : <></>}
+                      {
+                      followStatus === LOADING_STATUS_FOLLOW_FRIEND ?
+                        <Box sx={{ width: '100%' }}>
+                          <CircularProgress />
+                        </Box>
+                        :
+                        followStatus === false ? <Button sx={{mx: 1}} variant="outlined" startIcon={<AddAlertIcon />} onClick={() => handleFollow(id)}>Theo dõi</Button> : <Button sx={{mx: 1}} variant="outlined" color="primary" startIcon={<NotificationsOffIcon />} onClick={() => handleUnFollow(id)}>Hủy theo dõi</Button>
+                      }
+                      <Button startIcon={<MessageIcon />} variant="outlined" onClick={() => handleSendMessage(id)}>Nhắn tin</Button>
+                    </div>
+                  }
+                </CardActions>
               </Card>
             </Grid>
           </Box>
@@ -233,4 +497,4 @@ function Wall() {
   )
 }
 
-export default Wall;
+export default connect(mapStateToProps)(Wall);

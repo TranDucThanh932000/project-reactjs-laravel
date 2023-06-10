@@ -25,6 +25,7 @@ Route::post('/check-token', [Authentication::class, 'checkToken']);
 Route::get('/check-account', [Authentication::class, 'checkAccountExist']);
 Route::get('/lucky-number-today', [LuckyNumberController::class, 'getLuckyNumberToday']);
 Route::get('/lucky-number-latest', [LuckyNumberController::class, 'getLatestLuckyNumber']);
+Route::get('/blogs/search', [BlogController::class, 'searchByTitle']);
 Route::resource('blogs', BlogController::class);
 Route::group(['prefix' => 'blogs',  'namespace' => 'Blog'], function() {
     Route::post('/up-view', [BlogController::class, 'upView']);
@@ -33,6 +34,7 @@ Route::resource('categories', CategoryController::class);
 Route::get('follow/top5', [FollowerController::class, 'getTop5']);
 Route::post('/qr-code', [QrCodeController::class, 'store']);
 Route::get('/user/list-blog/{userId}', [BlogController::class, 'listBlogOfUser']);
+Route::get('/user/search', [UserController::class, 'searchByName']);
 Route::get('/user/{id}', [UserController::class, 'getById']);
 
 Route::group([

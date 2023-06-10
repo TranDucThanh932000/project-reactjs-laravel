@@ -35,7 +35,7 @@ const DetailBlog = (props) => {
       setLoading(false);
     });
     blogService.upView({blogId})
-  }, []);
+  }, [blogId]);
 
   const formatTime = useCallback((val) => {
     return moment(val, "YYYY-MM-DD hh:mm:ss").format("DD/MM/YYYY hh:mm");

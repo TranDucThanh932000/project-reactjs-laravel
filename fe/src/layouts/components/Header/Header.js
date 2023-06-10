@@ -27,7 +27,7 @@ import {
   updateNotiStack,
   removeFirstNotiStack,
   updateStatusPopupFriend,
-  updateListFriend
+  updateListFriend,
 } from "../../../store/actions/commonAction";
 import {
   openAndCloseChatting,
@@ -40,20 +40,34 @@ import styles from "./Header.module.scss";
 import classNames from "classnames/bind";
 import * as authentication from "../../../services/authenticationService";
 import * as notification from "../../../services/notificationService";
+import * as blogsService from "../../../services/blogService";
 import Switch from "@mui/material/Switch";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import { Avatar, Button, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, SwipeableDrawer } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  CircularProgress,
+  Divider,
+  Fade,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemButton,
+  ListItemText,
+  Popper,
+  SwipeableDrawer,
+} from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import * as chattingService from "../../../services/chattingService";
-import * as userService from '../../../services/userService'
+import * as userService from "../../../services/userService";
 import Pusher from "pusher-js";
 import { StatusRead, TypeNotification } from "../../../utils/constants";
 import Brightness1Icon from "@mui/icons-material/Brightness1";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import InformationUser from "../../../components/Popup/informationUser";
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import GroupIcon from '@mui/icons-material/Group';
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import GroupIcon from "@mui/icons-material/Group";
 
 const cx = classNames.bind(styles);
 
@@ -110,7 +124,7 @@ const mapStateToProps = (state) => {
     notifications: state.commonReducer.notifications,
     listFriendOnline: state.commonReducer.listFriendOnline,
     listFriend: state.commonReducer.listFriend,
-    openListFriend: state.commonReducer.openListFriend
+    openListFriend: state.commonReducer.openListFriend,
   };
 };
 
@@ -179,7 +193,7 @@ const Header = (props) => {
         authEndpoint: process.env.REACT_APP_BASE_URL + "chat/pusher/auth",
         auth: {
           headers: {
-            "Authorization": "Bearer " + props.currentUser.token,
+            Authorization: "Bearer " + props.currentUser.token,
             "Access-Control-Allow-Origin": "*",
           },
         },
@@ -235,14 +249,14 @@ const Header = (props) => {
       });
       userService.getListFriend(props.currentUser.id).then((data) => {
         store.dispatch(updateListFriend(data));
-      })
+      });
     }
 
     return () => {
-      if(pusher) {
+      if (pusher) {
         pusher.unsubscribe("private-notification");
       }
-    }
+    };
   }, [props.currentUser]);
 
   //switch light
@@ -338,8 +352,8 @@ const Header = (props) => {
 
   const handleSelfWall = () => {
     handleMenuClose();
-    navigate('/user/' + props.currentUser.id);
-  }
+    navigate("/user/" + props.currentUser.id);
+  };
 
   const menuId = "primary-search-account-menu";
   const renderMenu = props.currentUser && (
@@ -358,9 +372,7 @@ const Header = (props) => {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleSelfWall}>
-        Trang cá nhân
-      </MenuItem>
+      <MenuItem onClick={handleSelfWall}>Trang cá nhân</MenuItem>
       <InformationUser handleMenuClose={handleMenuClose} />
       <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
     </Menu>
@@ -396,10 +408,7 @@ const Header = (props) => {
         </FormGroup>
       </MenuItem>
       <MenuItem onClick={() => handleShowListFriend(!props.openListFriend)}>
-        <IconButton
-          size="large"
-          color="inherit"
-        >
+        <IconButton size="large" color="inherit">
           <GroupIcon />
         </IconButton>
         <p>Bạn bè</p>
@@ -484,11 +493,50 @@ const Header = (props) => {
     friend.current = id;
     event.stopPropagation();
     setAnchorElItemFriend(event.currentTarget);
-  }
+  };
 
   const [anchorElItemFriend, setAnchorElItemFriend] = React.useState(null);
   const openFriendOpenFriend = Boolean(anchorElItemFriend);
   const friend = React.useRef(0);
+  const [txtSearch, setTxtSearch] = React.useState("");
+  const search = React.useRef(null);
+  const [listUserSearch, setListUserSearch] = React.useState([]);
+  const [listBlogSearch, setListBlogSearch] = React.useState([]);
+  const [loadingSearch, setLoadingSearch] = React.useState(false);
+  const [anchorSearch, setAnchorSearch] = React.useState(null);
+  const searchPosition = React.useRef(null);
+  const [openSearch, setOpenSearch] = React.useState(false);
+  const canBeOpen = openSearch && Boolean(anchorSearch);
+  const id = canBeOpen ? 'transition-popper-header' : undefined;
+
+  React.useEffect(() => {
+    if (!txtSearch) {
+      setOpenSearch(false);
+      setLoadingSearch(false);
+      setListUserSearch([]);
+      setListBlogSearch([]);
+      clearTimeout(search.current);
+      return;
+    }
+    if (search.current) {
+      clearTimeout(search.current);
+    }
+    search.current = setTimeout(async () => {
+      setLoadingSearch(true);
+      await Promise.all([
+        userService.searchByName(txtSearch).then((data) => {
+          setListUserSearch(data);
+        }),
+        blogsService.searchByTitle(txtSearch).then((data) => {
+          setListBlogSearch(data);
+        }),
+      ]).then(() => {
+        setLoadingSearch(false);
+        setAnchorSearch(searchPosition.current);
+        setOpenSearch(true);
+      });
+    }, 500);
+  }, [txtSearch]);
 
   const handleCloseOpenFriend = (event) => {
     event.preventDefault();
@@ -496,11 +544,7 @@ const Header = (props) => {
   };
 
   const handleChooseMessage = (id) => {
-    if (
-      props.chatting.findIndex(
-        (user) => user.toUserId == id
-      ) < 0
-    ) {
+    if (props.chatting.findIndex((user) => user.toUserId == id) < 0) {
       chattingService
         .getMessageOfFriend(id)
         .then((res) => {
@@ -513,8 +557,7 @@ const Header = (props) => {
           res.msgs.forEach((msg) => {
             newUserMsg.msg.push({
               message: msg.content,
-              toOther:
-                id == msg.to_user_id ? true : false,
+              toOther: id == msg.to_user_id ? true : false,
               created_at: msg.created_at,
               id: msg.id,
             });
@@ -528,7 +571,7 @@ const Header = (props) => {
     setAnchorMessage(null);
     setAnchorElItemFriend(null);
     handleShowListFriend(false);
-  }
+  };
 
   const handleChooseFriend = (event, id) => {
     friend.current = id;
@@ -555,15 +598,76 @@ const Header = (props) => {
           >
             <MenuIcon />
           </IconButton>
-          <Search className={cx("m-0")}>
+          <Search 
+            className={cx("m-0")}
+            aria-describedby={id}
+            ref={searchPosition}
+          >
             <SearchIconWrapper>
               <SearchIcon />
             </SearchIconWrapper>
             <StyledInputBase
               placeholder="Tìm kiếm"
               inputProps={{ "aria-label": "search" }}
+              onChange={(e) => {
+                setTxtSearch(e.target.value);
+              }}
+              value={txtSearch}
             />
+            <IconButton
+              type="button"
+              aria-label="search"
+              disableRipple
+              disableTouchRipple
+              className={cx(!loadingSearch ? 'hidden' : '')}
+            >
+              <CircularProgress size={16} />
+            </IconButton>
           </Search>
+          <Popper id={id} open={openSearch} anchorEl={anchorSearch} transition style={{ zIndex: 1201, border: 'none' }}>
+            {({ TransitionProps }) => (
+              <Fade {...TransitionProps} timeout={350}>
+                <Box sx={{ border: 1, p: 1, bgcolor: 'background.paper', border: 'none' }}>
+                    { listUserSearch.length !== 0 && <h3>Người dùng</h3>}
+                    {
+                      listUserSearch.map(x => (
+                        <MenuItem key={x.id} onClick={() => {
+                          navigate(`/user/${x.id}`);
+                          setOpenSearch(false);
+                        }}>
+                          <Avatar
+                            alt={x.name}
+                            src={`https://docs.google.com/uc?id=${x.avatar}`}
+                            sx={{ mr: 1 }}
+                          />
+                            {x.name}
+                          </MenuItem>
+                      ))
+                    }
+                    { listBlogSearch.length !== 0 ? 
+                      <>
+                        <Divider />
+                        <h3>Bài đăng</h3>
+                      </> 
+                      : 
+                      <></>
+                    }
+                    {
+                      listBlogSearch.map(x => (
+                        <MenuItem key={x.id} onClick={() => {
+                          navigate(`/${x.id}`);
+                          setOpenSearch(false);
+                        }}>{x.title}</MenuItem>
+                      ))
+                    }
+                    {
+                      !loadingSearch && !listBlogSearch.length && !listUserSearch.length && 
+                      <MenuItem onClick={() => setOpenSearch(false)} disableRipple disableTouchRipple>Không tìm thấy gì cả</MenuItem>
+                    }
+                </Box>
+              </Fade>
+            )}
+          </Popper>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             <IconButton>
@@ -583,14 +687,16 @@ const Header = (props) => {
               <>
                 <IconButton
                   size="large"
-                  aria-controls={props.openListFriend ? "basic-menu" : undefined}
+                  aria-controls={
+                    props.openListFriend ? "basic-menu" : undefined
+                  }
                   onClick={() => handleShowListFriend(!props.openListFriend)}
                   className={cx("text-white")}
                 >
                   <GroupIcon />
                 </IconButton>
                 <SwipeableDrawer
-                  anchor={'right'}
+                  anchor={"right"}
                   // onClick={() => handleShowListFriend(!props.openListFriend)}
                   open={props.openListFriend}
                   onClose={() => handleShowListFriend(false)}
@@ -599,7 +705,11 @@ const Header = (props) => {
                 >
                   <List>
                     {props.listFriend.map((friend, index) => (
-                      <ListItem key={index} disablePadding onClick={(e) => handleChooseFriend(e, friend.id)}>
+                      <ListItem
+                        key={index}
+                        disablePadding
+                        onClick={(e) => handleChooseFriend(e, friend.id)}
+                      >
                         <ListItemButton>
                           <ListItemAvatar>
                             <StyledBadge
@@ -626,10 +736,16 @@ const Header = (props) => {
                           <div>
                             <IconButton
                               id="basic-button"
-                              aria-controls={openFriendOpenFriend ? 'basic-menu' : undefined}
+                              aria-controls={
+                                openFriendOpenFriend ? "basic-menu" : undefined
+                              }
                               aria-haspopup="true"
-                              aria-expanded={openFriendOpenFriend ? 'true' : undefined}
-                              onClick={(e) => handleChooseFriendBtn(e, friend.id)}
+                              aria-expanded={
+                                openFriendOpenFriend ? "true" : undefined
+                              }
+                              onClick={(e) =>
+                                handleChooseFriendBtn(e, friend.id)
+                              }
                             >
                               <MoreVertIcon />
                             </IconButton>
@@ -644,11 +760,19 @@ const Header = (props) => {
                     open={openFriendOpenFriend}
                     onClose={handleCloseOpenFriend}
                     MenuListProps={{
-                      'aria-labelledby': 'basic-button',
+                      "aria-labelledby": "basic-button",
                     }}
                   >
-                    <MenuItem onClick={() => handleChooseMessage(friend.current)}>Nhắn tin</MenuItem>
-                    <MenuItem onClick={() => navigate(`/user/${friend.current}`)}>Xem trang cá nhân</MenuItem>
+                    <MenuItem
+                      onClick={() => handleChooseMessage(friend.current)}
+                    >
+                      Nhắn tin
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => navigate(`/user/${friend.current}`)}
+                    >
+                      Xem trang cá nhân
+                    </MenuItem>
                   </Menu>
                 </SwipeableDrawer>
 

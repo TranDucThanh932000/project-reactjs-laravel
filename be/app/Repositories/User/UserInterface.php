@@ -8,4 +8,5 @@ interface UserInterface
     public function getByAccount($account);
     public function getById($id);
     public function updateInfor($id);
+    public function searchByName($txtSearch);
 }

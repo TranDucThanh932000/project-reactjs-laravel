@@ -54,3 +54,12 @@ export const upView = async (data) => {
         console.log(error);
     }
 }
+
+export const searchByTitle = async (txtSearch) => {
+    try {
+        const res = await httpRequest.get(`/blogs/search?txtSearch=${txtSearch}`);
+        return res;
+    } catch (error) {
+        console.log(error);
+    } 
+}

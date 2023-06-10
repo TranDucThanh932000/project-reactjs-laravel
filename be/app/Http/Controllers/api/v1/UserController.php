@@ -37,6 +37,7 @@ class UserController extends Controller
         if(! $user) {
             return response()->json([], StatusCode::BAD_REQUEST);
         }
+
         return response()->json([
             'avatar' => $user->avatar,
             'id' => $user->id,
@@ -46,4 +47,8 @@ class UserController extends Controller
         ], StatusCode::OK);
     }
 
+    public function searchByName(Request $request)
+    {
+        return response()->json($this->user->searchByName($request->txtSearch), StatusCode::OK);
+    }
 }

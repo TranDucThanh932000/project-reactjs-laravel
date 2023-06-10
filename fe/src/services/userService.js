@@ -47,3 +47,12 @@ export const getById = async (id) => {
         console.log(error);
     }
 }
+
+export const searchByName = async (txtSearch) => {
+    try {
+        const res = await httpRequest.get(`user/search?txtSearch=${txtSearch}`);
+        return res;
+    } catch (error) {
+        console.log(error);
+    }
+}

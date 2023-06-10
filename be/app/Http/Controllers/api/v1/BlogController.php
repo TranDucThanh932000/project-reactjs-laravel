@@ -122,4 +122,9 @@ class BlogController extends Controller
 
         return $this->blog->getBlogOfUser($userId);
     }
+
+    public function searchByTitle(Request $request)
+    {
+        return response()->json($this->blog->searchByTitle($request->txtSearch), StatusCode::OK);
+    }
 }
