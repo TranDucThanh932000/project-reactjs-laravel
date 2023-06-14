@@ -81,7 +81,7 @@ const DetailBlog = (props) => {
           <p>
             Tác giả:{" "}
             <b>
-              <i>{blog.user.name}</i>
+              <i className={cx("cursor-pointer")} onClick={() => {navigate(`/user/${blog.user.id}`)}}>{blog.user.name}</i>
             </b>
           </p>
           <p>

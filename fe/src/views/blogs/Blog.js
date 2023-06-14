@@ -60,6 +60,7 @@ import * as friendService from '../../services/friendService';
 import * as chattingService from '../../services/chattingService';
 import * as followService from '../../services/followService';
 import { openAndCloseChatting, openAndGetMsg } from '../../store/actions/chattingAction';
+import { Masonry } from "@mui/lab";
 
 const LOADING_STATUS_FRIEND = 9999;
 const LOADING_STATUS_FOLLOW_FRIEND = 9999;
@@ -244,9 +245,6 @@ function Blog(props) {
           //too many request
           return;
         }
-        //setItems((prev) => prev.push(...res.blogs));
-        //như trên không chạy, khả năng do nó k thấy sự thay đổi địa chỉ nên không rerender
-        //còn concat này nó đẩy thêm data mới vào và tạo ra 1 mảng có địa chỉ mới
         if (isScroll) {
           setItems((prev) => prev.concat(res.blogs));
         } else {
@@ -610,6 +608,27 @@ function Blog(props) {
     store.dispatch(updateListRankingFollower(newListFL));
   }
 
+  //cheat to pass error of library mui-lab, wait dev MUI team to fix it
+  //https://github.com/mui/material-ui/issues/36909
+  React.useEffect(() => {
+    window.addEventListener('error', e => {
+        if (e.message === 'ResizeObserver loop limit exceeded') {
+            const resizeObserverErrDiv = document.getElementById(
+                'webpack-dev-server-client-overlay-div'
+            );
+            const resizeObserverErr = document.getElementById(
+                'webpack-dev-server-client-overlay'
+            );
+            if (resizeObserverErr) {
+                resizeObserverErr.setAttribute('style', 'display: none');
+            }
+            if (resizeObserverErrDiv) {
+                resizeObserverErrDiv.setAttribute('style', 'display: none');
+            }
+        }
+    });
+  }, []);
+
   return (
     <div className={cx("wrapper")}>
       <Grid container spacing={2} sx={{ my: 2 }}>
@@ -711,145 +730,146 @@ function Blog(props) {
           </Box>
         </Grid>
       </Grid>
-      <Grid container id="cuadricula">
+      <Grid container id="cuadricula" spacing={1}>
         {!doneFirstLoad && <SkeletonBlog />}
         {items.length
-          ? items.map((x, index) => {
+        ? 
+          <Masonry columns={{ xs: 1, sm: 2, md: 4 }}> 
+            {items.map((x, index) => {
               return (
-                <Grid key={index} item className={cx("item")} style={{height: 'min-content'}}>
-                  <Card sx={{ maxWidth: "100%" }}>
-                    <CardHeader
-                      avatar={
-                        <Badge
-                          overlap="circular"
-                          anchorOrigin={{
-                            vertical: "bottom",
-                            horizontal: "right",
-                          }}
-                          badgeContent={
-                            x.user.level !== Level.NONE ? (
-                              <Tooltip title="VIP">
-                                <StarPurple500OutlinedIcon
-                                  style={{ color: "red" }}
-                                />
-                              </Tooltip>
-                            ) : (
-                              <></>
-                            )
-                          }
-                        >
-                          <Avatar
-                            sx={{
-                              bgcolor: colorAvatar[x.user.id % 10],
-                            }}
-                            aria-label="recipe"
-                            alt=""
-                            src={`https://docs.google.com/uc?id=${x.user.avatar}`}
-                            onClick={() => navigate('/user/' + x.user.id)}
-                            className={cx('cursor-pointer')}
-                          >
-                            {x.user.name[0]}
-                          </Avatar>{" "}
-                        </Badge>
-                      }
-                      action={
-                        <IconButton 
-                          aria-label="basic-menu"
-                          aria-controls={openOption ? 'basic-menu' : undefined}
-                          aria-haspopup="true"
-                          aria-expanded={openOption ? 'true' : undefined}
-                          onClick={(e) => handleChooseOptionUser(e, x.user.id)}
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                      }
-                      title={<Typography className={cx('cursor-pointer')} onClick={() => navigate(`/user/${x.user.id}`)}>{x.user.name}</Typography>}
-                      subheader={<Typography style={{ fontFamily: '"Roboto","Helvetica","Arial",sans-serif', opacity: 0.6 }}>{formatTime(x.updated_at)}</Typography>}
-                    />
-                    <Link to={`/${x.id}`}>
-                      <CardContent>
-                        <Box>
-                          <Grid container spacing={2}>
-                            {x.blog_medias.length > 0 &&
-                              x.blog_medias.map((img) => (
-                                <Grid key={img.id} item sm={12} md={6}>
-                                  <CardMedia
-                                    component="img"
-                                    height="194"
-                                    image={`https://docs.google.com/uc?id=${img.url}`}
-                                    alt="Image"
-                                    aria-describedby={img.id}
-                                    className={cx(
-                                      "image-blog",
-                                      "border-radius-1"
-                                    )}
-                                  />
-                                </Grid>
-                              ))}
-                          </Grid>
-                        </Box>
-                        <Popper id={id} open={openPopper} anchorEl={anchorEl}>
-                          <Box
-                            sx={{
-                              border: 1,
-                              p: 1,
-                              bgcolor: "background.paper",
-                            }}
-                          >
-                            {x.id}
-                          </Box>
-                        </Popper>
-                      </CardContent>
-                      <CardContent>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          className={cx("word-break")}
-                        >
-                          {x.short_description}
-                        </Typography>
-                      </CardContent>
-                    </Link>
-                    <CardActions disableSpacing>
-                      {!x.blog_likes.length ? (
-                        <IconButton
-                          aria-label="add to favorites"
-                          onClick={() => handleFavorite(1, index)}
-                        >
-                          <FavoriteBorderIcon />
-                        </IconButton>
-                      ) : (
-                        <IconButton
-                          aria-label="remove to favorites"
-                          onClick={() => handleFavorite(0, index)}
-                        >
-                          <FavoriteIcon sx={{ color: "pink" }} />
-                        </IconButton>
-                      )}
-                      {x.blog_likes_count}
-                      <IconButton aria-label="share">
-                        <ShareIcon />
-                      </IconButton>
-                      {/* <ExpandMore
-                        expand={expanded}
-                        onClick={handleExpandClick}
-                        aria-expanded={expanded}
-                        aria-label="show more"
+                <Card key={index}>
+                  <CardHeader
+                    avatar={
+                      <Badge
+                        overlap="circular"
+                        anchorOrigin={{
+                          vertical: "bottom",
+                          horizontal: "right",
+                        }}
+                        badgeContent={
+                          x.user.level !== Level.NONE ? (
+                            <Tooltip title="VIP">
+                              <StarPurple500OutlinedIcon
+                                style={{ color: "red" }}
+                              />
+                            </Tooltip>
+                          ) : (
+                            <></>
+                          )
+                        }
                       >
-                        <ExpandMoreIcon />
-                      </ExpandMore> */}
-                    </CardActions>
-                    {/* <Collapse in={expanded} timeout="auto" unmountOnExit>
-                      <CardContent>
-                        <Typography paragraph className={cx("word-break")}>
-                          {x.content}
-                        </Typography>
-                      </CardContent>
-                    </Collapse> */}
-                  </Card>
-                </Grid>
+                        <Avatar
+                          sx={{
+                            bgcolor: colorAvatar[x.user.id % 10],
+                          }}
+                          aria-label="recipe"
+                          alt=""
+                          src={`https://docs.google.com/uc?id=${x.user.avatar}`}
+                          onClick={() => navigate('/user/' + x.user.id)}
+                          className={cx('cursor-pointer')}
+                        >
+                          {x.user.name[0]}
+                        </Avatar>{" "}
+                      </Badge>
+                    }
+                    action={
+                      <IconButton 
+                        aria-label="basic-menu"
+                        aria-controls={openOption ? 'basic-menu' : undefined}
+                        aria-haspopup="true"
+                        aria-expanded={openOption ? 'true' : undefined}
+                        onClick={(e) => handleChooseOptionUser(e, x.user.id)}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                    }
+                    title={<Typography className={cx('cursor-pointer')} onClick={() => navigate(`/user/${x.user.id}`)}>{x.user.name}</Typography>}
+                    subheader={<Typography style={{ fontFamily: '"Roboto","Helvetica","Arial",sans-serif', opacity: 0.6 }}>{formatTime(x.updated_at)}</Typography>}
+                  />
+                  <Link to={`/${x.id}`}>
+                    <CardContent>
+                      <Box>
+                        <Grid container spacing={2}>
+                          {x.blog_medias.length > 0 &&
+                            x.blog_medias.map((img) => (
+                              <Grid key={img.id} item sm={12} md={6}>
+                                <CardMedia
+                                  component="img"
+                                  height="194"
+                                  image={`https://docs.google.com/uc?id=${img.url}`}
+                                  alt="Image"
+                                  aria-describedby={img.id}
+                                  className={cx(
+                                    "image-blog",
+                                    "border-radius-1"
+                                  )}
+                                />
+                              </Grid>
+                            ))}
+                        </Grid>
+                      </Box>
+                      <Popper id={id} open={openPopper} anchorEl={anchorEl}>
+                        <Box
+                          sx={{
+                            border: 1,
+                            p: 1,
+                            bgcolor: "background.paper",
+                          }}
+                        >
+                          {x.id}
+                        </Box>
+                      </Popper>
+                    </CardContent>
+                    <CardContent>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        className={cx("word-break")}
+                      >
+                        {x.short_description}
+                      </Typography>
+                    </CardContent>
+                  </Link>
+                  <CardActions disableSpacing>
+                    {!x.blog_likes.length ? (
+                      <IconButton
+                        aria-label="add to favorites"
+                        onClick={() => handleFavorite(1, index)}
+                      >
+                        <FavoriteBorderIcon />
+                      </IconButton>
+                    ) : (
+                      <IconButton
+                        aria-label="remove to favorites"
+                        onClick={() => handleFavorite(0, index)}
+                      >
+                        <FavoriteIcon sx={{ color: "pink" }} />
+                      </IconButton>
+                    )}
+                    {x.blog_likes_count}
+                    <IconButton aria-label="share">
+                      <ShareIcon />
+                    </IconButton>
+                    {/* <ExpandMore
+                      expand={expanded}
+                      onClick={handleExpandClick}
+                      aria-expanded={expanded}
+                      aria-label="show more"
+                    >
+                      <ExpandMoreIcon />
+                    </ExpandMore> */}
+                  </CardActions>
+                  {/* <Collapse in={expanded} timeout="auto" unmountOnExit>
+                    <CardContent>
+                      <Typography paragraph className={cx("word-break")}>
+                        {x.content}
+                      </Typography>
+                    </CardContent>
+                  </Collapse> */}
+                </Card>
               );
-            })
+            })}
+          </Masonry>
           : doneFirstLoad && <h1>Chưa có bài viết nào!!!</h1>}
       </Grid>
       <Menu

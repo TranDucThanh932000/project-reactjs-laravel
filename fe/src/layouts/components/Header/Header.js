@@ -510,12 +510,28 @@ const Header = (props) => {
   const id = canBeOpen ? 'transition-popper-header' : undefined;
 
   React.useEffect(() => {
+    var inputElement = document.getElementById("input-search");
+
+    const handleFocus = () => {
+      if(txtSearch) {
+        setOpenSearch(true);
+      }
+    }
+
+    inputElement.addEventListener("focus", handleFocus);
+
+    return () => {
+      inputElement.removeEventListener("focus", handleFocus)
+    }
+  }, [txtSearch]);
+
+  React.useEffect(() => {
     if (!txtSearch) {
+      clearTimeout(search.current);
       setOpenSearch(false);
       setLoadingSearch(false);
       setListUserSearch([]);
       setListBlogSearch([]);
-      clearTimeout(search.current);
       return;
     }
     if (search.current) {
@@ -537,6 +553,28 @@ const Header = (props) => {
       });
     }, 500);
   }, [txtSearch]);
+
+  React.useEffect(() => {
+    const overlay = document.getElementsByClassName("App")[0];
+
+    if (openSearch) {
+      overlay.addEventListener("click", handleClickOutside);
+    }
+
+    return () => {
+      overlay.removeEventListener("click", handleClickOutside);
+    };
+  }, [openSearch]);
+
+  const handleClickOutside = (event) => {
+    const popper = document.getElementById('transition-popper-header');
+    if(event.target.id === 'input-search') {
+      return;
+    }
+    if(!popper || !popper.contains(event.target)) {
+      setOpenSearch(false);
+    }
+  }
 
   const handleCloseOpenFriend = (event) => {
     event.preventDefault();
@@ -585,6 +623,7 @@ const Header = (props) => {
         <Toolbar
           className={cx("commonBackgroundColor")}
           sx={{ paddingRight: { xs: "0", md: "16px" } }}
+          id="header"
         >
           <IconButton
             color="inherit"
@@ -613,6 +652,7 @@ const Header = (props) => {
                 setTxtSearch(e.target.value);
               }}
               value={txtSearch}
+              id="input-search"
             />
             <IconButton
               type="button"
@@ -627,7 +667,7 @@ const Header = (props) => {
           <Popper id={id} open={openSearch} anchorEl={anchorSearch} transition style={{ zIndex: 1201, border: 'none' }}>
             {({ TransitionProps }) => (
               <Fade {...TransitionProps} timeout={350}>
-                <Box sx={{ border: 1, p: 1, bgcolor: 'background.paper', border: 'none' }}>
+                <Box id="search-popper" sx={{ border: 1, p: 1, bgcolor: 'background.paper', border: 'none' }}>
                     { listUserSearch.length !== 0 && <h3>Người dùng</h3>}
                     {
                       listUserSearch.map(x => (
