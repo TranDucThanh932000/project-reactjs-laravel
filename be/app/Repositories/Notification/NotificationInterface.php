@@ -8,4 +8,5 @@ interface NotificationInterface
     public function countNotificationUnRead();
     public function getNotification($from, $limit);
     public function store($notification);
+    public function seenAll($userId);
 }

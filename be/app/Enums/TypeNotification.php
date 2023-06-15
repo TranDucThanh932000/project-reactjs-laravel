@@ -14,4 +14,5 @@ final class TypeNotification extends Enum
     const ADD_FRIEND = 1;
     const FOLLOW = 2;
     const LIKE_POST = 3;
+    const ACCEPT_FRIEND = 4;
 }

@@ -11,6 +11,7 @@ import {
   updateStatusLogin,
   closeSidebar,
   openSidebar,
+  updateCurrentUser,
 } from "../../store/actions/commonAction";
 import { Link, useNavigate } from "react-router-dom";
 import LinkMui from "@mui/material/Link";
@@ -78,6 +79,7 @@ const Register = () => {
   const handleRegister = async (values) => {
     let res = await authenticationService.register(values);
 
+    store.dispatch(updateCurrentUser(res.user));
     store.dispatch(updateStatusLogin(true));
     store.dispatch(openSidebar(true));
     localStorage.setItem("loginToken", res.token);

@@ -45,7 +45,8 @@ import {
 import {
   updateStatusLoading,
   updateTextAlert,
-  updateListRankingFollower
+  updateListRankingFollower,
+  updateListFriend
 } from "../../store/actions/commonAction";
 import moment from "moment";
 import { Box } from "@mui/system";
@@ -59,6 +60,7 @@ import { Level, StatusFriend } from "../../utils/constants";
 import * as friendService from '../../services/friendService';
 import * as chattingService from '../../services/chattingService';
 import * as followService from '../../services/followService';
+import * as userService from "../../services/userService";
 import { openAndCloseChatting, openAndGetMsg } from '../../store/actions/chattingAction';
 import { Masonry } from "@mui/lab";
 
@@ -561,6 +563,10 @@ function Blog(props) {
     .then(() => {
       setRelationship({
         status: StatusFriend.ACCEPTED
+      });
+      //reload list friend
+      userService.getListFriend(props.currentUser.id).then((data) => {
+        store.dispatch(updateListFriend(data));
       });
     })
 

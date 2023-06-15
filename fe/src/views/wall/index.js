@@ -31,6 +31,7 @@ import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import store from "../../store";
 import { connect } from "react-redux";
 import {
+  updateListFriend,
   updateListRankingFollower
 } from "../../store/actions/commonAction";
 import { openAndCloseChatting, openAndGetMsg } from '../../store/actions/chattingAction';
@@ -214,6 +215,9 @@ function Wall(props) {
     .then(() => {
       setRelationship({
         status: StatusFriend.ACCEPTED
+      });
+      userService.getListFriend(props.currentUser.id).then((data) => {
+        store.dispatch(updateListFriend(data));
       });
     })
 

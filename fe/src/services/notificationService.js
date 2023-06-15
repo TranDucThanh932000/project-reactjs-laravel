@@ -27,3 +27,12 @@ export const markStatusRead = async (data) => {
     }
 };
 
+export const seenAll = async (data) => {
+    try {
+        const res = await httpRequest.post('notification/seen-all', data);
+        return res;
+    } catch (error) {
+        console.log(error);
+    }
+};
+

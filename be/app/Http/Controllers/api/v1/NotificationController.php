@@ -32,4 +32,9 @@ class NotificationController extends Controller
     {
         return response()->json($this->notification->markStatusRead($request->id, $request->status), StatusCode::OK);
     }
+
+    public function seenAll(Request $request)
+    {
+        return response()->json($this->notification->seenAll($request->userId));
+    }
 }

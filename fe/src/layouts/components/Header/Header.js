@@ -58,7 +58,6 @@ import {
   Popper,
   SwipeableDrawer,
 } from "@mui/material";
-import ImageIcon from "@mui/icons-material/Image";
 import * as chattingService from "../../../services/chattingService";
 import * as userService from "../../../services/userService";
 import Pusher from "pusher-js";
@@ -209,6 +208,11 @@ const Header = (props) => {
           if (data.type === TypeNotification.ADD_FRIEND) {
             content = `<span><b><a href="#" target="_blank">${data.user.name}</a></b> đã gửi lời mời kết bạn</span>`;
           }
+          if (data.type === TypeNotification.ACCEPT_FRIEND) {
+            content = `<span><b><a href="#" target="_blank">${data.user.name}</a></b> đã đồng ý kết bạn</span>`;
+            //update list friend
+            store.dispatch(updateListFriend([...props.listFriend, data.user]));
+          }
           if (data.type === TypeNotification.FOLLOW) {
             content = `<span><b><a href="#" target="_blank">${data.user.name}</a></b> đã theo dõi bạn</span>`;
           }
@@ -237,7 +241,7 @@ const Header = (props) => {
             id: x.id,
             userId: x.owner_user.id,
             userName: x.owner_user.name,
-            userImg: "",
+            userImg: x.owner_user.avatar,
             type: x.type,
             status: x.status,
           };
@@ -617,6 +621,26 @@ const Header = (props) => {
     handleChooseMessage(id);
   };
 
+  const handleSeenAll = () => {
+    notification.seenAll({
+      userId: props.currentUser.id
+    })
+    .then(() => {
+      let data = props.notifications.map((x) => {
+        return {
+          id: x.id,
+          userId: x.userId,
+          userName: x.userName,
+          userImg: x.userImg,
+          type: x.type,
+          status: StatusRead.READED
+        };
+      });
+      setCountNotificationUnread(0);
+      store.dispatch(setNotification([...data]));
+    })
+  }
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="fixed" open={props.open}>
@@ -939,13 +963,17 @@ const Header = (props) => {
                 {props.notifications.map((x) => (
                   <MenuItem key={x.id + "-" + x.userId} onClick={() => {}}>
                     <ListItemAvatar>
-                      <Avatar>
-                        <ImageIcon />
+                      <Avatar src={`https://docs.google.com/uc?id=${x.userImg}`} alt={x.userName}>
                       </Avatar>
                     </ListItemAvatar>
                     {x.type === TypeNotification.ADD_FRIEND && (
                       <ListItemText
                         secondary={`${x.userName} đã gửi lời kết bạn`}
+                      />
+                    )}
+                    {x.type === TypeNotification.ACCEPT_FRIEND && (
+                      <ListItemText
+                        secondary={`${x.userName} đã đồng ý kết bạn`}
                       />
                     )}
                     {x.type === TypeNotification.FOLLOW && (
@@ -968,7 +996,7 @@ const Header = (props) => {
                 ))}
               </Box>
               <Box textAlign={"center"}>
-                <Button>Đánh dấu đã đọc tất cả</Button>
+                <Button onClick={handleSeenAll}>Đánh dấu đã đọc tất cả</Button>
               </Box>
             </Menu>
 

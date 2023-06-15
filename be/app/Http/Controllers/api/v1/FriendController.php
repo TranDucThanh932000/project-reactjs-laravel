@@ -66,6 +66,19 @@ class FriendController extends Controller
     public function acceptRequest(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
+        $notification = $this->notification->store([
+            'owner' => $user->id,
+            'to_user' => $request->friend,
+            'type' => TypeNotification::ACCEPT_FRIEND,
+            'status' => StatusNotification::UNREAD
+        ]);
+        broadcast(new Notification(
+            $notification->id,
+            $user, 
+            'private-notification-' . $request->friend, 
+            TypeNotification::ACCEPT_FRIEND,
+        ))
+        ->toOthers();
 
         return response()->json([
             'status' => $this->friend->acceptRequest($user->id, $request->friend)

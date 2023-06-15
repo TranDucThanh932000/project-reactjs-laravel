@@ -32,7 +32,9 @@ class NotificationRepository implements NotificationInterface
         ->orderBy('created_at', 'desc')
         ->offset($from)
         ->take($limit)
-        ->with(['ownerUser'])
+        ->with(['ownerUser' => function($q) {
+            return $q->select('id', 'name', 'avatar');
+        }])
         ->get();
     }
 
@@ -48,4 +50,12 @@ class NotificationRepository implements NotificationInterface
         ]);
     }
 
+    public function seenAll($userId)
+    {
+        return $this->notification->where('to_user', $userId)
+        ->where('status', StatusNotification::UNREAD)
+        ->update([
+            'status' => StatusNotification::READED
+        ]);
+    }
 }

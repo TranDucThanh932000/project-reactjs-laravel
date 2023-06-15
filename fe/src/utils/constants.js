@@ -7,6 +7,7 @@ export const TypeNotification = {
     ADD_FRIEND: 1,
     FOLLOW: 2,
     LIKE_POST: 3,
+    ACCEPT_FRIEND: 4
 }
 
 export const StatusRead = {

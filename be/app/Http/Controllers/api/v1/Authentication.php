@@ -24,7 +24,8 @@ class Authentication extends Controller
         $credentials = $request->only('account', 'password');
         $token = '';
         try {
-            if (! $token = JWTAuth::attempt($credentials)) {
+            //one month
+            if (! $token = JWTAuth::attempt($credentials, ['ttl' => 2592000])) {
                 return response()->json(['error' => 'invalid_credentials'], 401);
             }
         } catch (JWTException $e) {
@@ -53,8 +54,6 @@ class Authentication extends Controller
 
             $token = JWTAuth::fromUser($user);
     
-            JWTAuth::parseToken()->authenticate();
-    
             JWTAuth::invalidate($token);
     
             return response()->json('success', StatusCode::OK);
@@ -81,20 +80,22 @@ class Authentication extends Controller
             return response()->json(['error' => 'Existed account'], 400);
         }
 
-        $this->user->store($request->all());
+        $user = $this->user->store($request->all());
 
         $credentials = [
             'account' => $request->account,
             'password' => $request->password
         ];
         try {
-            if (! $token = JWTAuth::attempt($credentials)) {
+            //one month
+            if (! $token = JWTAuth::attempt($credentials, ['ttl' => 2592000])) {
                 return response()->json(['error' => 'invalid_credentials'], 401);
             }
         } catch (JWTException $e) {
             return response()->json(['error' => 'could_not_create_token'], 500);
         }
-        return response()->json(compact('token'));
+        $user['token'] = $token;
+        return response()->json(compact('token', 'user'));
     }
 
     public function checkAccountExist(Request $request)

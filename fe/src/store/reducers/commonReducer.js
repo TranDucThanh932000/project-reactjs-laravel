@@ -81,8 +81,19 @@ const commonReducer = (state = initialState, action) => {
             id: action.payload.id,
             userId: action.payload.user.id,
             userName: action.payload.user.name,
-            userImg: '',
+            userImg: action.payload.user.avatar,
             type: TypeNotification.ADD_FRIEND,
+            status: StatusRead.UNREAD
+          })
+          break;
+        }
+        case TypeNotification.ACCEPT_FRIEND: {
+          state.notifications.unshift({
+            id: action.payload.id,
+            userId: action.payload.user.id,
+            userName: action.payload.user.name,
+            userImg: action.payload.user.avatar,
+            type: TypeNotification.ACCEPT_FRIEND,
             status: StatusRead.UNREAD
           })
           break;
@@ -92,7 +103,7 @@ const commonReducer = (state = initialState, action) => {
             id: action.payload.id,
             userId: action.payload.user.id,
             userName: action.payload.user.name,
-            userImg: '',
+            userImg: action.payload.user.avatar,
             type: TypeNotification.FOLLOW,
             status: StatusRead.UNREAD
           })
