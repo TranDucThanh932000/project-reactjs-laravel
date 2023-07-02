@@ -205,7 +205,7 @@ const App = (props) => {
           <Box flexDirection={'column-reverse'}>
             {
               props.notiStack.map(x => (
-                <Item sx={{ marginTop: '10px' }}>
+                <Item key={x} sx={{ marginTop: '10px' }}>
                   <Alert severity="info">
                     <div dangerouslySetInnerHTML={{ __html: x.content}}></div>
                   </Alert>

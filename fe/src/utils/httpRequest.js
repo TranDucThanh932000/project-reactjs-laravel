@@ -27,6 +27,7 @@ httpRequest.interceptors.request.use(
           })
           .catch((error) => {
             // Xử lý lỗi khi lấy token mới không thành công
+            localStorage.removeItem("loginToken");
             return Promise.reject(error);
           });
       } else {

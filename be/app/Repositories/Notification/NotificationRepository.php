@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Notification;
 
+use App\Enums\StatusFriend;
 use App\Enums\StatusNotification;
 use App\Models\Notification;
 use JWTAuth;
@@ -29,12 +30,19 @@ class NotificationRepository implements NotificationInterface
         $user = JWTAuth::parseToken()->authenticate();
 
         return $this->notification->where('to_user', $user->id)
+        ->with([
+            'ownerUser' => function($q) use($user) {
+                $q->select('id', 'name', 'avatar')
+                ->withCount([
+                    'friend as is_waiting' => function($q) use($user) {
+                        $q->where('friend', $user->id)->where('status', StatusFriend::WAITTING);
+                    }
+                ]);
+            },
+        ])
         ->orderBy('created_at', 'desc')
         ->offset($from)
         ->take($limit)
-        ->with(['ownerUser' => function($q) {
-            return $q->select('id', 'name', 'avatar');
-        }])
         ->get();
     }
 

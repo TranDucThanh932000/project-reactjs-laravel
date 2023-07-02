@@ -67,6 +67,9 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import InformationUser from "../../../components/Popup/informationUser";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import GroupIcon from "@mui/icons-material/Group";
+import useRelationship from '../../../mixins/useRelationship';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 
 const cx = classNames.bind(styles);
 
@@ -124,6 +127,7 @@ const mapStateToProps = (state) => {
     listFriendOnline: state.commonReducer.listFriendOnline,
     listFriend: state.commonReducer.listFriend,
     openListFriend: state.commonReducer.openListFriend,
+    listFollowerRanking: state.commonReducer.listFollowerRanking
   };
 };
 
@@ -184,6 +188,19 @@ const Header = (props) => {
   const [anchorNotification, setAnchorNotification] = React.useState(null);
   const openListNotification = Boolean(anchorNotification);
   const [countNotificationUnread, setCountNotificationUnread] = React.useState(0);
+  const notifications = React.useRef([]);
+  const { 
+    handleAddFriend, 
+    handleUnFriend, 
+    handleCancelRequestFriend, 
+    handleAcceptRequestFriend, 
+    handleFollow, 
+    handleUnFollow,
+    setRelationship,
+    setFollowStatus,
+    relationship,
+    followStatus
+  } = useRelationship(props);
 
   React.useEffect(() => {
     if (props.currentUser) {
@@ -244,8 +261,10 @@ const Header = (props) => {
             userImg: x.owner_user.avatar,
             type: x.type,
             status: x.status,
+            is_waiting: x.owner_user.is_waiting
           };
         });
+        notifications.current = parseData;
         store.dispatch(setNotification(parseData));
       });
       notification.countNotification().then((data) => {
@@ -967,9 +986,23 @@ const Header = (props) => {
                       </Avatar>
                     </ListItemAvatar>
                     {x.type === TypeNotification.ADD_FRIEND && (
-                      <ListItemText
-                        secondary={`${x.userName} đã gửi lời kết bạn`}
-                      />
+                      <>
+                        <ListItemText
+                          secondary={`${x.userName} đã gửi lời kết bạn`}
+                        />
+                        {
+                          (x.is_waiting === 1 || x.is_waiting === true) && (
+                            <>
+                              <IconButton onClick={() => handleAcceptRequestFriend(x.userId)} aria-label="accept" color="primary">
+                                <CheckIcon />
+                              </IconButton>
+                              <IconButton onClick={() => handleCancelRequestFriend(x.userId)} aria-label="delete" color="primary">
+                                <CloseIcon />
+                              </IconButton>
+                            </>
+                          )
+                        }
+                      </>
                     )}
                     {x.type === TypeNotification.ACCEPT_FRIEND && (
                       <ListItemText
