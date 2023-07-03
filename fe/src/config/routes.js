@@ -6,7 +6,8 @@ const routes = {
     luckyNumberToday: '/lucky-number-today',
     qrcode: '/qr-code',
     listenTogether: '/listen-together',
-    wall: '/user/:id'
+    wall: '/user/:id',
+    tips: '/tips'
 };
 
 export default routes;

@@ -10,6 +10,7 @@ import QrCode from '../views/qrCode'
 import DetailBlog from '../views/blogs/DetailBlog';
 import ListenTogether from '../views/listenTogether';
 import Wall from '../views/wall';
+import Tips from '../views/tips';
 
 const publicRoutes = [
     { path: config.routes.blog, component: Home },
@@ -19,7 +20,8 @@ const publicRoutes = [
     { path: config.routes.luckyNumberToday, component: LuckyNumberToday },
     { path: config.routes.qrcode, component: QrCode },
     { path: config.routes.listenTogether, component: ListenTogether },
-    { path: config.routes.wall, component: Wall}
+    { path: config.routes.wall, component: Wall},
+    { path: config.routes.tips, component: Tips},
 ];
 
 const privateRoutes = [];

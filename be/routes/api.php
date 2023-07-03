@@ -10,8 +10,10 @@ use App\Http\Controllers\api\v1\FollowerController;
 use App\Http\Controllers\api\v1\FriendController;
 use App\Http\Controllers\api\v1\GoogleDriveController;
 use App\Http\Controllers\api\v1\LuckyNumberController;
+use App\Http\Controllers\api\v1\MenuTipController;
 use App\Http\Controllers\api\v1\NotificationController;
 use App\Http\Controllers\api\v1\QrCodeController;
+use App\Http\Controllers\api\v1\TipController;
 use App\Http\Controllers\api\v1\UploadImageEditorController;
 use App\Http\Controllers\api\v1\UserController;
 
@@ -39,6 +41,9 @@ Route::post('/qr-code', [QrCodeController::class, 'store']);
 Route::get('/user/list-blog/{userId}', [BlogController::class, 'listBlogOfUser']);
 Route::get('/user/search', [UserController::class, 'searchByName']);
 Route::get('/user/{id}', [UserController::class, 'getById']);
+
+Route::resource('menu-tips', MenuTipController::class);
+Route::resource('tips', TipController::class);
 
 Route::group([
     'middleware' => ['jwt.auth', 'throttle:240'],

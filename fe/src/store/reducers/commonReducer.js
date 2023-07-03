@@ -1,7 +1,7 @@
 import { actionName } from "../constants";
 import NewspaperIcon from '@mui/icons-material/Newspaper';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
-import { QrCode } from "@mui/icons-material";
+import { QrCode, Shop } from "@mui/icons-material";
 import { TypeNotification, StatusRead } from "../../utils/constants";
 import HeadphonesIcon from '@mui/icons-material/Headphones';
 
@@ -31,6 +31,11 @@ const initialState = {
       text: 'Cùng nghe nhạc',
       url: '/listen-together',
       icon: <HeadphonesIcon/>
+    },
+    {
+      text: 'Mẹo trò chơi',
+      url: '/tips',
+      icon: <Shop/>
     },
   ],
   currentUser: null,
@@ -83,7 +88,17 @@ const commonReducer = (state = initialState, action) => {
             userName: action.payload.user.name,
             userImg: action.payload.user.avatar,
             type: TypeNotification.ADD_FRIEND,
-            status: StatusRead.UNREAD
+            status: StatusRead.UNREAD,
+            is_waiting: true
+          })
+          state.notifications = state.notifications.map(x => {
+            if(action.payload.user.id === x.userId) {
+              return {
+                ...x,
+                is_waiting: true
+              }
+            }
+            return x;
           })
           break;
         }

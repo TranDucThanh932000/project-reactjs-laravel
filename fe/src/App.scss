@@ -88,6 +88,10 @@ a {
   justify-content: space-between;
 }
 
+.justify-content-center {
+  justify-content: center !important;
+}
+
 .hidden {
   display: none;
 }
@@ -520,5 +524,17 @@ body.loading .loading-div {
       border: none !important;
       border-radius: 20px;
       box-shadow: 0 0 10px gray, 0 0 1px gray;
+  }
+}
+
+.video-tip {
+  .MuiBox-root {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    video {
+      max-width: 600px;
+      width: 600px;
+    }
   }
 }
